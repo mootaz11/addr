@@ -1,16 +1,67 @@
-import { StatusBar } from 'expo-status-bar';
-import React from 'react';
+import React,{useState} from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { AuthContext } from './navigation/authContext';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import { createDrawerNavigator } from '@react-navigation/drawer';
+import CustomDrawer from './custom/customDrawer'
+import {ChatStack,orderStack} from './navigation/navigation';
+import Login from './screens/LoginScreen';
+import forgotPassword from './screens/forgotPassword';
+import Home from './screens/HomeScreen';
+import Settings from './screens/SettingsScreen';
+
 
 export default function App() {
+  const [loggedInuser,SetloggedInuser]=useState(true);
+
+  const AuthStack = createStackNavigator();
+  const drawerStack = createDrawerNavigator();
+  
+  const authContext = React.useMemo(() => {
+    return {
+      signIn: () => {
+        SetloggedInuser(true)
+      },
+      signUp: () => {
+        SetloggedInuser(false)
+      },
+      signOut: () => {
+        SetloggedInuser(false)
+      }
+    };
+
+  }
+    , [])
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <AuthContext.Provider value={authContext}>
+      <NavigationContainer>
+        {loggedInuser ? (
+          
+          <drawerStack.Navigator  drawerContent={props => <CustomDrawer {...props}/>}>
+            <drawerStack.Screen name="orders" component={orderStack}/>
+
+            <drawerStack.Screen name="Settings" component={Settings}/>
+            <drawerStack.Screen name="Home" component={Home} />
+            <drawerStack.Screen name="chat" component={ChatStack} />
+            <drawerStack.Screen name="logout"  component={Login}/>
+          </drawerStack.Navigator>
+
+):
+      <AuthStack.Navigator
+      screenOptions={{
+        headerShown: false
+      }}
+      >
+        
+            <AuthStack.Screen name="Login" component={Login} />
+            <AuthStack.Screen  name="forgotPassword" component={forgotPassword} />
+          </AuthStack.Navigator>}
+      </NavigationContainer>
+    </AuthContext.Provider>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,

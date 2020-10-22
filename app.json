@@ -5,10 +5,12 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
+
+    
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/logo.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#1db5db"
     },
     "updates": {
       "fallbackToCacheTimeout": 0
@@ -17,7 +19,19 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.addressti.addressti",
+      "config": {
+        "googleMapsApiKey": "AIzaSyAxCgj947FZABl1m_AmOa65BZarGxVs_yA"
+      }
+    
+    },
+    "android": {
+      "package": "com.addressti.addressti",
+      "config": {
+        "googleMaps": { "apiKey": "AIzaSyAl9tTiWc9OJAwuT25o6SLRr9EBimgxdTQ" }   
+     }
+  
     },
     "web": {
       "favicon": "./assets/favicon.png"
