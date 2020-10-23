@@ -7,8 +7,7 @@ import { AuthContext } from '../navigation/authContext';
 import * as Google from "expo-google-app-auth";
 import { configGoogleSignin } from '../secretKeys/appkeys';
 import { ScrollView } from 'react-native-gesture-handler';
-
-
+import {signup} from '../rest/userApi';
 
 
 const userCredentialsFields = [
@@ -20,6 +19,8 @@ const userCredentialsFields = [
 const singupFields = [
     { placeholder: 'username', imageSrc: require("../assets/login.png"), name: 'username', type: 'text', secureTextEntry: false },
     { placeholder: 'email', imageSrc: require("../assets/email.png"), name: 'email', type: 'text', secureTextEntry: false },
+    { placeholder: 'first name', imageSrc: require("../assets/email.png"), name: 'firstName', type: 'text', secureTextEntry: false },
+    { placeholder: 'last name', imageSrc: require("../assets/email.png"), name: 'lastName', type: 'text', secureTextEntry: false },
     { placeholder: 'password', name: 'password', type: 'password', imageSrc: require("../assets/password.png"), secureTextEntry: true },
     { placeholder: 'repeat your password', name: 'password1', imageSrc: require("../assets/password.png"), type: 'password', secureTextEntry: true },
     { placeholder: 'phone', name: 'phone', type: 'text', imageSrc: require("../assets/phone.png"), secureTextEntry: false },
@@ -54,9 +55,12 @@ export default function Login({ navigation }) {
 
 
 
-    const { signIn } = React.useContext(AuthContext);
+    const {  } = React.useContext(AuthContext);
     const SingupSchema = yup.object({
         username: yup.string().required('username is required. '),
+        firstName: yup.string().required('firstName is required. '),
+        lastName: yup.string().required('lastName is required. '),
+
         email: yup.string().email('email is invalid .').required('email is required .'),
         password: yup.string().min(6, 'password is weak').required('password is required .'),
         password1: yup.string().oneOf([yup.ref('password')], 'password not match'),
@@ -127,11 +131,23 @@ export default function Login({ navigation }) {
             </View>
             
             <Formik
-                initialValues={{ email: '', password: '' }}
-                validationSchema={LoginSchema}
+                initialValues={!pressedSignup ? { email: '', password: '' }:{email: '', username: '',firstName:'',lastName:'',password:'',phone:'',address:''}}
+                validationSchema={pressedSignup ? SingupSchema :LoginSchema}
                 onSubmit={(values, actions) => {
-                    console.log(values);
-                    actions.resetForm();
+                    if(pressedLogin){
+                        console.log(values);
+                        
+    
+                    }
+                    else {
+                        console.log(values);
+                        signup(values).then(res=>{
+                            console.log(res.data);
+                        })
+                        .catch(err=>{console.log(err)})
+                        actions.resetForm();
+                    }
+
                 }
                 }
             >
@@ -195,9 +211,12 @@ export default function Login({ navigation }) {
                                         )
 
                                     }
+                                    <TouchableOpacity onPress={props.handleSubmit} style={pressedLogin ? {width:"60%" ,position: "absolute",bottom: "-7%"}:{width:"60%" ,position: "absolute",bottom: "-3%"}}>
                                     <View style={pressedLogin ?styles.submit :styles.submitSignup}>
                                         <Text style={styles.submitText}>{pressedLogin ? "GetStarted" : "Create account"}</Text>
                                     </View>
+
+                                    </TouchableOpacity>
                                     <TouchableOpacity onPress={checkForgotPassword}>
                                         <Text style={styles.forgotPassword}>{pressedLogin ? "forgot your password ?" : null}</Text>
 
@@ -321,7 +340,7 @@ const styles = StyleSheet.create({
     },
     submit: {
         flex: 1,
-        width: "60%",
+        width: "100%",
         height: 35,
         backgroundColor: "#24A9E1",
         borderRadius: 18,
@@ -337,7 +356,7 @@ const styles = StyleSheet.create({
 
     submitSignup: {
         flex: 1,
-        width: "60%",
+        width: "100%",
         height: 35,
         backgroundColor: "#24A9E1",
         borderRadius: 18,

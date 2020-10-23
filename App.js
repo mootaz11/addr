@@ -13,13 +13,14 @@ import Settings from './screens/SettingsScreen';
 
 
 export default function App() {
-  const [loggedInuser,SetloggedInuser]=useState(true);
-
+  const [loggedInuser,SetloggedInuser]=useState(false);
+  
   const AuthStack = createStackNavigator();
   const drawerStack = createDrawerNavigator();
   
   const authContext = React.useMemo(() => {
-    return {
+    return {  
+      userConnected:{name:"mootaz",lastname:"amara"},
       signIn: () => {
         SetloggedInuser(true)
       },
@@ -41,7 +42,6 @@ export default function App() {
           
           <drawerStack.Navigator  drawerContent={props => <CustomDrawer {...props}/>}>
             <drawerStack.Screen name="orders" component={orderStack}/>
-
             <drawerStack.Screen name="Settings" component={Settings}/>
             <drawerStack.Screen name="Home" component={Home} />
             <drawerStack.Screen name="chat" component={ChatStack} />
