@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { View, Text, StyleSheet, Platform, TouchableOpacity, Image, TextInput, ScrollView } from 'react-native'
 import { Icon } from 'react-native-elements';
-
+import  AuthContext from '../navigation/AuthContext';
 const deliveries_actif = [{
     clientName: "Amara Mootaz",
     price: 15,
@@ -50,13 +50,17 @@ const deliveries_history = [
 ]
 
 export default function Orders(props) {
-    const [actifDeliveries, setActifDeliveries] = useState(deliveries_actif)
-    const [historyDeliveries, setHistoryDeliveries] = useState(deliveries_history)
+    const [actifDeliveries, setActifDeliveries] = useState(deliveries_actif);
+    const [historyDeliveries, setHistoryDeliveries] = useState(deliveries_history);
+    const context= React.useContext(AuthContext);
+
+    console.log("user connected :",context.user)
+    
     const openDrawer = () => {
         props.navigation.openDrawer();
     }
     const detectQrCode = () => {
-    }
+alert("hello")             }
     const closeOrder= (orderToClose)=>{
         setActifDeliveries(actifDeliveries.filter(order=>orderToClose.clientName != order.clientName));
         setHistoryDeliveries(historyDeliveries=>[...historyDeliveries,orderToClose]);
@@ -93,7 +97,18 @@ export default function Orders(props) {
                 </TouchableOpacity>
 
             </View>
-            <ScrollView style={styles.deliveriesScroller}>
+            <ScrollView  //ios
+        contentInset={{
+          top: 0,
+          left: 0,
+          bottom:"200%",
+          right: 0
+        }}
+        //android
+        contentContainerStyle={{
+          paddingRight: Platform.OS == 'android' ? 20 : 0
+
+        }} style={styles.deliveriesScroller}>
                 <View style={styles.deliveriesContainer}>
                     {
                         actifDeliveries ?
@@ -187,7 +202,7 @@ export default function Orders(props) {
 
 const styles = StyleSheet.create({
     historyText: {
-        fontSize: "140%",
+        fontSize: 20,
         fontFamily: "Poppins",
         fontWeight: "bold",
         color: "white"
@@ -221,8 +236,7 @@ const styles = StyleSheet.create({
 
     },
     info: {
-        fontFamily: "Poppins",
-        fontSize: "90%"
+        fontSize: 11
     },
     actions: {
         width: "25%",
@@ -251,6 +265,7 @@ const styles = StyleSheet.create({
     },
     delivery: {
         width: "96%",
+        height:70,
         backgroundColor: "white",
         flexDirection: "row",
         borderRadius: 12,

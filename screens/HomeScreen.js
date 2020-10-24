@@ -1,13 +1,12 @@
 import React, { useState } from 'react'
-import { View } from 'react-native';
-/*import { StyleSheet, Dimensions, View, Image, Platform, Text, Clipboard, Modal, SafeAreaView } from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
+import { StyleSheet, Dimensions, View, Image, Platform, Text, Clipboard, Modal, SafeAreaView } from 'react-native';
+//import MapView, { Marker } from 'react-native-maps';
 import { Icon, SearchBar } from 'react-native-elements';
 import { ScrollView, TouchableOpacity } from 'react-native-gesture-handler';
 import { TextInput } from 'react-native-paper';
 import { FlatList } from 'react-native-gesture-handler';
 import _ from 'lodash';
-*/
+
 
 const partnersData = [
   {
@@ -57,10 +56,13 @@ const domains = [
   { title: "Food", imageDark: require("../assets/fast-food-dark.png"), image: require("../assets/fast-food.png") },
   { title: "Traveaux ", imageDark: require("../assets/builder-dark.png"), image: require("../assets/builder.png") },
   { title: "Taxi", imageDark: require("../assets/taxi-dark.png"), image: require("../assets/taxi.png") },
-  { title: "Urgence", imageDark: require("../assets/ambulance-dark.png"), image: require("../assets/ambulance.png") }];
-export default function Home({ navigation }) {
-  return(<View></View>)
-  /*
+  { title: "Urgence", imageDark: require("../assets/ambulance-dark.png"), image: require("../assets/ambulance.png") }
+];
+
+
+  export default function Home({ navigation }) {
+    return (<View></View>)
+/*
 
   const [dropDown, setdropDown] = useState(false);
   const [Markers, setMarkers] = useState([]);
@@ -203,6 +205,9 @@ export default function Home({ navigation }) {
         <Icon name="search" color={"#24A9E1"} />
         <TextInput onChange={()=>{setShowmodal(true)}} style={styles.searchInput} placeholder="Rechercher votre ville " placeholderTextColor="white" />
      </View>
+
+
+
       <ScrollView horizontal
         style={styles.domains}
         showsHorizontalScrollIndicator={false}
@@ -220,9 +225,9 @@ export default function Home({ navigation }) {
           paddingRight: Platform.OS == 'android' ? 20 : 0
 
         }}
-        
+        >
         {
-          domains.map((value, index) => {
+            domains.map((value, index) => {
             return (
               <View style={styles.domainsContainer} key={index}>
                 <TouchableOpacity onPress={() => { setDomain(value.title) }}>
@@ -332,7 +337,6 @@ export default function Home({ navigation }) {
   );
 */
 }
-
 /*
 
 const styles = StyleSheet.create({

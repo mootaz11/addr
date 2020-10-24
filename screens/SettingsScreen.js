@@ -1,23 +1,22 @@
-import React,{useState} from 'react'
+import React,{useState,useEffect} from 'react'
 import {View,Text,StyleSheet,Platform,Image,TouchableOpacity} from 'react-native'
 import { Icon, SearchBar } from 'react-native-elements';
 import { TextInput } from 'react-native-paper';
+import  AuthContext from '../navigation/AuthContext';
 
-const user_1 ={
-    username:"mootaz amara",
-    email:"amaramootaz11@gmail.com",
-    password:"25417290",
-    address:"khniss monastir",
-    image:require("../assets/mootaz.jpg")
-}
+
 
 export default function Settings({navigation}){
-    const [user,setUser]=useState(user_1)
+    const [user,setUser]=useState(null)
     const [editEmail,setEditEmail]=useState(false)
     const [editUsername,setEditUsername]=useState(false)
     const [editPassword,setEditPassword]=useState(false)
     const [editlocation,setEditlocation]=useState(false)
-
+    const context = React.useContext(AuthContext);
+    useEffect(()=>{
+        setUser(context.user)
+        console.log(user);
+    })
     const openDrawer = ()=>{
         navigation.openDrawer();
     }    
@@ -193,7 +192,7 @@ const styles = StyleSheet.create({
         justifyContent:"center",
         padding:"2%",
         shadowOffset:{  width: 2,  height: 2,  },
-        shadowColor: '"#f7f7f7"',
+        shadowColor: "grey",
         shadowOpacity: 1.0,
         
 
@@ -215,7 +214,7 @@ const styles = StyleSheet.create({
     },
 container:{
     flex:1,
-    backgroundColor:"#f7f7f7"
+    backgroundColor:"white"
 },
 addImageContainer:{
     width:"100%",
@@ -236,15 +235,15 @@ addImage:{
     alignItems:"center",
     width:"32%",
     height:"46%",
-    
+
 
 
 },
 image:{
-    width:"100%",
+    width:"90%",
     height:"100%",
     resizeMode:"stretch",
-    borderRadius:"50%",
+    borderRadius:25,
     shadowOffset:{width:1,height:1},
     shadowColor:"white"
 

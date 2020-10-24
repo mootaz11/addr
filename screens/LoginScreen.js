@@ -1,14 +1,13 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, TouchableOpacity, Text, Image, Platform, Dimensions } from 'react-native';
 import { Formik } from 'formik';
 import * as yup from 'yup';
 import Field from '../common/Field';
-import { AuthContext } from '../navigation/authContext';
+import  AuthContext  from '../navigation/AuthContext';
 import * as Google from "expo-google-app-auth";
 import { configGoogleSignin } from '../secretKeys/appkeys';
 import { ScrollView } from 'react-native-gesture-handler';
-import {signup} from '../rest/userApi';
-
+import {signup,login} from '../rest/userApi';
 
 const userCredentialsFields = [
     { placeholder: 'email', imageSrc: require("../assets/email.png"), name: 'email', type: 'text', secureTextEntry: false },
@@ -31,6 +30,13 @@ const singupFields = [
 export default function Login({ navigation }) {
     const [pressedSignup, setPressedSignup] = useState(false);
     const [pressedLogin, setPressedLogin] = useState(true);
+    const context = React.useContext(AuthContext);
+    useEffect(() => {
+        if(context.user){
+            navigation.navigate("orders");
+        }
+    },[context.user])
+
 
     const signInWithGoogle = async () => {
         try {
@@ -55,7 +61,6 @@ export default function Login({ navigation }) {
 
 
 
-    const {  } = React.useContext(AuthContext);
     const SingupSchema = yup.object({
         username: yup.string().required('username is required. '),
         firstName: yup.string().required('firstName is required. '),
@@ -135,19 +140,21 @@ export default function Login({ navigation }) {
                 validationSchema={pressedSignup ? SingupSchema :LoginSchema}
                 onSubmit={(values, actions) => {
                     if(pressedLogin){
-                        console.log(values);
-                        
+                          login(values).then(res=>{
+                              alert("login done");
+                              context.LoginHandler({user:res.data.user,token:res.data.token})
+                          }).catch(err=>{
+                            console.log(err.message)}) 
     
                     }
                     else {
-                        console.log(values);
                         signup(values).then(res=>{
                             console.log(res.data);
+                            alert("user Created Done !");
+                            actions.resetForm();
                         })
                         .catch(err=>{console.log(err)})
-                        actions.resetForm();
                     }
-
                 }
                 }
             >

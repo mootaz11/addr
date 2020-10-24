@@ -182,8 +182,8 @@ const styles = StyleSheet.create({
             top:"30%",
             elevation: 10,
             backgroundColor:"white",
-            borderTopRightRadius:"12%",
-            borderTopLeftRadius:"12%",
+            borderTopRightRadius:15,
+            borderTopLeftRadius:15,
             justifyContent:"center",
             alignItems:"center"
         },
@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
             height:"18%",   
             position:"absolute",
             width:"100%",
-            top:"10%",
+            top:"11%",
             elevation: 10,
         },
         
@@ -200,7 +200,7 @@ const styles = StyleSheet.create({
             justifyContent: "center",
             flexDirection: "column",
             width: "15%",
-            height:"87%",
+            height:"90%",
             overflow: "hidden",
             margin:8,
         },
@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
         headUserImage:{
             height:"70%",
             width:"70%",
-            borderRadius:"50%",
+            borderRadius:50,
             resizeMode:"cover",
 
             
@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
             },
             friendHeadName:{
                 color:"white"
-                ,fontSize:"80%",
+                ,fontSize:16,
                 margin:"1%",
                 fontWeight:"100",
                 letterSpacing:1
@@ -266,25 +266,25 @@ const styles = StyleSheet.create({
             },
             convImage:{
                 width:"98%",
-                height:"88%",
-                borderRadius:"50%",
+                height:"68%",
+                borderRadius:30,
                 resizeMode:"cover"
             },
             sender:{
                 margin:2,
-                fontSize:"100%",
+                fontSize:12,
                 color:"black",
                 fontWeight:"700",
             },
             message:{
                 color:"#bababa",
                 overflow:"visible",
-                fontSize:"80%"
+                fontSize:15
             },
             time:{
                 color:"#bababa",
                 overflow:"visible",
-                fontSize:"80%"
+                fontSize:12
 
             }
 

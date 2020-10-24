@@ -107,7 +107,7 @@ export default function Conversation(props) {
     return (
         <View style={styles.container}>
             <View style={styles.menu}>
-                <FontAwesome color={"white"} style={{ flex: 1, padding: 0, fontSize: 20 }} name="arrow-left" onPress={goBack} />
+                <FontAwesome color={"white"} style={{  padding: 0, fontSize: 20 }} name="arrow-left" onPress={goBack} />
                 <Image style={styles.friendImage} source={props.route.params.value.image} />
                 <Text style={styles.Title}>{props.route.params.value.name ? props.route.params.value.name : props.route.params.value.sender}</Text>
             </View>
@@ -170,8 +170,9 @@ export default function Conversation(props) {
                     <TextInput
                         style={styles.message}
                         placeholder={"Type a message.."}
-                        underlineColor={"#e6e6e6"}
-                        placeholderTextColor={"##919191"}
+                        underlineColor={"white"}
+                        underlineColorAndroid={"white"}
+                        //placeholderTextColor={"##919191"}
                         value={message}
                         onChangeText={(text) => { setMessage(text); }}
 
@@ -186,7 +187,7 @@ export default function Conversation(props) {
                     }
                 </View>
                 <View style={styles.sentCodeContainer}>
-                    <TouchableOpacity onPress={sendQrCode} style={{ width: "80%", height: "80%", }}>
+                    <TouchableOpacity onPress={sendQrCode} style={{ width: "80%", height: "100%", }}>
                         <View style={styles.monCodecontainer}>
                             <Text style={styles.moncode}>MON CODE</Text>
 
@@ -202,7 +203,7 @@ const styles = StyleSheet.create({
     sentCodeContainer:
     {
         backgroundColor: "white"
-        , width: "30%", height: "100%",
+        , width: "30%", height: 40,
         flexDirection: "column",
         justifyContent: "center",
         alignItems: "center"
@@ -223,7 +224,7 @@ const styles = StyleSheet.create({
     {
         color: "white",
         alignSelf:"stretch",
-        fontSize: "90%",
+        fontSize: 12,
         fontWeight: "bold",
         textAlign:"center"
     },
@@ -251,6 +252,7 @@ const styles = StyleSheet.create({
         height: 60,
         borderRadius: 50,
         marginHorizontal: 8
+        
     },
     Title: {
         fontSize: 20,
@@ -261,11 +263,11 @@ const styles = StyleSheet.create({
         width: "100%",
         height: "73%",
         position: "absolute",
-        top: "17%",
+        top: "19%",
         elevation: 10,
         backgroundColor: "white",
-        borderTopRightRadius: "12%",
-        borderTopLeftRadius: "12%",
+        borderTopRightRadius: 14,
+        borderTopLeftRadius: 14,
         padding: 5,
     },
     sendMessageContainer: {
@@ -298,10 +300,12 @@ const styles = StyleSheet.create({
         margin: 5,
         borderColor: "#e6e6e6",
         color: "#e6e6e6",
-        fontSize: "100%"
+        fontSize: 12,
+        borderTopStartRadius:25,
+        borderBottomStartRadius:25
     },
     sendMessageTouchable: {
-        width: "18%",
+        width: "16%",
         height: "100%",
         borderTopRightRadius: 25,
         borderBottomRightRadius: 25,
@@ -311,17 +315,17 @@ const styles = StyleSheet.create({
     },
     sendMessageButtonContainer: {
         width: "68%",
-        height: "68%",
-        borderRadius: "50%",
+        height: "50%",
+        borderRadius: 15,
         backgroundColor: "#2474F1",
         justifyContent: "center",
         alignItems: "center",
         margin: "1%"
     },
     sendIcon: {
-        width: "70%",
-        height: "70%",
-        resizeMode: "cover"
+        width: "60%",
+        height: "50%",
+        resizeMode: "contain"
     },
     FriendmessageSentContainer: {
         width: "90%",
@@ -331,6 +335,7 @@ const styles = StyleSheet.create({
         padding: 6,
         flexWrap: 'wrap',
         justifyContent: "flex-start",
+        alignSelf:"flex-end"
 
 
     },
@@ -372,7 +377,7 @@ const styles = StyleSheet.create({
 
     textMessage: {
         color: 'black',
-        fontSize: "100%",
+        fontSize: 12,
         margin: 5,
     }
     ,
@@ -402,19 +407,19 @@ const styles = StyleSheet.create({
     },
     FriendTime: {
         alignSelf: 'flex-end',
-        position: "relative",
-        left: 45,
-        bottom: -6,
-        fontSize: "74%",
+        position: "absolute",
+        left: "9%",
+        bottom: "1%",
+        fontSize: 12,
         color: "grey"
 
     },
     userTime: {
         alignSelf: 'flex-end',
-        position: "relative",
-        right: 45,
-        bottom: -6,
-        fontSize: "74%",
+        position: "absolute",
+        left: "75%",
+        bottom: 1,
+        fontSize: 12,
         color: "grey"
 
     }

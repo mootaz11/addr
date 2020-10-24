@@ -4,7 +4,7 @@ import {DrawerContentScrollView,DrawerItem} from '@react-navigation/drawer';
 import  {Avatar,Title,Caption,Text,TouchableRipple,Switch,Drawer,Paragraph} from 'react-native-paper';
 import {Icon} from 'react-native-elements'
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import  {logout} from '../navigation/authContext'
+import  {logout} from '../navigation/AuthContext'
 export default function CustomDrawer (props){
     return(
     
