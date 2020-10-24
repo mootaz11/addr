@@ -1,11 +1,13 @@
 import React, { useState,useEffect } from 'react'
 import AuthContext from './AuthContext'
 import {getConnectedUser} from '../rest/userApi';
+import { AsyncStorage } from 'react-native';
 
-export default function AppContext(props){
+export default  function AppContext(props){
     const [user, setUser] = useState(null)
     const [darkMode,setDarkMode]=useState(false);
-    const [token,setToken]=useState(localStorage.getItem("token"))
+     const token_init = ""
+    const [token,setToken]=useState(token_init)
     
     useEffect(() => {
         if (token) {
@@ -25,16 +27,16 @@ export default function AppContext(props){
         setDarkMode(darkMode=>!darkMode);
     }
     
-    const LoginHandler = ({ user, token }) => {
+    const LoginHandler = async ({ user, token }) => {
         console.log(user);
-        localStorage.setItem('token', token)
+        await AsyncStorage.setItem('token', token)
         setToken(token);
         setUser(user);
     }
 
-    const logoutHandler = () => {
+    const logoutHandler = async () => {
 
-        localStorage.removeItem('token')
+      await  AsyncStorage.removeItem('token')
         setToken(null);
 
         setUser(null)

@@ -111,18 +111,16 @@ export default function Login({ navigation }) {
 
     return (
         <ScrollView
-
-
         //ios
         contentInset={{
           top: 0,
           left: 0,
-          bottom:"80%",
+          bottom:"200%",
           right: 0
         }}
         //android
         contentContainerStyle={{
-          paddingRight: Platform.OS == 'android' ? 20 : 0
+          paddingRight: Platform.OS == 'android' ? 200 : 0
 
         }}
 
@@ -134,7 +132,26 @@ export default function Login({ navigation }) {
                 <Image style={styles.logoApplication} source={require("../assets/logoBlue.png")} />
 
             </View>
-            
+             <View style={styles.switch}>
+
+                                        <View style={!pressedLogin ? styles.login : styles.loginPressed}>
+                                            <TouchableOpacity onPress={checkLogin}>
+
+                                                <Text style={!pressedLogin ? styles.switchTextLogin : styles.switchTextLoginPressed}>Log in</Text>
+                                            </TouchableOpacity>
+
+                                        </View>
+
+
+                                        <View style={!pressedSignup ? styles.signup : styles.signupPressed}>
+                                            <TouchableOpacity onPress={checkSignup}>
+                                                <Text style={!pressedSignup ? styles.switchTextSignup : styles.switchTextSignupPressed}>Sign up</Text>
+                                            </TouchableOpacity>
+
+                                        </View>
+
+
+                                    </View>
             <Formik
                 initialValues={!pressedSignup ? { email: '', password: '' }:{email: '', username: '',firstName:'',lastName:'',password:'',phone:'',address:''}}
                 validationSchema={pressedSignup ? SingupSchema :LoginSchema}
@@ -164,26 +181,7 @@ export default function Login({ navigation }) {
                             <React.Fragment>
 
                                 <View style={!pressedSignup ? styles.FieldsContainer : styles.FieldsContainerSignup}>
-                                    <View style={styles.switch}>
-
-                                        <View style={!pressedLogin ? styles.login : styles.loginPressed}>
-                                            <TouchableOpacity onPress={checkLogin}>
-
-                                                <Text style={!pressedLogin ? styles.switchTextLogin : styles.switchTextLoginPressed}>Log in</Text>
-                                            </TouchableOpacity>
-
-                                        </View>
-
-
-                                        <View style={!pressedSignup ? styles.signup : styles.signupPressed}>
-                                            <TouchableOpacity onPress={checkSignup}>
-                                                <Text style={!pressedSignup ? styles.switchTextSignup : styles.switchTextSignupPressed}>Sign up</Text>
-                                            </TouchableOpacity>
-
-                                        </View>
-
-
-                                    </View>
+                                   
 
                                     {pressedLogin ? userCredentialsFields.map((value, i) => {
                                         return (
@@ -335,12 +333,13 @@ const styles = StyleSheet.create({
     switch: {
         padding:"2%",
         flex: 1,
-        width: "68%",
-        height: 35,
+        width: "58%",
+        height: "6%",
         backgroundColor: "white",
         borderRadius: 18,
         position: "absolute",
-        bottom: "106%",
+        top: "25%",
+        elevation:10,
         marginTop: Platform.OS == 'ios' ? 30 : 20,
         alignSelf: "center",
         flexDirection: "row",
@@ -385,23 +384,28 @@ const styles = StyleSheet.create({
     },
 
     container: {
+        flex:1,
         alignItems: "center",
         backgroundColor: '#f5f5f5',
-        width: "100%",
-        height: "100%",
+        width: Dimensions.get("screen").width,
+        height: Dimensions.get("screen").height,
+        overflow:"scroll"
 
 
     },
     logoContainerLogin:{
             width:"100%",
-            height:"70%",
-            alignContent:"center",
-            alignItems:"center"
+            height:"30%",
+            flexDirection:"column",
+            alignItems:"center",
+            justifyContent:"center"
     },
     logoContainerSignup:{
         width:"100%",
         height:"27%",
         alignContent:"center",
+        flexDirection:"column",
+        justifyContent:"center",
         alignItems:"center"
 },
     FieldsContainerSignup: {
@@ -410,7 +414,9 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
         width: "80%",
-        height: "60%",
+        position:"absolute",
+        top:"31%",
+        height: "65%",
         shadowColor: '#fff',
         shadowOffset: { width: 1, height: 1 },
         shadowColor: '#333',
@@ -428,7 +434,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
         width: "80%",
-        height: "70%",
+        height: "40%",
         shadowColor: '#fff',
         shadowOffset: { width: 1, height: 1 },
         shadowColor: '#333',
@@ -474,6 +480,8 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         height:"40%",
+        position:"absolute",
+        top:"90%",
         padding: "10%",
         margin: 30
     }
