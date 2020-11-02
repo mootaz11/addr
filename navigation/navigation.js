@@ -5,7 +5,7 @@ import Chat from '../screens/ChatScreen';
 import Home from '../screens/HomeScreen';
 import Orders from '../screens/Orders';
 import Conversation from '../screens/Conversation';
-
+import Deliveries from '../screens/DeliveriesScreen'
 
 
 
@@ -21,6 +21,9 @@ export const orderStack = () =>(
       headerShown: false
     }}>
     <ordersStackNav.Screen name="orders"  component={Orders}/>
+    <ordersStackNav.Screen name="deliveries"  component={Deliveries}/>
+
+
   </ordersStackNav.Navigator>
 
 )
@@ -33,7 +36,6 @@ export const ChatStack=()=>(
     headerShown: false
   }}>
       <chatStackNav.Screen name="chat"  component={Chat}/>
-      <chatStackNav.Screen name="conversation"  component={Conversation}/>
 
 
     </chatStackNav.Navigator>

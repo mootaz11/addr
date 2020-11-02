@@ -1,100 +1,82 @@
-import React, { useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { View, Text, StyleSheet, Platform, Image, ScrollView, TouchableOpacity, Button } from 'react-native'
 import { TextInput, Paragraph } from 'react-native-paper';
 import _ from 'lodash';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-
 import QRCode from 'react-native-qrcode-svg';
+import AuthContext from '../navigation/AuthContext';
 
 
 
-const mon_code = "moota12345";
-const conversation_init = {
-    users: ["25417290", "28896426"],
-    messages: [
-
-        {
-            sender: "25417290",
-            content: "bonjour mootaz cv !",
-            code: "123",
-            date: "12.45"
-        },
-
-
-        {
-            sender: "28896426",
-            content: "bonjour akram aya wineek  brabbi bech nass2lek ye5i chbi walid l 7anout aamalek hakkak ken jit kifek nkalmlloul 7akem  allahh yahddik a bro w khw  !",
-            code: "124",
-            date: "12.47"
-        },
-
-
-        {
-            sender: "25417290",
-            content: "hani kel aada ntab3ou fel denia !",
-            code: "125",
-            date: "12.55"
-        },
-
-
-        {
-            sender: "28896426",
-            content: "labess sa7bi nchhlh rabbi maak !",
-            code: "126",
-            date: "12.45"
-        },
-        {
-            sender: "25417290",
-            content: "aaa",
-            code: "126",
-            date: "12.45"
-        },
-        {
-            sender: "25417290",
-            content: "a",
-            code: "126",
-            date: "12.45"
-        }
-
-
-    ],
-};
-
-const current_user_id = "25417290";
-
-
+   
 export default function Conversation(props) {
-
-    const [message, setMessage] = useState("");
-    const [messages, setMessages] = useState(conversation_init.messages);
-    const [conversation, setConversation] = useState(conversation_init)
-    const [moncode, setMoncode] = useState(mon_code);
+    const context = useContext(AuthContext);
     
+    const [message, setMessage] = useState("");
+    const [messages, setMessages] = useState(props.route.params.conversation.messages);
+    const [conversation, setConversation] = useState(props.route.params.conversation);
+  
+    useEffect(()=>{
+        
+    },[context.conversations])
+    
+   
 
     const sendQrCode= ()=>{
-        setMessages(messages => [...messages, {
-            sender: "28896426",
-            content: "mon code est : "+moncode,
-            date: new Date().toISOString().split("T")[1].split(":")[0].toString() + ":" + new Date().toISOString().split("T")[1].split(":")[1].toString(),
-            code: "128"
-        }]
-        )
+        if(messages.length==0){
+            const data={
+                 users:conversation.users,
+                 title:conversation.title,
+                 image:conversation.image,
+                 type:conversation.type,
+                 content:"mon code est   :"+context.user.locationCode,
+             }
+             context.startNewConversation(data).then(conversation=>{
+                setConversation(conversation);
+                setMessages(conversation.messages);
+            }).catch(err=>{console.log(err)})
+         }
+         else {
+            const data={
+                conversationId:conversation._id,
+                content:"mon code est   :"+context.user.locationCode,
+                code:context.user.locationCode
+            }
+            setMessages(messages=>[...messages,data]);
+            context.send_message(data);
+        }
+
+        
 
     }
 
     const sendMessage = () => {
+        if(messages.length==0){
+           const data={
+            users:conversation.users,
+            title:conversation.title,
+            image:conversation.image,
+            type:conversation.type,
+            content:message,
+            }
+            context.startNewConversation(data).then(conversation=>{
+                setConversation(conversation);
+                setMessages(conversation.messages)
+                context.handleConversation(conversation);
+            }).catch(err=>{console.log(err)})
 
-        setMessages(messages => [...messages, {
-            sender: "28896426",
-            content: message,
-            date: new Date().toISOString().split("T")[1].split(":")[0].toString() + ":" + new Date().toISOString().split("T")[1].split(":")[1].toString(),
-            code: "128"
-        }]
-        )
+        }
+        else {
+            const data = {
+                conversationId:conversation._id,
+                content:message
+            }
+            context.send_message(data).then(m=>{
+                setMessages(messages=>[...messages,m]);
+            }).catch(err=>console.log(err));
+
+        }
         setMessage("");
-
-
-
     }
 
 
@@ -102,51 +84,51 @@ export default function Conversation(props) {
 
 
     const goBack = () => {
-        props.navigation.navigate("chat");
+        //console.log (Object.keys(props.route.params));
+       props.navigation.navigate((Object.keys(props.route.params)[1].toString()));
     }
     return (
         <View style={styles.container}>
             <View style={styles.menu}>
                 <FontAwesome color={"white"} style={{  padding: 0, fontSize: 20 }} name="arrow-left" onPress={goBack} />
-                <Image style={styles.friendImage} source={props.route.params.value.image} />
-                <Text style={styles.Title}>{props.route.params.value.name ? props.route.params.value.name : props.route.params.value.sender}</Text>
+                <Image style={styles.friendImage} source={props.route.params.conversation.image} />
+                <Text style={styles.Title}>{props.route.params.conversation.other ? props.route.params.conversation.other : props.route.params.conversation.other}</Text>
             </View>
             <ScrollView style={styles.ConversationBody}
             >
 
                 {
+                    messages ?
                     messages.length > 0 ?
                         messages.map((message, index) => {
                             return (
-                                message.sender == current_user_id ?
-
+                                   message.sender._id == context.user._id ?
                                     (<View style={styles.messageSentContainer} key={index}>
                                         <Image style={styles.userImage} source={require("../assets/mootaz.jpg")} />
                                         <View style={styles.messageSent}>
                                               <Text style={styles.textMessage}>{message.content}</Text>
-                                           { message.content =="mon code est : "+moncode ? 
+                                           { message.content.includes("mon code est   :") ? 
                                          (  <QRCode
-                                                value={mon_code}
-                                                
+                                            value={message.content.substr(16)}
                                             />)
 
                                             :null
                                           }
                                         </View>
-                                        <Text style={styles.userTime}>{message.date}</Text>
+                                        <Text style={styles.userTime}>{message.date.split('T')[1].split(':')[0]+":"+message.date.split('T')[1].split(':')[1]}</Text>
 
                                     </View>
                                     ) :
                                     (
                                         <View style={styles.FriendmessageSentContainer} key={index}>
-                                            <Text style={styles.FriendTime}>{message.date}</Text>
+                                            <Text style={styles.FriendTime}>{message.date.split('T')[1].split(':')[0]+":"+message.date.split('T')[1].split(':')[1]}</Text>
 
                                             <View style={styles.FriendmessageSent}>
                                                 <Text style={styles.textMessage}>{message.content}</Text>
-                                                { message.content =="mon code est : "+moncode ? 
+                                                { message.content.includes("mon code est   :")? 
                                                 (  <QRCode
                                                        
-                                                       value={mon_code}
+                                                    value={message.content.substr(16)}
                                                        
                                                    />)
        
@@ -154,14 +136,14 @@ export default function Conversation(props) {
                                                  }
        
                                                 </View>
-                                            <Image style={styles.FriendImage} source={props.route.params.value.image} />
+                                            <Image style={styles.FriendImage} source={props.route.params.conversation.image} />
 
                                         </View>
                                     )
                             )
 
                         })
-                        : null
+                        : null : null
                 }
 
             </ScrollView>

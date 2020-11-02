@@ -1,63 +1,61 @@
-import React, { useState } from 'react'
+import React,{useContext,useState} from 'react';
 import { View, Text, StyleSheet, Platform, TouchableOpacity, Image, TextInput, ScrollView } from 'react-native'
 import { Icon } from 'react-native-elements';
 import  AuthContext from '../navigation/AuthContext';
 import {close_order,deleteOrder} from "../rest/ordersApi";
 
-
-export default function Orders(props) {
-    const context = React.useContext(AuthContext);
-    const [actifOrders, setActifOrders] = useState(context.actifOrders);
-    const [historyOrders, setHistoryOrders] = useState(context.historyOrders);
-   
+export default function Deliveries(props)
+{   const context = useContext(AuthContext);
+    const [actifDeliveries, setActifDeliveries] = useState(context.actifDeliveries);
+    const [historyDeliveries, setHistoryDeliveries] = useState(context.historyDeliveries);
+    
     const openDrawer = () => {
         props.navigation.openDrawer();
     }
 
+    const detectQrCode = () => {
+        alert("hello")             }
+    
+        const closeDelivery= (deliveryToClose)=>{
+            close_delivery(deliveryToClose._id).then(res=>{
+                setHistoryDeliveries(actifDeliveries.filter(delivery=>deliveryToClose._id != delivery._id));
+                setHistoryDeliveries(historyDeliveries=>[...historyDeliveries,deliveryToClose]);
+                })
+                .catch(err=>{alert(err.message)}) 
+        }
+    
+    
 
 
 
-    const closeOrder= (orderToClose)=>{
-        close_order(orderToClose._id).then(res=>{
-            setActifOrders(actifOrders.filter(order=>orderToClose._id != order._id));
-            setHistoryOrders(historyOrders=>[...historyOrders,orderToClose]);
+        const deleteFromHistory =(deliveryToDelete) =>{
+            deletedelivery(deliveryToDelete._id).then(res=>{
+                alert(res.data.message);
+                setHistoryDeliveries(historyDeliveries.filter(delivery=>deliveryToDelete._id != delivery._id));
+    
+            }).catch(err=>{
+                alert(err.message);
             })
-            .catch(err=>{alert(err.message)}) 
-    }
+    
+        }
+        const startConversation = (order)=>{
+            const conversation =  context.openConversationHandler({},{user:context.user,other:order.client});
+            props.navigation.navigate("conversation",{conversation,deliveries:true})
+         }
+    
+        const deleteFromActif = (deliveryToDelete)=>{
+            deletedelivery(deliveryToDelete._id).then(res=>{
+                alert(res.data.message);
+                setActifDeliveries(actifDeliveries.filter(delivery=>deliveryToDelete._id != delivery._id));
+            }).catch(err=>{alert(err.message)})
+        }
 
-
-    const startConversation = (order)=>{
-       const conversation =  context.openConversationHandler({},{user:order.client,other:order.deliverer});
-       props.navigation.navigate("conversation",{conversation,orders:true})
-    }
-
-
-
-
-    const deleteFromHistory =(orderToDelete) =>{
-        deleteOrder(orderToDelete._id).then(res=>{
-            alert(res.data.message);
-            setHistoryOrders(historyOrders.filter(order=>orderToDelete._id != order._id));
-
-        }).catch(err=>{
-            alert(err.message);
-        })
-
-    }
-
-
-    const deleteFromActif = (orderToDelete)=>{
-        deleteOrder(orderToDelete._id).then(res=>{
-            alert(res.data.message);
-            setActifOrders(actifOrders.filter(order=>orderToDelete._id != order._id));
-        }).catch(err=>{alert(err.message)})
-
-    }
-   return (
+        
+    return (
         <View style={styles.container}>
             <View style={styles.menu}>
                 <Icon color={"white"} style={{ flex: 1, padding: 0 }} name="menu" onPress={openDrawer} />
-                <Text style={styles.Title}>Commandes</Text>
+                <Text style={styles.Title}>Livraisons</Text>
             </View>
             <View style={styles.HeaderContainer}>
                 <View style={styles.SearchBarContainer}>
@@ -72,6 +70,13 @@ export default function Orders(props) {
                     />
                 </View>
 
+                <TouchableOpacity onPress={detectQrCode} style={{ width: "24%", height: "80%" }}>
+
+                    <View style={styles.qrCodeContainer}>
+                        <Image style={styles.qrcode} source={require("../assets/qr-icon.png")} />
+                    </View>
+
+                </TouchableOpacity>
 
             </View>
             <ScrollView  //ios
@@ -88,23 +93,23 @@ export default function Orders(props) {
         }} style={styles.deliveriesScroller}>
                 <View style={styles.deliveriesContainer}>
                     {
-                        actifOrders ?
-                            actifOrders.map((value, index) => {
+                        actifDeliveries ?
+                            actifDeliveries.map((value, index) => {
                                 return(
                                     <View style={styles.delivery} key={index}>
                                         <View style={styles.clientImageContainer}>
                                             <Image style={{ width: "80%", height: "80%", resizeMode: "contain" }} source={require("../assets/mootaz.jpg")} />
                                         </View>
                                         <View style={styles.deliveryInfo}>
-                                            <Text style={styles.info}>Nom de Livreur: {value.deliverer.firstName} </Text>
-                                            <Text style={styles.info}>Prix de commande:{value.title} </Text>
-                                            <Text style={styles.info}>Numero Téléphone: {value.deliverer.phone}</Text>
+                                            <Text style={styles.info}>Nom de client: {value.client.firstName} </Text>
+                                            <Text style={styles.info}>Prix de livraison:{value.title} </Text>
+                                            <Text style={styles.info}>Numero Téléphone: {value.phone}</Text>
 
 
                                         </View>
                                         <View style={styles.actions}>
                                             <View style={styles.sendMessageContainer}>
-                                                <TouchableOpacity onPress= { ()=>{startConversation(value)} } style={{ width: "50%", height: "50%", margin: 5 }}>
+                                                <TouchableOpacity onPress= { ()=>{startConversation(value)} }  style={{ width: "50%", height: "50%", margin: 5 }}>
                                                     <Image style={{ width: "100%", height: "100%", resizeMode: "contain" }} source={require("../assets/message.png")} />
 
                                                 </TouchableOpacity>
@@ -113,8 +118,8 @@ export default function Orders(props) {
                                                 <TouchableOpacity onPress={()=>{deleteFromActif(value)}} style={{ width: "25%", height: "25%", marginHorizontal: 5 }}>
                                                     <Image style={{ width: "100%", height: "100%", resizeMode: "contain" }} source={require("../assets/closeOrder.png")} />
 
-                                                </TouchableOpacity>
-                                                <TouchableOpacity onPress={()=>{closeOrder(value)}} style={{ width: "25%", height: "25%", marginHorizontal: 5 }}>
+                                                </TouchableOpacity >
+                                                <TouchableOpacity  onPress={()=>{closeDelivery(value)}}  style={{ width: "25%", height: "25%", marginHorizontal: 5 }}>
                                                     <Image style={{ width: "100%", height: "100%", resizeMode: "contain" }} source={require("../assets/orderDone.png")} />
 
                                                 </TouchableOpacity>
@@ -133,17 +138,17 @@ export default function Orders(props) {
                 <View style={styles.deliveriesContainer}>
 
                 {
-                        historyOrders ?
-                        historyOrders.map((value, index) => {
+                        historyDeliveries ?
+                        historyDeliveries.map((value, index) => {
                                 return(
                                     <View style={styles.delivery} key={index}>
                                         <View style={styles.clientImageContainer}>
                                             <Image style={{ width: "80%", height: "80%", resizeMode: "contain" }} source={require("../assets/mootaz.jpg")} />
                                         </View>
                                         <View style={styles.deliveryInfo}>
-                                            <Text style={styles.info}>Nom de Livereur: {value.deliverer.firstName} </Text>
-                                            <Text style={styles.info}>Nom de Commande:{value.title} </Text>
-                                            <Text style={styles.info}>Numero Téléphone: {value.deliverer.phone}</Text>
+                                            <Text style={styles.info}>Nom de client: {value.client.firstName} </Text>
+                                            <Text style={styles.info}>Prix de livraison:{value.title} </Text>
+                                            <Text style={styles.info}>Numero Téléphone: {value.phone}</Text>
                                             <Text style={styles.info}>Date: {value.date}</Text>
 
 
@@ -160,6 +165,7 @@ export default function Orders(props) {
                                                     <Image style={{ width: "100%", height: "100%", resizeMode: "contain" }} source={require("../assets/closeOrder.png")} />
 
                                                 </TouchableOpacity>
+                                              
 
                                             </View>
                                         </View>
@@ -176,6 +182,7 @@ export default function Orders(props) {
 const styles = StyleSheet.create({
     historyText: {
         fontSize: 20,
+        fontFamily: "Poppins",
         fontWeight: "bold",
         color: "white"
 
@@ -292,11 +299,11 @@ const styles = StyleSheet.create({
         height: "10%",
         position: "absolute",
         top: "11%",
+        left: "10%",
         elevation: 10,
-        flexDirection: "column",
-        justifyContent: "center",
+        flexDirection: "row",
+        justifyContent: "flex-start",
         alignItems: "center",
-
     },
     SearchBarContainer: {
         width: "74%",
@@ -340,4 +347,6 @@ const styles = StyleSheet.create({
     }
 
 })
+
+
 

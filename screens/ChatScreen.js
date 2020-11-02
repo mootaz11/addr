@@ -1,83 +1,38 @@
-import React,{useState} from 'react';
-import { View, Text, StyleSheet,Platform,Image,TouchableOpacity} from 'react-native';
+import React,{useContext, useEffect, useState} from 'react';
+import { View, Text, StyleSheet,Platform,Image,TouchableOpacity,Dimensions} from 'react-native';
 import { Icon } from 'react-native-elements';
 import { ScrollView ,FlatList } from 'react-native-gesture-handler';
-
-const latestMessages=[{
-    sender:"JULIA TENDORI",
-    id:"55",
-    time:"17:45 ",
-    message:"tnajem tjibli sandwich l win ne5dem svp !",
-    image:require("../assets/julia.jpg")
-},
-{
-    sender:"MIXMAX XXXXXX",
-    id:"54",
-    time:"12:30 ",
-    message:"tnajem tjibli sandwich l win ne5dem svp !",
-    image:require("../assets/papadom.png")
-},
-{
-    sender:"MOOTAZ TENDORI",
-    id:"57",
-    time:"12:20 ",
-    message:"tnajem tjibli sandwich l win ne5dem svp !",
-    image:require("../assets/mootaz.jpg")
-},
-{
-    sender:"BAHRI TENDORI",
-    id:"77",
-    time:"12:20 ",
-    message:"tnajem tjibli sandwich l win ne5dem svp !",
-    image:require("../assets/mixmax.png")
-},
-
-]
-const usersConnected=[
-{
-    name:"Chinchin",
-    id:"55",
-    image:require("../assets/chinchin.png")
-},
-{
-    name:"Mix Max",
-    id:"545",
-    image:require("../assets/mixmax.png")
-
-},
-{
-    name:"Mootaz",
-    id:"54",
-    image:require("../assets/mootaz.jpg")
-
-},
-{
-    name:"Julia",
-    id:"54",
-    image:require("../assets/julia.jpg")
-
-},
-{
-    name:"papadam",
-    id:"544",
-    image:require("../assets/papadom.png")
-
-},
-
-];
+import AuthContext from '../navigation/AuthContext';
+import _ from 'lodash';
 
 
 
 export default function Chat({navigation}){
-    const [groupChat,setGroupChat]= useState([]);
-    const [personalChat,setPersonal]=useState([]);
-const checkConversation =(value)=>{
-    console.log(value)
-    navigation.navigate("conversation",{value})
+    const context = useContext(AuthContext);
+    const [conversations,setConversations]=useState(context.conversations);
+    const [user,setUser]=useState(context.user)
+    const [notSeenConversations,setnotSeenConversations] = useState(context.notSeenConversations);    
+    const [SeenConversations,setSeenConversations] = useState(context.seenConversations)
+  
+
+
+    useEffect(()=>{
+        
+        setConversations(context.conversations);
+        setnotSeenConversations(context.notSeenConversations);
+        setSeenConversations(context.seenConversations);
+
+    },[context.conversations,context.notSeenConversations,context.seenConversations,context.socket])
+    
+    
+    
+    const checkConversation =(conversation)=>{
+    navigation.navigate("conversation",{conversation,chat:true})
 }
 const  openDrawer =()=>{
     navigation.openDrawer();
 }
+
 
 return(
     <View style={styles.container}>
@@ -90,20 +45,20 @@ return(
           showsHorizontalScrollIndicator={false}
           >
            {
-               usersConnected.map((value,key)=>{
+               conversations ? 
+               conversations.map((conversation,key)=>{
                    return (
                     <View style={styles.friendContainer} key={key}>
-                        <TouchableOpacity onPress={()=>{checkConversation(value)}}>
-                            <View  style={styles.headUserImageContainer} >
-                             <Image style={styles.headUserImage} source = {value.image}/>
-                             <Text style={styles.friendHeadName}>{value.name}</Text>
-
+                        <TouchableOpacity onPress={()=>{checkConversation(conversation)}}>
+                            <View  style={styles.headUserImageContainer}>
+                             <Image style={styles.headUserImage} source = {require("../assets/mootaz.jpg")}/>
+                             <Text style={styles.friendHeadName}>{conversation.type=="personal" ? conversation.users[conversation.users.findIndex(u=>{return u._id != user._id})].firstName+" "+conversation.users[conversation.users.findIndex(u=>{return u._id != user._id})].lastName: conversation.lastName }</Text>
                             </View>
                         </TouchableOpacity>
                     </View>
                    )
                })
-
+               :null
            }
 
             
@@ -112,29 +67,71 @@ return(
      <View style={styles.conversations}>
          <View style={styles.convContainer} >
                  <View style={styles.conversationImagecontainer}>
+                 {notSeenConversations ? 
                  <FlatList
-                    data={latestMessages}
+                    data={notSeenConversations}
                     renderItem={({ item }) =>
                 <TouchableOpacity   onPress={() => {checkConversation(item)}}>
                   <View style={styles.conversationContainer} >
                         <View style={styles.ConvimageContainer}>
-                            <Image source={item.image} style={styles.convImage}/>
+                            <Image source={require("../assets/mootaz.jpg")} style={styles.convImage}/>
                         </View>
                         <View style={styles.messageBody}>
-                            <Text style={styles.sender}>{item.sender}</Text>
-                            <Text style={styles.message}>{item.message}</Text>
+                            <Text style={styles.sender}>{item.type=="personal" ? item.users[item.users.findIndex(u=>{return u._id != user._id})].firstName+" "+item.users[item.users.findIndex(u=>{return u._id != user._id})].lastName: item.title }</Text>
+                            <Text style={styles.message}>{item.messages[item.messages.length-1].content}</Text>
                         </View>
                         <View style ={styles.messageMeta}>
-                        <Text style={styles.time}>{item.time}</Text>
-
+                        <Text style={styles.time}>{item.messages[item.messages.length-1].date.split('T')[1].split(':')[0]+":"+item.messages[item.messages.length-1].date.split('T')[1].split(':')[1]}</Text>
+                       {
+                           item.notSeen>0 ?
+                        <View style={styles.seen}>
+                            <Text style={styles.seenNumber}>{item.notSeen.toString()}</Text>
+                        </View>
+                        : null
+                        }
                         </View>
                   </View>
                 </TouchableOpacity>
 
               }
 
-              keyExtractor={item => item.id}
+              keyExtractor={item => item._id}
             />
+            :null
+            }
+
+{SeenConversations ? 
+                 <FlatList
+                    data={SeenConversations}
+                    renderItem={({ item }) =>
+                <TouchableOpacity   onPress={() => {checkConversation(item)}}>
+                  <View style={styles.conversationContainer} >
+                        <View style={styles.ConvimageContainer}>
+                            <Image source={require("../assets/mootaz.jpg")} style={styles.convImage}/>
+                        </View>
+                        <View style={styles.messageBody}>
+                            <Text style={styles.sender}>{item.type=="personal" ? item.users[item.users.findIndex(u=>{return u._id != user._id})].firstName+" "+item.users[item.users.findIndex(u=>{return u._id != user._id})].lastName: item.title }</Text>
+                            <Text style={styles.message}>{item.messages[item.messages.length-1].content}</Text>
+                        </View>
+                        <View style ={styles.messageMeta}>
+                        <Text style={styles.time}>{item.messages[item.messages.length-1].date.split('T')[1].split(':')[0]+":"+item.messages[item.messages.length-1].date.split('T')[1].split(':')[1]}</Text>
+                       {
+                           item.notSeen>0 ?
+                        <View style={styles.seen}>
+                            <Text style={styles.seenNumber}>{item.notSeen.toString()}</Text>
+                        </View>
+                        : null
+                        }
+                        </View>
+                  </View>
+                </TouchableOpacity>
+
+              }
+
+              keyExtractor={item => item._id}
+            />
+            :null
+            }
 
                  </View>
         </View>
@@ -143,13 +140,24 @@ return(
 </View>
 )
 
-}
-
+        }
 
 
 const styles = StyleSheet.create({
-   
-
+    seen:{
+        backgroundColor:"red",
+        borderRadius:3,
+        flexDirection:"column",
+        flexWrap:"wrap",
+        justifyContent:"center",
+        alignItems:"center",
+        margin:2,
+        padding:2
+    },
+seenNumber:{
+    color:"white",
+    fontSize:11
+},
     container:{
         flex:1,
         backgroundColor:"#2474F1"
@@ -198,9 +206,9 @@ const styles = StyleSheet.create({
         friendContainer:{
             alignItems: "center",
             justifyContent: "center",
+            alignContent:"center",
             flexDirection: "column",
-            width: "15%",
-            height:"90%",
+            flexWrap:"wrap",
             overflow: "hidden",
             margin:8,
         },
@@ -208,16 +216,13 @@ const styles = StyleSheet.create({
             justifyContent: "center",
             flexDirection: "column",
             alignItems:"center",
-            width:100,
-            height:100,
+            flexWrap:"wrap",
             margin:2,
-
-
         },
         headUserImage:{
-            height:"70%",
-            width:"70%",
-            borderRadius:50,
+            height:60,
+            width:60,
+            borderRadius:60,
             resizeMode:"cover",
 
             
@@ -225,8 +230,8 @@ const styles = StyleSheet.create({
             },
             friendHeadName:{
                 color:"white"
-                ,fontSize:16,
-                margin:"1%",
+                ,fontSize:15,
+                marginVertical:"1%",
                 fontWeight:"100",
                 letterSpacing:1
                 
@@ -260,14 +265,15 @@ const styles = StyleSheet.create({
                 justifyContent:"center",
                 flexDirection:"column",
                 padding:"5%",
+                alignItems:"center"
 
 
 
             },
             convImage:{
-                width:"98%",
-                height:"68%",
-                borderRadius:30,
+                width:70,
+                height:70,
+                borderRadius:70,
                 resizeMode:"cover"
             },
             sender:{

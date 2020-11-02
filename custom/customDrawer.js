@@ -4,8 +4,10 @@ import {DrawerContentScrollView,DrawerItem} from '@react-navigation/drawer';
 import  {Avatar,Title,Caption,Text,TouchableRipple,Switch,Drawer,Paragraph} from 'react-native-paper';
 import {Icon} from 'react-native-elements'
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import  {logout} from '../navigation/AuthContext'
+import  AuthContext from '../navigation/AuthContext';
+
 export default function CustomDrawer (props){
+    const context = React.useContext(AuthContext);
     return(
     
     <View  style={{flex:1}}>
@@ -48,14 +50,17 @@ export default function CustomDrawer (props){
         <Drawer.Section style={styles.drawerSection} >
              <DrawerItem icon={({color,size})=>(
                   <Icon 
-                    name="settings"
+                    name="account-circle"
                     color={color}
                     size={size} 
                 />
                 )} 
-                label="Mes Commandes"
-                onPress={()=>{props.navigation.navigate("orders")}}/>
+                label="livraisons"
+                onPress={()=>{props.navigation.navigate("deliveries")}}
+                />
+
         </Drawer.Section>
+
         <Drawer.Section style={styles.drawerSection} >
              <DrawerItem icon={({color,size})=>(
                   <Icon 
@@ -64,8 +69,8 @@ export default function CustomDrawer (props){
                     size={size} 
                 />
                 )} 
-                label="Termes de Services"
-                onPress={()=>{props.navigation.navigate("Terms")}}/>
+                label="Mes Commandes"
+                onPress={()=>{props.navigation.navigate("orders")}}/>
         </Drawer.Section>
 
     </DrawerContentScrollView>
@@ -78,7 +83,7 @@ export default function CustomDrawer (props){
                 />
                 )} 
                 label="Logout"
-                onPress={()=>{}}
+                onPress={()=>{context.logoutHandler()}}
                 />
 
         </Drawer.Section>

@@ -32,10 +32,10 @@ export default function Login({ navigation }) {
     const [pressedLogin, setPressedLogin] = useState(true);
     const context = React.useContext(AuthContext);
     useEffect(() => {
-        if(context.user){
-            navigation.navigate("orders");
+        if(!context.isloading && context.user){
+            navigation.navigate("Settings");
         }
-    },[context.user])
+    },[context.user,context.isloading])
 
 
     const signInWithGoogle = async () => {
@@ -108,9 +108,11 @@ export default function Login({ navigation }) {
         navigation.navigate("Signup")
     }
 
-
+ 
     return (
+        
         <ScrollView
+
         //ios
         contentInset={{
           top: 0,
@@ -161,6 +163,7 @@ export default function Login({ navigation }) {
                               alert("login done");
                               context.LoginHandler({user:res.data.user,token:res.data.token})
                           }).catch(err=>{
+                              alert("failed")
                             console.log(err.message)}) 
     
                     }
@@ -260,8 +263,8 @@ export default function Login({ navigation }) {
         </ScrollView>
 
     )
+            }
 
-}
 
 
 const styles = StyleSheet.create({
@@ -338,11 +341,12 @@ const styles = StyleSheet.create({
         backgroundColor: "white",
         borderRadius: 18,
         position: "absolute",
-        top: "25%",
+        top: "22%",
         elevation:10,
         marginTop: Platform.OS == 'ios' ? 30 : 20,
         alignSelf: "center",
         flexDirection: "row",
+        zIndex:50
     },
     submit: {
         flex: 1,

@@ -1,22 +1,21 @@
-import React,{useState,useEffect} from 'react'
+import React,{useEffect,useState} from 'react'
 import {View,Text,StyleSheet,Platform,Image,TouchableOpacity} from 'react-native'
-import { Icon, SearchBar } from 'react-native-elements';
+import { Icon } from 'react-native-elements';
 import { TextInput } from 'react-native-paper';
 import  AuthContext from '../navigation/AuthContext';
-
-
+import {updateImage,updateInfo,updatePassword} from '../rest/userApi';
 
 export default function Settings({navigation}){
-    const [user,setUser]=useState(null)
-    const [editEmail,setEditEmail]=useState(false)
-    const [editUsername,setEditUsername]=useState(false)
-    const [editPassword,setEditPassword]=useState(false)
-    const [editlocation,setEditlocation]=useState(false)
+
     const context = React.useContext(AuthContext);
-    useEffect(()=>{
-        setUser(context.user)
-        console.log(user);
-    })
+    const [user,setUser]=useState(context.user);
+    const [editEmail,setEditEmail]=useState(false);
+    const [editUsername,setEditUsername]=useState(false);
+    const [editPassword,setEditPassword]=useState(false);
+    const [editlocation,setEditlocation]=useState(false);
+
+
+
     const openDrawer = ()=>{
         navigation.openDrawer();
     }    
@@ -24,9 +23,12 @@ export default function Settings({navigation}){
         if(!editUsername)
         {setEditUsername(true);}
         else {
-            //update user data
-            console.log(user);
-            setEditUsername(false)
+            updateInfo({username:user.username}).then(res=>{
+                alert(res.data.message);
+        }).catch(err=>{alert(err.message)})
+       
+        setEditEmail(false);
+                setEditUsername(false)
         }
     }
     const changetoTextInputEmail =()=>{
@@ -34,10 +36,16 @@ export default function Settings({navigation}){
             setEditEmail(true);
         }
         else {
-            //update user data
-            console.log(user);
+            updateInfo({email:user.email}).then(res=>{
+                    alert(res.data.message);
+            }).catch(err=>{alert(err.message)})
+           
             setEditEmail(false);
+        
+
+        
         }
+
     }
     const changetoTextInputPassword =()=>{
         if(!editPassword){
@@ -70,10 +78,10 @@ export default function Settings({navigation}){
              </View>
              <View style={styles.addImageContainer}>
                  <View style={styles.addImage} >
-                <Image style={styles.image}  source={ user.image ? user.image : require("../assets/add-image.png")}/>
+                <Image style={styles.image}  source={ user.photo ? user.photo : require("../assets/add-image.png")}/>
                  </View>
                  <TouchableOpacity onPress={changePicture}>
-                     <Text style={styles.imageTitle}>{ user.image ? "Modifier votre image" : "Ajouter une image"}</Text>
+                     <Text style={styles.imageTitle}>{ user.photo ? "Modifier votre image" : "Ajouter une image"}</Text>
                  </TouchableOpacity>
             </View>
             <View style={styles.generalInfo}>
@@ -96,7 +104,7 @@ export default function Settings({navigation}){
                 <Image style={styles.infoImage} source={require("../assets/emailProfile.png")}/>
                 
                 { !editEmail && <Text style={styles.userInfo}>{user.email}</Text> }
-                {editEmail && <TextInput  style={styles.userInfoInput} value={user.email}  onChangeText={(text)=>setUser({email:text,username:user.username,password:user.password,address:user.address})}  />} 
+                {editEmail && <TextInput  style={styles.userInfoInput} value={user.email}  onChangeText={(text)=>setUser({...user,email:text})}  />} 
                 <TouchableOpacity style={styles.buttonEdit} onPress={changetoTextInputEmail}>
                 { !editEmail && <Image style={styles.edit}  source={require("../assets/edit.png") }/>}
                    { editEmail && <Image style={styles.edit}  source={require("../assets/done.png") }/>}
@@ -106,8 +114,8 @@ export default function Settings({navigation}){
                 
                 <View style={styles.info}>
                 <Image style={styles.infoImage} source={require("../assets/passwordProfile.png")}/>
-                {!editPassword&&<Text style={styles.userInfo}>{user.password}</Text>}
-                {editPassword && <TextInput  style={styles.userInfoInput} value={user.password}  onChangeText={(text)=>setUser({password:text,email:user.email,username:user.username,address:user.address})}  />} 
+                {!editPassword&&<Text style={styles.userInfo}>*********</Text>}
+                {editPassword && <TextInput  style={styles.userInfoInput} value={""}  onChangeText={(text)=>setUser({...user,password:text})}  />} 
                 <TouchableOpacity style={styles.buttonEdit} onPress={changetoTextInputPassword}>
                 { !editPassword && <Image style={styles.edit}  source={require("../assets/edit.png") }/>}
                    { editPassword && <Image style={styles.edit}  source={require("../assets/done.png") }/>}
