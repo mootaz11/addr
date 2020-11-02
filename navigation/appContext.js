@@ -120,7 +120,7 @@ useEffect(()=>{
 
 
                     const conv_index =_conversations.findIndex(conv => {return conv._id == message.conversation});
-                    const not_seenIndex =_notSeenConversations.findIndex(conv => {return conv._id == message.conversation});
+                    //const not_seenIndex =_notSeenConversations.findIndex(conv => {return conv._id == message.conversation});
                     
                     // if(conv_index >=0 && not_seenIndex>=0){
                         
