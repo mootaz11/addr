@@ -17,8 +17,15 @@ export default function Conversation(props) {
     const [conversation, setConversation] = useState(props.route.params.conversation);
   
     useEffect(()=>{
-        
-    },[context.conversations])
+        let _conversations = [...context.conversations];
+        const index = _conversations.findIndex(conv=>{return conv._id==conversation._id});
+        if(index>=0){
+          let _conversation = _conversations[index];
+          setMessages(messages => [...messages,_conversation.messages[_conversation.messages.length-1]]);
+          setConversation(_conversation);        
+        }
+       // console.log(conv.messages[conv.messages.length-1])
+    },[context.conversations,context.socket])
     
    
 
@@ -79,7 +86,13 @@ export default function Conversation(props) {
         setMessage("");
     }
 
-
+    const makeAsSeen = ()=>{
+        if(conversation){
+            context.markAsReadConversation()
+        }
+    
+    
+    }
 
 
 
@@ -96,7 +109,6 @@ export default function Conversation(props) {
             </View>
             <ScrollView style={styles.ConversationBody}
             >
-
                 {
                     messages ?
                     messages.length > 0 ?
@@ -116,7 +128,7 @@ export default function Conversation(props) {
                                           }
                                         </View>
                                         <Text style={styles.userTime}>{message.date.split('T')[1].split(':')[0]+":"+message.date.split('T')[1].split(':')[1]}</Text>
-
+                                        <Image style={styles.seenImage} source={require("../assets/julia.jpg")}/>
                                     </View>
                                     ) :
                                     (
@@ -157,7 +169,7 @@ export default function Conversation(props) {
                         //placeholderTextColor={"##919191"}
                         value={message}
                         onChangeText={(text) => { setMessage(text); }}
-
+                        onFocus={makeAsSeen}
 
                     />
                     {message.length > 0 &&
@@ -327,9 +339,10 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "flex-start",
         margin: 8,
-        padding: 6,
+        padding: 4,
         flexWrap: 'wrap',
         justifyContent: "flex-start",
+        backgroundColor:'red'
 
     },
     FriendmessageSent: {
@@ -387,6 +400,15 @@ const styles = StyleSheet.create({
         position: "relative",
         bottom: 10
     },
+    seenImage:{
+        width: 12,
+        height: 12,
+        borderRadius: 50,
+        alignSelf: 'flex-end',
+        
+        
+        
+    },
     FriendTime: {
         alignSelf: 'flex-end',
         position: "absolute",
@@ -399,8 +421,8 @@ const styles = StyleSheet.create({
     userTime: {
         alignSelf: 'flex-end',
         position: "absolute",
-        left: "75%",
-        bottom: 1,
+        left: "72%",
+        bottom: 0,
         fontSize: 12,
         color: "grey"
 

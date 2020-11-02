@@ -5,6 +5,7 @@ import {createConversation, getUserConversations,sendMessage,getConversation} fr
 
 import {getConnectedUser} from '../rest/userApi';
 import {getUserActifOrders,getUserHistoryOrders,getUserActifDeliveries} from '../rest/ordersApi';
+import { not } from 'react-native-reanimated';
 //import AsyncStorage from '@react-native-community/async-storage'
 /*  const getToken = async () => {
         let token = '';
@@ -46,6 +47,7 @@ export default  function AppContext(props){
                 console.log(err)
             })
         } 
+
         else {
             setIsloading(false);}
     },[token])
@@ -55,25 +57,26 @@ useEffect(()=>{
         console.log("use effectxxxxx");
 
       getUserConversations().then(_conversations=>{
-                        setConversations(_conversations);
                         let _notSeen =[];
                         let _Seen =[];
                         _conversations.map(conversation=>{
                             let notSeenSum=0;
-                            conversation.messages.map(message=>{
+                            let conv = {...conversation};
+                            conv.messages.map(message=>{
                                 if(message.sender._id != user._id && message.seen.length==0){
                                     notSeenSum+=1;}})
                                     if(notSeenSum>0)
-                                    {conversation.notSeen=notSeenSum;  
-                                    _notSeen.push(conversation);
+                                    {conv.notSeen=notSeenSum;  
+                                    _notSeen.push(conv);
                                     }
                                     else {
-                                        _Seen.push(conversation);
+                                        _Seen.push(conv);
                                     }
                         })
                         setSeenConversations([..._Seen]);
                         setNotSeenConversations([..._notSeen]);
-                   
+                        setConversations(_conversations);
+
                 }).catch(err=>{console.log(err)})
             }
             },[user])
@@ -103,7 +106,7 @@ useEffect(()=>{
     },[user])
 
 
-
+//markasread-conversation
 
 
     useEffect(()=>{
@@ -113,39 +116,32 @@ useEffect(()=>{
         if(conversations ){
 
             socket.on('send-message',(message)=>{
-                    const _conversations = [...conversations];
+                socket.off('send-message')
+                const _conversations = [...conversations];
                     const _notSeenConversations = [...notSeenConversations];
-                    console.log(_conversations);
-                    console.log(_notSeenConversations);
-
-
-                    const conv_index =_conversations.findIndex(conv => {return conv._id == message.conversation});
-                    //const not_seenIndex =_notSeenConversations.findIndex(conv => {return conv._id == message.conversation});
                     
-                    // if(conv_index >=0 && not_seenIndex>=0){
-                        
+                    const conv_index =_conversations.findIndex(conv => {return conv._id == message.conversation});
+                    const not_seenIndex =_notSeenConversations.findIndex(conv => {return conv._id == message.conversation});
+                    
+                     if(conv_index >=0 && not_seenIndex>=0){    
+                         let _convReal = {..._conversations[conv_index]};
+                          let _convNotSeen = {..._notSeenConversations[not_seenIndex]};
+                          let notSeenMessages = [..._convNotSeen.messages];
+                          notSeenMessages.push(message);
+                    
+                          _convReal.messages=notSeenMessages
+                          _convNotSeen.messages=notSeenMessages
+                    
+                          _conversations.splice(conv_index,1);
+                          _notSeenConversations.splice(not_seenIndex,1);
+                          _convNotSeen.notSeen+=1;
+                         _notSeenConversations.push(_convNotSeen);
+                         _conversations.push(_convReal);
 
-                        
-                    //     let _convReal = {..._conversations[conv_index]};
-                    //     let _convNotSeen = {..._notSeenConversations[not_seenIndex]};
-                        
-
-
-                    //     _convReal.messages.push(message);
-                    //     _convNotSeen.messages.push(message);
-
-                    //     _conversations.splice(conv_index,1);
-                    //     _notSeenConversations.splice(not_seenIndex,1);
-                    //     _convNotSeen.notSeen+=1;
-
-                    //     _notSeenConversations.push(_convNotSeen)
-                    //     _conversations.push(_convReal);
-
-                    // }
+                     setNotSeenConversations(_notSeenConversations);
+                     setConversations(_conversations)
+                    }
                 })
-
-
-
             socket.on('create-conversation',(conversation)=>{
                     const _notSeen = [...notSeenConversations]; 
                     let notSeenSum=0;
@@ -169,17 +165,33 @@ useEffect(()=>{
     },[conversations,notSeenConversations,seenConversations])  
     
 
-
-
-    
-
     const handleConversation =(conversation)=>{
         setConversations(conversations=>[...conversations,conversation]);
         setSeenConversations(seenConversations=>[...seenConversations,conversation]);    
-
     }
 
 
+    const markAsReadConversation = (conv_id)=>{
+        if(conversations.findIndex(conversation=>{return conversation._id==conv_id})>=0){
+
+        
+            let _conv = {...conversations.findIndex(conversation=>{return conversation._id==conv_id})};
+            
+            let _notSeenConversations = [...notSeenConversations];
+            let _SeenConversations = [...seenConversations];
+            let _conversations = [...conversations];
+            console.log(_conv.messages);
+
+            _notSeenConversations.filter(conversation => {return conversation._id != _conv._id});
+            _conversations.filter(conversation => {return conversation._id != _conv._id});
+            _SeenConversations.push(_conv);
+
+
+            console.log(" not seen",_notSeenConversations)
+            console.log("  seen",_SeenConversations)
+            console.log("all",_conversations)
+        }
+    }
 
 
     const startNewConversation = (data)=>{
@@ -290,6 +302,7 @@ return(
     send_message:send_message,
     seenConversations:seenConversations,
     handleConversation:handleConversation,
+    markAsReadConversation:markAsReadConversation
 
 }
 }>
