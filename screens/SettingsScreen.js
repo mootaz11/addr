@@ -1,12 +1,14 @@
 import React,{useEffect,useState} from 'react'
-import {View,Text,StyleSheet,Platform,Image,TouchableOpacity} from 'react-native'
+import {View,Text,StyleSheet,Platform,Image,TouchableOpacity,Dimensions,Alert} from 'react-native'
 import { Icon } from 'react-native-elements';
 import { TextInput } from 'react-native-paper';
 import  AuthContext from '../navigation/AuthContext';
 import * as ImagePicker from 'expo-image-picker';
+import * as Permissions from 'expo-permissions';
 import {useActionSheet} from '@expo/react-native-action-sheet';
 
 import {updateImage,updateInfo,updatePassword} from '../rest/userApi';
+import { Form } from 'formik';
 
 const BUTTONS = [
     'Take Photo', 
@@ -81,30 +83,47 @@ export default function Settings({navigation}){
             setEditlocation(false);
         }
     }
- 
+    const { showActionSheetWithOptions } = useActionSheet();
 
-    
-    
-    
-    
-        const { showActionSheetWithOptions } = useActionSheet();
-    
-        const verifyPermissions = async () => {
-          const result = await Permissions.askAsync(Permissions.CAMERA, Permissions.CAMERA_ROLL);
-          if(result.status !== 'granted'){
-            Alert.alert('Insufficient permissions!', 
-            'You need to grant camera permissions to use this app',
-            [{text: 'Okay'}]
-            );
-            return false ;
-          }
-          return true;
-    
-        };
-    
-    const    changePicture=()=>{
 
-         
+    const chooseFromCamera=async ()=>{
+        await Permissions.askAsync(Permissions.CAMERA);
+        await Permissions.askAsync(Permissions.CAMERA_ROLL);
+
+        let image=await ImagePicker.launchCameraAsync({
+            allowsEditing: true,
+            base64: true
+      
+        })
+        console.log(image.uri)
+        setUser({...user,photo:image.uri})
+        const formdata= new FormData();
+
+        
+
+    }
+    const chooseFromLibrary=async ()=>{
+       const permResult1 =  await Permissions.askAsync(Permissions.CAMERA);
+       const permResult2 = await Permissions.askAsync(Permissions.CAMERA_ROLL);
+        
+       if(permResult1.status !=="granted" && permResult2.status !="granted"){
+           Alert.alert("permission required");
+       }
+
+        let image = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [4, 3],
+            quality: 1,
+          });
+          console.log(image.uri)
+          setUser({...user,photo:image.uri})
+
+          const formdata= new FormData();
+        
+    }
+
+        const changePicture = () => {
             showActionSheetWithOptions({
                 title: 'Select Photo',
                 titleTextStyle: {
@@ -124,52 +143,20 @@ export default function Settings({navigation}){
             }, selectHandler);
         };
     
-
-        const takePhotoFromCameraHandler = async () => {
-            const hasPermissions = await verifyPermissions();
-            if(!hasPermissions){
-                return ;
-            }
-    
-            const image = await ImagePicker.launchCameraAsync({
-                allowsEditing: true,
-                aspect: [9,12],
-                quality: 0.5
-            });
-    
-            setUser({...user,photo:image.uri});
-        };
-
-
-    
-        const choosePhotoFromLibrary = async () => {
-            const hasPermissions = await verifyPermissions();
-            if(!hasPermissions){
-                return ;
-            }
-    
-            const image = await ImagePicker.launchImageLibraryAsync();
-            setUser({...user,photo:image.uri});
-
-        };
-    
-
-
         const selectHandler = (index) => {
             switch(index){
                 case 0:
-                    takePhotoFromCameraHandler();
+                    chooseFromCamera();
                     break;
                 case 1:
-                    choosePhotoFromLibrary();
+                    chooseFromLibrary();
                     break;
                 default:
                     break;
             }
     
         };
-
-
+    
     return(
         <View style={dark ? styles.containerdark :styles.container}>
 
@@ -179,7 +166,7 @@ export default function Settings({navigation}){
              </View>
              <View style={styles.addImageContainer}>
                  <View style={styles.addImage} >
-                <Image style={dark ? styles.imageDark :styles.image}  source={ user.photo ? user.photo : require("../assets/add-image.png")}/>
+                <Image style={dark ? styles.imageDark :styles.image}   source={ user.photo ? {uri:user.photo}  : require("../assets/add-image.png")}/>
                  </View>
                  <TouchableOpacity onPress={changePicture}>
                      <Text style={dark ? styles.imageTitleDark :styles.imageTitle}>{ user.photo ? "Modifier votre image" : "Ajouter une image"}</Text>

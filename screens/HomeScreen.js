@@ -1,5 +1,5 @@
 import React, { useState ,useContext,useEffect} from 'react'
-import { StyleSheet, Dimensions, View, Image, Platform, Text, Clipboard, Modal, SafeAreaView } from 'react-native';
+import { StyleSheet, Dimensions, View, Image, Platform, Text, Clipboard, Modal, SafeAreaView,Alert } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import { Icon, SearchBar } from 'react-native-elements';
 import { ScrollView, TouchableOpacity } from 'react-native-gesture-handler';
@@ -7,6 +7,8 @@ import { TextInput } from 'react-native-paper';
 import { FlatList } from 'react-native-gesture-handler';
 import _ from 'lodash';
 import AuthContext from '../navigation/AuthContext';
+import * as Location from 'expo-location';
+
 
 const partnersData = [
   {
@@ -79,6 +81,17 @@ const domains = [
 
 
   useEffect(()=>{
+    (async () => {
+      let { status } = await Location.requestPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission to access location was denied');
+      }
+      
+      let location = await Location.getCurrentPositionAsync({});
+      console.log(location);
+      setLocation({latitude:location.coords.latitude,longitude:location.coords.longitude});
+    })();
+
     setDark(context.darkMode);
   },[context.darkMode])
 
@@ -130,29 +143,27 @@ const domains = [
       >
         <Marker
           coordinate={{
-            latitude: 35.7643
+            latitude: location.latitude
 
             ,
-            longitude: 10.8113
+            longitude:location.longitude
 
           }}
 
         >
-          <Image source={require('../assets/mootaz.jpg')} style={{ height: 35, width: 35, borderRadius: 30 }} />
+          <Image source={require('../assets/mootaz.jpg')} style={{ height: 30, width: 30, borderRadius: 30 }} />
 
         </Marker>
 
         <Marker
           coordinate={{
-            latitude: 35.7773
-
-            ,
+            latitude: 35.7773,
             longitude: 10.8313
 
           }}
 
         >
-          <Image source={require('../assets/mootaz.jpg')} style={{ height: 35, width: 35, borderRadius: 30 }} />
+          <Image source={require('../assets/mootaz.jpg')} style={{ height: 30, width: 30, borderRadius: 30 }} />
 
         </Marker>
 
@@ -271,17 +282,19 @@ const domains = [
           domains.map((value, index) => {
             return (
               <View style={styles.partnersContainer} key={index}>
-                <TouchableOpacity onPress={() => { setDomain(value.title) }}>
                   <View style={styles.SinglePartner} >
                     <View style={styles.PartnerImageContainer}></View>
                     <View style={styles.operations}>
+                    <TouchableOpacity onPress={() => { setDomain(value.title) }}>
+
                       <View style={styles.call}></View>
+                      </TouchableOpacity>
+
                       <View style={styles.messaging}></View>
                     </View>
 
                   </View>
 
-                </TouchableOpacity>
               </View>
 
             )
@@ -528,30 +541,64 @@ const styles = StyleSheet.create({
       width: 180,
       height: "92%",
       alignItems: "flex-start",
-      backgroundColor: '#2474F1',
-      flexDirection:"row"
+      backgroundColor: '#24A9E1',
+      flexDirection:"row",
+      shadowOffset:{width:3,height:3},
+      shadowOpacity:0.3,
+      borderRadius:8,
+      shadowColor:"white",
+      
     },
     PartnerImageContainer:{
-      backgroundColor:"red",
+      backgroundColor:"#24A9E1",
       width:"70%",
-      height:"100%"
+      height:"100%",
+      shadowColor:"white",
+      shadowOffset:{width:3,height:3},
+      shadowOpacity:0.3,
+      borderRadius:8
     },
     operations:{
-      backgroundColor:"black",
+      backgroundColor:"#219dd1",
       width:"30%",
       height:"100%",
       flexDirection:"column",
-      alignItems:"flex-start"
+      alignItems:"flex-start",
+      shadowColor:"white",
+      shadowOffset:{width:3,height:3},
+      shadowOpacity:0.3,
+      borderRadius:8,
+      zIndex:50,
+      elevation:10,
+      borderColor:"white",
+      borderWidth:0.2
+
 
     },
     call:{
       width:"100%",
-      height:"50%"
+      height:"50%",
+      shadowColor:"white",
+      shadowOffset:{width:3,height:3},
+      shadowOpacity:0.3,
+      borderRadius:8,
+      zIndex:50,
+      elevation:10,
+      borderColor:"white",
+      borderWidth:0.2
     },
     messaging:{
         width:"100%",
         height:"50%",
-        backgroundColor:"blue"
+        backgroundColor:"#219dd1",
+        shadowColor:"white",
+        shadowOffset:{width:3,height:3},
+        shadowOpacity:0.3,
+        borderRadius:8,
+        zIndex:50,
+        elevation:10,
+        borderColor:"white",
+        borderWidth:0.2
     },
   service: {
     margin: 4,
