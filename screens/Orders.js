@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState,useEffect } from 'react'
 import { View, Text, StyleSheet, Platform, TouchableOpacity, Image, TextInput, ScrollView } from 'react-native'
 import { Icon } from 'react-native-elements';
 import  AuthContext from '../navigation/AuthContext';
@@ -9,7 +9,13 @@ export default function Orders(props) {
     const context = React.useContext(AuthContext);
     const [actifOrders, setActifOrders] = useState(context.actifOrders);
     const [historyOrders, setHistoryOrders] = useState(context.historyOrders);
-   
+    const [dark,setDark]=useState(context.darkMode);
+  
+    useEffect(()=>{
+      setDark(context.darkMode);
+    },[context.darkMode])
+  
+
     const openDrawer = () => {
         props.navigation.openDrawer();
     }
@@ -54,13 +60,13 @@ export default function Orders(props) {
 
     }
    return (
-        <View style={styles.container}>
+        <View style={dark ? styles.containerDark : styles.container}>
             <View style={styles.menu}>
                 <Icon color={"white"} style={{ flex: 1, padding: 0 }} name="menu" onPress={openDrawer} />
                 <Text style={styles.Title}>Commandes</Text>
             </View>
             <View style={styles.HeaderContainer}>
-                <View style={styles.SearchBarContainer}>
+                <View style={dark ? styles.SearchBarContainerDark :styles.SearchBarContainer}>
                     <View style={styles.searchIconContainer}>
                         <Image source={require("../assets/search-icon-black.png")} style={styles.searchicon} />
                     </View>
@@ -91,14 +97,14 @@ export default function Orders(props) {
                         actifOrders ?
                             actifOrders.map((value, index) => {
                                 return(
-                                    <View style={styles.delivery} key={index}>
+                                    <View style={dark ? styles.deliveryDark : styles.delivery} key={index}>
                                         <View style={styles.clientImageContainer}>
                                             <Image style={{ width: "80%", height: "80%", resizeMode: "contain" }} source={require("../assets/mootaz.jpg")} />
                                         </View>
                                         <View style={styles.deliveryInfo}>
-                                            <Text style={styles.info}>Nom de Livreur: {value.deliverer.firstName} </Text>
-                                            <Text style={styles.info}>Prix de commande:{value.title} </Text>
-                                            <Text style={styles.info}>Numero Téléphone: {value.deliverer.phone}</Text>
+                                            <Text style={dark ? styles.infoDark : styles.info}>Nom de Livreur: {value.deliverer.firstName} </Text>
+                                            <Text style={dark ? styles.infoDark : styles.info}>Prix de commande:{value.title} </Text>
+                                            <Text style={dark ? styles.infoDark : styles.info}>Numero Téléphone: {value.deliverer.phone}</Text>
 
 
                                         </View>
@@ -109,7 +115,7 @@ export default function Orders(props) {
 
                                                 </TouchableOpacity>
                                             </View>
-                                            <View style={styles.crud}>
+                                            <View style={dark ? styles.crudDark : styles.crud}>
                                                 <TouchableOpacity onPress={()=>{deleteFromActif(value)}} style={{ width: "25%", height: "25%", marginHorizontal: 5 }}>
                                                     <Image style={{ width: "100%", height: "100%", resizeMode: "contain" }} source={require("../assets/closeOrder.png")} />
 
@@ -127,7 +133,7 @@ export default function Orders(props) {
                             : null}
                             
                 </View>
-                <View style={styles.history}>
+                <View style={dark ? styles.historyDark : styles.history}>
                     <Text style={styles.historyText}>Historique</Text>
                 </View>
                 <View style={styles.deliveriesContainer}>
@@ -136,15 +142,15 @@ export default function Orders(props) {
                         historyOrders ?
                         historyOrders.map((value, index) => {
                                 return(
-                                    <View style={styles.delivery} key={index}>
+                                    <View style={dark ? styles.deliveryDark : styles.delivery} key={index}>
                                         <View style={styles.clientImageContainer}>
                                             <Image style={{ width: "80%", height: "80%", resizeMode: "contain" }} source={require("../assets/mootaz.jpg")} />
                                         </View>
                                         <View style={styles.deliveryInfo}>
-                                            <Text style={styles.info}>Nom de Livereur: {value.deliverer.firstName} </Text>
-                                            <Text style={styles.info}>Nom de Commande:{value.title} </Text>
-                                            <Text style={styles.info}>Numero Téléphone: {value.deliverer.phone}</Text>
-                                            <Text style={styles.info}>Date: {value.date}</Text>
+                                            <Text style={dark ? styles.infoDark : styles.info}>Nom de Livereur: {value.deliverer.firstName} </Text>
+                                            <Text style={dark ? styles.infoDark : styles.info}>Nom de Commande:{value.title} </Text>
+                                            <Text style={dark ? styles.infoDark : styles.info}>Numero Téléphone: {value.deliverer.phone}</Text>
+                                            <Text style={dark ? styles.infoDark : styles.info}>Date: {value.date}</Text>
 
 
                                         </View>
@@ -155,7 +161,7 @@ export default function Orders(props) {
 
                                                 </TouchableOpacity>
                                             </View>
-                                            <View style={styles.crud}>
+                                            <View style={dark ? styles.crudDark :styles.crud}>
                                                 <TouchableOpacity onPress={()=>{deleteFromHistory(value)}} style={{ width: "25%", height: "25%", marginHorizontal: 5 }}>
                                                     <Image style={{ width: "100%", height: "100%", resizeMode: "contain" }} source={require("../assets/closeOrder.png")} />
 
@@ -188,6 +194,14 @@ const styles = StyleSheet.create({
         alignItems: "center",
         backgroundColor: "#2474F1"
     },
+    historyDark: {
+        width: "100%",
+        height: 40,
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "#1E1E1E"
+    },
     crud: {
         width: "60%",
         height: "100%",
@@ -199,6 +213,16 @@ const styles = StyleSheet.create({
         borderBottomRightRadius: 12
 
     },
+    crudDark:{
+        width: "60%",
+        height: "100%",
+        flexDirection: "row",
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "#313131",
+        borderTopRightRadius: 12,
+        borderBottomRightRadius: 12
+    },
     sendMessageContainer: {
         width: "40%",
         height: "100%",
@@ -209,6 +233,10 @@ const styles = StyleSheet.create({
     },
     info: {
         fontSize: 11
+    },
+    infoDark: {
+        fontSize: 11,
+        color:"white"
     },
     actions: {
         width: "25%",
@@ -247,6 +275,18 @@ const styles = StyleSheet.create({
 
 
     },
+    deliveryDark: {
+        width: "96%",
+        height:70,
+        backgroundColor: "#414141",
+        flexDirection: "row",
+        borderRadius: 12,
+        marginVertical: 6,
+        flexWrap: 'wrap',
+        justifyContent: "flex-start",
+
+
+    },
     deliveriesContainer: {
         width: "100%",
         flexDirection: "column",
@@ -266,6 +306,10 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: "#BFC0C2"
+    },
+    containerDark: {
+        flex: 1,
+        backgroundColor: "#292929"
     },
     menu: {
 
@@ -292,11 +336,11 @@ const styles = StyleSheet.create({
         height: "10%",
         position: "absolute",
         top: "11%",
+        left: "10%",
         elevation: 10,
-        flexDirection: "column",
-        justifyContent: "center",
+        flexDirection: "row",
+        justifyContent: "flex-start",
         alignItems: "center",
-
     },
     SearchBarContainer: {
         width: "74%",
@@ -309,18 +353,16 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 1, height: 1 }
 
     },
-    qrCodeContainer: {
-        width: "100%",
-        height: "100%",
-        flexDirection: "column",
-        justifyContent: "center",
-        alignItems: "center"
+    SearchBarContainerDark: {
+        width: "74%",
+        height: "80%",
+        borderRadius: 25,
+        backgroundColor: "#1E1E1E",
+        flexDirection: "row",
+        shadowColor: "#1E1E1E",
+        shadowOpacity: 0.3,
+        shadowOffset: { width: 1, height: 1 }
 
-    },
-    qrcode: {
-        height: "100%",
-        width: "80%",
-        resizeMode: "contain"
     },
     searchIconContainer: {
         width: "15%",

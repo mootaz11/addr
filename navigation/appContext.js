@@ -1,13 +1,13 @@
 import React, { useState,useEffect } from 'react'
 import AuthContext from './AuthContext';
 import io  from 'socket.io-client';
-import {createConversation, getUserConversations,sendMessage,getConversation} from '../rest/conversationApi';
+import {createConversation, getUserConversations,sendMessage,markAsreadConversation} from '../rest/conversationApi';
 
 import {getConnectedUser} from '../rest/userApi';
 import {getUserActifOrders,getUserHistoryOrders,getUserActifDeliveries} from '../rest/ordersApi';
-import { not } from 'react-native-reanimated';
-//import AsyncStorage from '@react-native-community/async-storage'
-/*  const getToken = async () => {
+
+import AsyncStorage from '@react-native-community/async-storage'
+  const getToken = async () => {
         let token = '';
         try {
           token = await AsyncStorage.getItem('token') || 'none';
@@ -15,7 +15,8 @@ import { not } from 'react-native-reanimated';
           console.log(error.message);
         }
         return token;
-      }*/
+      }
+
 
 
 
@@ -31,17 +32,16 @@ export default  function AppContext(props){
     const [actifDeliveries,setActifDeliveries]=useState([]);
     const [historyDeliveries,setHistoryDeliveries]=useState([])
     const [darkMode,setDarkMode]=useState(false);
-    const token_init =localStorage.getItem("token") ; //getToken(); 
+    const token_init = getToken();  //localStorage.getItem("token") ; 
     const [token,setToken]=useState(token_init)
     const [isloading,setIsloading]=useState(true);
 
     useEffect(() => {
         if (token) {
-
-            getConnectedUser().then(res=>{
+            getConnectedUser().then(res=>{  
+                setDarkMode(false);
                 setUser(res.data.connectedUser);
                 socket.emit('connectuser',token);
-              
                 setIsloading(false);  
             }).catch(err=>{
                 console.log(err)
@@ -172,24 +172,27 @@ useEffect(()=>{
 
 
     const markAsReadConversation = (conv_id)=>{
-        if(conversations.findIndex(conversation=>{return conversation._id==conv_id})>=0){
 
-        
-            let _conv = {...conversations.findIndex(conversation=>{return conversation._id==conv_id})};
+        if(notSeenConversations.findIndex(conversation=>{return conversation._id==conv_id})>=0){
+            markAsreadConversation(conv_id).then(_conv=>{
+                let _notSeenConversations = [...notSeenConversations];
+                let _SeenConversations = [...seenConversations];
+                let _conversations = [...conversations];
+    
+                let notSeen =  _notSeenConversations.filter(conversation => { conversation._id != _conv._id});
+                let all =      _conversations.filter(conversation => { conversation._id != _conv._id});
+                
+                _SeenConversations.push(_conv);
+                all.push(_conv);
+                
+                console.log(" not seen",notSeen)
+                console.log("  seen",_SeenConversations)
+                console.log("all",all)
+
+            }).catch(err=>{console.log(err)});
+
             
-            let _notSeenConversations = [...notSeenConversations];
-            let _SeenConversations = [...seenConversations];
-            let _conversations = [...conversations];
-            console.log(_conv.messages);
-
-            _notSeenConversations.filter(conversation => {return conversation._id != _conv._id});
-            _conversations.filter(conversation => {return conversation._id != _conv._id});
-            _SeenConversations.push(_conv);
-
-
-            console.log(" not seen",_notSeenConversations)
-            console.log("  seen",_SeenConversations)
-            console.log("all",_conversations)
+          
         }
     }
 
@@ -263,22 +266,23 @@ useEffect(()=>{
 
 
 
-    const modifyDarkMode =()=>{
+    const modifyDarkModeHandler =()=>{
+        console.log("hhhhh");
         setDarkMode(darkMode=>!darkMode);
+        
     }
     
     const LoginHandler = async ({ user, token }) => {
-     // await AsyncStorage.setItem('token', token);
-        localStorage.setItem("token",token);
+         await AsyncStorage.setItem('token', token);
+        //localStorage.setItem("token",token);
         setToken(token);
         setUser(user);
     }
 
     const logoutHandler =  async () => {
-        localStorage.removeItem("token");
-        //await AsyncStorage.removeItem('token');
+        //localStorage.removeItem("token");
+        await AsyncStorage.removeItem('token');
         setToken(null);
-
         setUser(null);
     }
 
@@ -292,7 +296,7 @@ return(
     LoginHandler:LoginHandler,
     openConversationHandler:openConversationHandler,
     logoutHandler:logoutHandler,
-    setDarkMode:modifyDarkMode,
+    modifyDarkModeHandler:modifyDarkModeHandler,
     isloading:isloading,
     actifOrders:actifOrders,
     historyOrders:historyOrders,

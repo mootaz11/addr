@@ -15,8 +15,18 @@ export default function Conversation(props) {
     const [message, setMessage] = useState("");
     const [messages, setMessages] = useState(props.route.params.conversation.messages);
     const [conversation, setConversation] = useState(props.route.params.conversation);
-  
+    const [dark,setDark]=useState(context.darkMode);
     useEffect(()=>{
+        
+        if(conversation){
+            context.markAsReadConversation(conversation._id);
+        }
+    
+    },[])
+
+
+    useEffect(()=>{
+        setDark(context.darkMode)
         let _conversations = [...context.conversations];
         const index = _conversations.findIndex(conv=>{return conv._id==conversation._id});
         if(index>=0){
@@ -25,7 +35,7 @@ export default function Conversation(props) {
           setConversation(_conversation);        
         }
        // console.log(conv.messages[conv.messages.length-1])
-    },[context.conversations,context.socket])
+    },[context.conversations,context.socket,context.darkMode])
     
    
 
@@ -86,14 +96,6 @@ export default function Conversation(props) {
         setMessage("");
     }
 
-    const makeAsSeen = ()=>{
-        if(conversation){
-            context.markAsReadConversation()
-        }
-    
-    
-    }
-
 
 
     const goBack = () => {
@@ -101,13 +103,13 @@ export default function Conversation(props) {
        props.navigation.navigate((Object.keys(props.route.params)[1].toString()));
     }
     return (
-        <View style={styles.container}>
+        <View style={dark ? styles.containerDark :styles.container}>
             <View style={styles.menu}>
                 <FontAwesome color={"white"} style={{  padding: 0, fontSize: 20 }} name="arrow-left" onPress={goBack} />
                 <Image style={styles.friendImage} source={props.route.params.conversation.image} />
                 <Text style={styles.Title}>{props.route.params.conversation.other ? props.route.params.conversation.other : props.route.params.conversation.other}</Text>
             </View>
-            <ScrollView style={styles.ConversationBody}
+            <ScrollView style={dark ? styles.ConversationBodyDark : styles.ConversationBody}
             >
                 {
                     messages ?
@@ -117,8 +119,8 @@ export default function Conversation(props) {
                                    message.sender._id == context.user._id ?
                                     (<View style={styles.messageSentContainer} key={index}>
                                         <Image style={styles.userImage} source={require("../assets/mootaz.jpg")} />
-                                        <View style={styles.messageSent}>
-                                              <Text style={styles.textMessage}>{message.content}</Text>
+                                        <View style={dark ? styles.messageSentDark :styles.messageSent}>
+                                              <Text style={dark ? styles.textMessageDark : styles.textMessage}>{message.content}</Text>
                                            { message.content.includes("mon code est   :") ? 
                                          (  <QRCode
                                             value={message.content.substr(16)}
@@ -135,7 +137,7 @@ export default function Conversation(props) {
                                         <View style={styles.FriendmessageSentContainer} key={index}>
                                             <Text style={styles.FriendTime}>{message.date.split('T')[1].split(':')[0]+":"+message.date.split('T')[1].split(':')[1]}</Text>
 
-                                            <View style={styles.FriendmessageSent}>
+                                            <View style={dark ? styles.FriendmessageSentDark : styles.FriendmessageSent}>
                                                 <Text style={styles.textMessage}>{message.content}</Text>
                                                 { message.content.includes("mon code est   :")? 
                                                 (  <QRCode
@@ -159,30 +161,30 @@ export default function Conversation(props) {
                 }
 
             </ScrollView>
-            <View style={styles.sendMessageContainer}>
-                <View style={styles.messageBodyContainer}>
+            <View style={dark ? styles.sendMessageContainerDark : styles.sendMessageContainer}>
+                <View style={dark ? styles.messageBodyContainerDark : styles.messageBodyContainer}>
                     <TextInput
-                        style={styles.message}
+                        style={dark ? styles.messageDark : styles.message}
                         placeholder={"Type a message.."}
-                        underlineColor={"white"}
-                        underlineColorAndroid={"white"}
+                        underlineColor={dark ? "#292929":"white"}
+                        underlineColorAndroid={dark ? "#292929" :"white"}
+                        
                         //placeholderTextColor={"##919191"}
                         value={message}
                         onChangeText={(text) => { setMessage(text); }}
-                        onFocus={makeAsSeen}
-
+                        
                     />
                     {message.length > 0 &&
                         <TouchableOpacity style={styles.sendMessageTouchable} onPress={sendMessage}>
-                            <View style={styles.sendMessageButtonContainer}>
+                            <View style={dark ? styles.sendMessageButtonContainerDark  :styles.sendMessageButtonContainer}>
                                 <Image style={styles.sendIcon} source={require("../assets/sendMessage.png")} />
                             </View>
                         </TouchableOpacity>
                     }
                 </View>
-                <View style={styles.sentCodeContainer}>
+                <View style={dark ? styles.sentCodeContainerDark : styles.sentCodeContainer}>
                     <TouchableOpacity onPress={sendQrCode} style={{ width: "80%", height: "100%", }}>
-                        <View style={styles.monCodecontainer}>
+                        <View style={dark ? styles.monCodecontainerDark :styles.monCodecontainer}>
                             <Text style={styles.moncode}>MON CODE</Text>
 
                         </View>
@@ -202,9 +204,25 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center"
     },
-
+    sentCodeContainerDark:
+    {
+        backgroundColor: "#292929"
+        , width: "30%", height: 40,
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center"
+    },
     monCodecontainer: {
         backgroundColor: "#2474F1",
+        width: "100%",
+        height: "100%",
+        borderRadius: 25,
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center"
+    },
+    monCodecontainerDark: {
+        backgroundColor: "#242424",
         width: "100%",
         height: "100%",
         borderRadius: 25,
@@ -227,6 +245,10 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: "#2474F1"
+    },
+    containerDark: {
+        flex: 1,
+        backgroundColor:"#292929"
     },
     menu: {
 
@@ -263,7 +285,18 @@ const styles = StyleSheet.create({
         borderTopRightRadius: 14,
         borderTopLeftRadius: 14,
         padding: 5,
-    },
+    },          
+    ConversationBodyDark: {
+        width: "100%",
+        height: "73%",
+        position: "absolute",
+        top: "19%",
+        elevation: 10,
+        backgroundColor:"#121212",
+        borderTopRightRadius: 14,
+        borderTopLeftRadius: 14,
+        padding: 5,
+    },  
     sendMessageContainer: {
         width: "100%",
         height: "10%",
@@ -276,13 +309,37 @@ const styles = StyleSheet.create({
         backgroundColor: "white",
 
     },
+    sendMessageContainerDark: {
+        width: "100%",
+        height: "10%",
+        position: "absolute",
+        top: "90%",
+        elevation: 10,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "flex-start",
+        backgroundColor: "#292929",
 
+    },
+
+    
     messageBodyContainer: {
         width: "64%",
         height: "80%",
         borderRadius: 25,
         margin: "2%",
         backgroundColor: "#e6e6e6",
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "flex-start",
+        alignContent: "center"
+    },
+    messageBodyContainerDark: {
+        width: "64%",
+        height: "80%",
+        borderRadius: 25,
+        margin: "2%",
+        backgroundColor: "#292929",
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "flex-start",
@@ -296,7 +353,23 @@ const styles = StyleSheet.create({
         color: "#e6e6e6",
         fontSize: 12,
         borderTopStartRadius:25,
-        borderBottomStartRadius:25
+        borderBottomStartRadius:25,
+        borderBottomEndRadius:25,
+        borderTopEndRadius:25,
+
+    },
+    messageDark: {
+        width: "80%",
+        height: "100%",
+        margin: 5,
+        borderColor: "#303030",
+        color: "#303030",
+        fontSize: 12,
+        borderTopStartRadius:25,
+        borderBottomStartRadius:25,
+        borderBottomEndRadius:25,
+        borderTopEndRadius:25,
+        backgroundColor:"#303030"
     },
     sendMessageTouchable: {
         width: "16%",
@@ -312,6 +385,15 @@ const styles = StyleSheet.create({
         height: "50%",
         borderRadius: 15,
         backgroundColor: "#2474F1",
+        justifyContent: "center",
+        alignItems: "center",
+        margin: "1%"
+    },
+    sendMessageButtonContainerDark: {
+        width: "68%",
+        height: "50%",
+        borderRadius: 15,
+        backgroundColor: "#303030",
         justifyContent: "center",
         alignItems: "center",
         margin: "1%"
@@ -342,10 +424,20 @@ const styles = StyleSheet.create({
         padding: 4,
         flexWrap: 'wrap',
         justifyContent: "flex-start",
-        backgroundColor:'red'
 
     },
     FriendmessageSent: {
+        width: "70%",
+        flexDirection: "row",
+        backgroundColor: "#292929",
+        alignItems: "flex-start",
+        margin: 10,
+        padding: 5,
+        flexWrap: 'wrap',
+        justifyContent: "flex-start",
+        borderRadius: 15
+    },
+    FriendmessageSentDark:{
         width: "70%",
         flexDirection: "row",
         backgroundColor: '#E6E6E6',
@@ -355,12 +447,27 @@ const styles = StyleSheet.create({
         flexWrap: 'wrap',
         justifyContent: "flex-start",
         borderRadius: 15
+
+
     },
     messageSent:
     {
         width: "70%",
         flexDirection: "row",
         backgroundColor: '#CFE0FC',
+        alignItems: "flex-start",
+        margin: 10,
+        padding: 5,
+        flexWrap: 'wrap',
+        justifyContent: "flex-start",
+        borderRadius: 15
+
+    },
+    messageSentDark:
+    {
+        width: "70%",
+        flexDirection: "row",
+        backgroundColor: '#19A3FE',
         alignItems: "flex-start",
         margin: 10,
         padding: 5,
@@ -376,6 +483,11 @@ const styles = StyleSheet.create({
         margin: 5,
     }
     ,
+    textMessageDark: {
+        color: 'white',
+        fontSize: 12,
+        margin: 5,
+    },
     userImageContainer:
     {
         flexDirection: "column",

@@ -11,7 +11,7 @@ export const leftConversation = (conversation)=>{
     })
 }
 
-export const sendMessage = (message)=>{
+export const sendMessage = (message,token)=>{
     return new Promise((resolve,reject)=>{
         axios.post("/chat/message",message).then(res=>{
             resolve(res.data.message);
@@ -49,6 +49,7 @@ export  const getUserConversations=()=>{
         }).catch(err=>{reject(err)})
     })
 }
+
 
 export const markAsreadConversation=(convId)=>{
     return new Promise((resolve,reject)=>{

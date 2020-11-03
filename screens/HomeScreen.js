@@ -1,12 +1,12 @@
-import React, { useState } from 'react'
+import React, { useState ,useContext,useEffect} from 'react'
 import { StyleSheet, Dimensions, View, Image, Platform, Text, Clipboard, Modal, SafeAreaView } from 'react-native';
-//import MapView, { Marker } from 'react-native-maps';
+import MapView, { Marker } from 'react-native-maps';
 import { Icon, SearchBar } from 'react-native-elements';
 import { ScrollView, TouchableOpacity } from 'react-native-gesture-handler';
 import { TextInput } from 'react-native-paper';
 import { FlatList } from 'react-native-gesture-handler';
 import _ from 'lodash';
-
+import AuthContext from '../navigation/AuthContext';
 
 const partnersData = [
   {
@@ -61,9 +61,8 @@ const domains = [
 
 
   export default function Home({ navigation }) {
-    return (<View></View>)
-/*
-
+   const context = useContext(AuthContext);
+  const [dark,setDark] = useState(context.darkMode);
   const [dropDown, setdropDown] = useState(false);
   const [Markers, setMarkers] = useState([]);
   const [location, setLocation] = useState(null);
@@ -79,6 +78,9 @@ const domains = [
   const [showModal,setShowmodal]=useState(false);
 
 
+  useEffect(()=>{
+    setDark(context.darkMode);
+  },[context.darkMode])
 
 
 
@@ -123,7 +125,7 @@ const domains = [
         }}
 
         style={styles.container}
-        customMapStyle={darkStyle}
+        customMapStyle={ dark ? darkStyle : defaultStyle}
         provider="google"
       >
         <Marker
@@ -335,9 +337,9 @@ const domains = [
     </View>
 
   );
-*/
+
 }
-/*
+
 
 const styles = StyleSheet.create({
   City: {
@@ -576,15 +578,7 @@ const styles = StyleSheet.create({
 
 
 
-const customDarkStyle = [{
-  "elementType": "labels.icon",
-  "stylers": [
-    {
-      "visibility": "off"
-    }
-  ]
-}
-];
+const defaultStyle = [];
 
 
 const darkStyle = [
@@ -773,4 +767,3 @@ const darkStyle = [
     ]
   }
 ]
-*/

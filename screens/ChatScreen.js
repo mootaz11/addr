@@ -13,18 +13,19 @@ export default function Chat({navigation}){
     const [user,setUser]=useState(context.user)
     const [notSeenConversations,setnotSeenConversations] = useState(context.notSeenConversations);    
     const [SeenConversations,setSeenConversations] = useState(context.seenConversations)
-  
+    const [dark,setDark]=useState(true);
 
 
     useEffect(()=>{
-        
+        setDark(context.darkMode)
         setConversations(context.conversations);
         setnotSeenConversations(context.notSeenConversations);
         setSeenConversations(context.seenConversations);
+        
 
-    },[context.conversations,context.notSeenConversations,context.seenConversations,context.socket])
+    },[context.conversations,context.notSeenConversations,context.seenConversations,context.socket,context.darkMode])
     
-    
+        
     
     const checkConversation =(conversation)=>{
     navigation.navigate("conversation",{conversation,chat:true})
@@ -35,7 +36,7 @@ const  openDrawer =()=>{
 
 
 return(
-    <View style={styles.container}>
+    <View style={dark ? styles.containerDark :styles.container}>
     <View style={styles.menu}>
         <Icon color={"white"} style={{ flex: 1, padding: 0 }} name="menu" onPress={openDrawer} />
         <Text style={styles.Title}>Chat</Text>
@@ -64,7 +65,7 @@ return(
             
 
         </ScrollView>
-     <View style={styles.conversations}>
+     <View style={dark ? styles.conversationsDark :styles.conversations}>
          <View style={styles.convContainer} >
                  <View style={styles.conversationImagecontainer}>
                  {notSeenConversations ? 
@@ -77,7 +78,7 @@ return(
                             <Image source={require("../assets/mootaz.jpg")} style={styles.convImage}/>
                         </View>
                         <View style={styles.messageBody}>
-                            <Text style={styles.sender}>{item.type=="personal" ? item.users[item.users.findIndex(u=>{return u._id != user._id})].firstName+" "+item.users[item.users.findIndex(u=>{return u._id != user._id})].lastName: item.title }</Text>
+                            <Text style={dark ? styles.senderDark : styles.sender}>{item.type=="personal" ? item.users[item.users.findIndex(u=>{return u._id != user._id})].firstName+" "+item.users[item.users.findIndex(u=>{return u._id != user._id})].lastName: item.title }</Text>
                             <Text style={styles.message}>{item.messages[item.messages.length-1].content}</Text>
                         </View>
                         <View style ={styles.messageMeta}>
@@ -110,7 +111,7 @@ return(
                             <Image source={require("../assets/mootaz.jpg")} style={styles.convImage}/>
                         </View>
                         <View style={styles.messageBody}>
-                            <Text style={styles.sender}>{item.type=="personal" ? item.users[item.users.findIndex(u=>{return u._id != user._id})].firstName+" "+item.users[item.users.findIndex(u=>{return u._id != user._id})].lastName: item.title }</Text>
+                            <Text style={dark ? styles.senderDark : styles.sender}>{item.type=="personal" ? item.users[item.users.findIndex(u=>{return u._id != user._id})].firstName+" "+item.users[item.users.findIndex(u=>{return u._id != user._id})].lastName: item.title }</Text>
                             <Text style={styles.message}>{item.messages[item.messages.length-1].content}</Text>
                         </View>
                         <View style ={styles.messageMeta}>
@@ -162,6 +163,10 @@ seenNumber:{
         flex:1,
         backgroundColor:"#2474F1"
     },
+    containerDark:{
+        flex:1,
+        backgroundColor:"#292929"
+    },
     menu: {
 
         position: "absolute",
@@ -190,6 +195,18 @@ seenNumber:{
             top:"30%",
             elevation: 10,
             backgroundColor:"white",
+            borderTopRightRadius:15,
+            borderTopLeftRadius:15,
+            justifyContent:"center",
+            alignItems:"center"
+        },
+        conversationsDark:{
+            width:"100%",
+            height:"70%",   
+            position:"absolute",
+            top:"30%",
+            elevation: 10,
+            backgroundColor:"#121212",
             borderTopRightRadius:15,
             borderTopLeftRadius:15,
             justifyContent:"center",
@@ -278,9 +295,15 @@ seenNumber:{
             },
             sender:{
                 margin:2,
-                fontSize:12,
+                fontSize:13,
                 color:"black",
                 fontWeight:"700",
+            },
+            senderDark:{
+            margin:2,
+            fontSize:13,
+            color:"white",
+            fontWeight:"700",
             },
             message:{
                 color:"#bababa",

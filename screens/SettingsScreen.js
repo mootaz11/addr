@@ -3,7 +3,16 @@ import {View,Text,StyleSheet,Platform,Image,TouchableOpacity} from 'react-native
 import { Icon } from 'react-native-elements';
 import { TextInput } from 'react-native-paper';
 import  AuthContext from '../navigation/AuthContext';
+import * as ImagePicker from 'expo-image-picker';
+import {useActionSheet} from '@expo/react-native-action-sheet';
+
 import {updateImage,updateInfo,updatePassword} from '../rest/userApi';
+
+const BUTTONS = [
+    'Take Photo', 
+    'Choose Photo Library', 
+    'Cancel'
+];
 
 export default function Settings({navigation}){
 
@@ -13,8 +22,13 @@ export default function Settings({navigation}){
     const [editUsername,setEditUsername]=useState(false);
     const [editPassword,setEditPassword]=useState(false);
     const [editlocation,setEditlocation]=useState(false);
-
-
+    const [dark,setDark]=useState(context.darkMode);
+    const [userImage,setUserImage] = useState(null);
+  
+    useEffect(()=>{
+      setDark(context.darkMode);
+    },[context.darkMode])
+  
 
     const openDrawer = ()=>{
         navigation.openDrawer();
@@ -67,31 +81,118 @@ export default function Settings({navigation}){
             setEditlocation(false);
         }
     }
-   const  changePicture=()=>{
-        console.log("change picture");
-    }
+ 
+
+    
+    
+    
+    
+        const { showActionSheetWithOptions } = useActionSheet();
+    
+        const verifyPermissions = async () => {
+          const result = await Permissions.askAsync(Permissions.CAMERA, Permissions.CAMERA_ROLL);
+          if(result.status !== 'granted'){
+            Alert.alert('Insufficient permissions!', 
+            'You need to grant camera permissions to use this app',
+            [{text: 'Okay'}]
+            );
+            return false ;
+          }
+          return true;
+    
+        };
+    
+    const    changePicture=()=>{
+
+         
+            showActionSheetWithOptions({
+                title: 'Select Photo',
+                titleTextStyle: {
+                    marginHorizontal: 100
+                },
+                textStyle:{ 
+                    marginHorizontal: 100,
+                    textAlign: "center",
+                    alignItems: 'center',
+                    color: 'blue',
+                    fontSize: 16,
+                    fontWeight: 'bold',
+                    fontStyle: 'italic'
+                },
+                options: BUTTONS,
+                cancelButtonIndex: 2
+            }, selectHandler);
+        };
+    
+
+        const takePhotoFromCameraHandler = async () => {
+            const hasPermissions = await verifyPermissions();
+            if(!hasPermissions){
+                return ;
+            }
+    
+            const image = await ImagePicker.launchCameraAsync({
+                allowsEditing: true,
+                aspect: [9,12],
+                quality: 0.5
+            });
+    
+            setUser({...user,photo:image.uri});
+        };
+
+
+    
+        const choosePhotoFromLibrary = async () => {
+            const hasPermissions = await verifyPermissions();
+            if(!hasPermissions){
+                return ;
+            }
+    
+            const image = await ImagePicker.launchImageLibraryAsync();
+            setUser({...user,photo:image.uri});
+
+        };
+    
+
+
+        const selectHandler = (index) => {
+            switch(index){
+                case 0:
+                    takePhotoFromCameraHandler();
+                    break;
+                case 1:
+                    choosePhotoFromLibrary();
+                    break;
+                default:
+                    break;
+            }
+    
+        };
+
+
     return(
-        <View style={styles.container}>
-            <View style={styles.menu}>
-                <Icon color={"#2474F1"} style={{ flex: 1, padding: 0 }} name="menu" onPress={openDrawer} />
-                <Text style={styles.Title}>My Account</Text>
+        <View style={dark ? styles.containerdark :styles.container}>
+
+            <View style={dark ? styles.menu: styles.menu}>
+                <Icon color={ dark ? "white": "#2474F1"} style={{ flex: 1, padding: 0 }} name="menu" onPress={openDrawer} />
+                <Text style={dark ? styles.TitleDark : styles.Title}>My Account</Text>
              </View>
              <View style={styles.addImageContainer}>
                  <View style={styles.addImage} >
-                <Image style={styles.image}  source={ user.photo ? user.photo : require("../assets/add-image.png")}/>
+                <Image style={dark ? styles.imageDark :styles.image}  source={ user.photo ? user.photo : require("../assets/add-image.png")}/>
                  </View>
                  <TouchableOpacity onPress={changePicture}>
-                     <Text style={styles.imageTitle}>{ user.photo ? "Modifier votre image" : "Ajouter une image"}</Text>
+                     <Text style={dark ? styles.imageTitleDark :styles.imageTitle}>{ user.photo ? "Modifier votre image" : "Ajouter une image"}</Text>
                  </TouchableOpacity>
             </View>
             <View style={styles.generalInfo}>
-                <View style={styles.info}>
+                <View style={dark ? styles.infoDark :styles.info}>
                     <Image style={styles.infoImage} source={require("../assets/loginProfile.png")}/>
                
 
 
-               { !editUsername &&<Text style={styles.userInfo}>{user.username}</Text>}
-                 {editUsername && <TextInput  style={styles.userInfoInput} value={user.username} onChangeText={(text)=>setUser({username:text,email:user.email,password:user.password,address:user.address})} />} 
+               { !editUsername &&<Text style={dark ? styles.userInfoDark :styles.userInfo}>{user.username}</Text>}
+                 {editUsername && <TextInput  style={dark ? styles.userInfoInputDark :styles.userInfoInput} value={user.username} onChangeText={(text)=>setUser({username:text,email:user.email,password:user.password,address:user.address})} />} 
                 <TouchableOpacity style={styles.buttonEdit} onPress={changetoTextInputUsername}>
                    { !editUsername && <Image style={styles.edit}  source={require("../assets/edit.png") }/>}
                    { editUsername && <Image style={styles.edit}  source={require("../assets/done.png") }/>}
@@ -100,11 +201,11 @@ export default function Settings({navigation}){
 
                 </View>
 
-                <View style={styles.info}>
+                <View style={dark ? styles.infoDark :styles.info}>
                 <Image style={styles.infoImage} source={require("../assets/emailProfile.png")}/>
                 
-                { !editEmail && <Text style={styles.userInfo}>{user.email}</Text> }
-                {editEmail && <TextInput  style={styles.userInfoInput} value={user.email}  onChangeText={(text)=>setUser({...user,email:text})}  />} 
+                { !editEmail && <Text style={dark ? styles.userInfoDark :styles.userInfo}>{user.email}</Text> }
+                {editEmail && <TextInput style={dark ? styles.userInfoInputDark :styles.userInfoInput} value={user.email}  onChangeText={(text)=>setUser({...user,email:text})}  />} 
                 <TouchableOpacity style={styles.buttonEdit} onPress={changetoTextInputEmail}>
                 { !editEmail && <Image style={styles.edit}  source={require("../assets/edit.png") }/>}
                    { editEmail && <Image style={styles.edit}  source={require("../assets/done.png") }/>}
@@ -112,10 +213,10 @@ export default function Settings({navigation}){
                 </View>
                 
                 
-                <View style={styles.info}>
+                <View style={dark ? styles.infoDark :styles.info}>
                 <Image style={styles.infoImage} source={require("../assets/passwordProfile.png")}/>
-                {!editPassword&&<Text style={styles.userInfo}>*********</Text>}
-                {editPassword && <TextInput  style={styles.userInfoInput} value={""}  onChangeText={(text)=>setUser({...user,password:text})}  />} 
+                {!editPassword&&<Text style={dark ? styles.userInfoDark :styles.userInfo}>*********</Text>}
+                {editPassword && <TextInput style={dark ? styles.userInfoInputDark :styles.userInfoInput} value={""}  onChangeText={(text)=>setUser({...user,password:text})}  />} 
                 <TouchableOpacity style={styles.buttonEdit} onPress={changetoTextInputPassword}>
                 { !editPassword && <Image style={styles.edit}  source={require("../assets/edit.png") }/>}
                    { editPassword && <Image style={styles.edit}  source={require("../assets/done.png") }/>}
@@ -123,10 +224,10 @@ export default function Settings({navigation}){
                 </View>
                 
 
-                <View style={styles.info}>
+                <View style={dark ? styles.infoDark :styles.info}>
                 <Image style={styles.infoImage} source={require("../assets/locationProfile.png")}/>
-                {!editlocation &&<Text style={styles.userInfo}>{user.address}</Text>}
-                {editlocation && <TextInput  style={styles.userInfoInput} value={user.address} onChangeText={(text)=>setUser({address:text,email:user.email,username:user.username,password:user.password})}  />} 
+                {!editlocation &&<Text style={dark ? styles.userInfoDark :styles.userInfo}>{user.address}</Text>}
+                {editlocation && <TextInput  style={dark ? styles.userInfoInputDark :styles.userInfoInput} value={user.address} onChangeText={(text)=>setUser({address:text,email:user.email,username:user.username,password:user.password})}  />} 
                 <TouchableOpacity style={styles.buttonEdit} onPress={changetoTextInputLocation}>
                 { !editlocation && <Image style={styles.edit}  source={require("../assets/edit.png") }/>}
                    { editlocation && <Image style={styles.edit}  source={require("../assets/done.png") }/>}
@@ -137,7 +238,7 @@ export default function Settings({navigation}){
                 
                 
                 
-                <View style={styles.info}>
+                <View style={dark ? styles.infoDark :styles.info}>
 
                 </View>
 
@@ -161,6 +262,22 @@ const styles = StyleSheet.create({
         alignSelf:"center"
 
     },
+    userInfoDark:{
+        width:"74%",
+        height:"90%",
+        margin:"2%",
+        fontSize:15,
+        textAlign:"center",
+        color:"white",
+        alignContent:"center",
+        alignSelf:"center"
+
+    },
+
+
+
+
+
     userInfoInput:{
         width:"72%",
         height:"90%",
@@ -168,6 +285,18 @@ const styles = StyleSheet.create({
         color:"grey",
         backgroundColor:"white"
     },
+    userInfoInputDark:{
+        width:"72%",
+        height:"90%",
+        margin:"2%",
+        color:"grey",
+        backgroundColor:"#1F1F1F"
+    },
+
+
+
+
+
     buttonEdit:{
         alignItems:"stretch",
         width:"10%",
@@ -189,6 +318,7 @@ const styles = StyleSheet.create({
         resizeMode:"contain",
         margin:"2%",
     },
+    
     info:{
         width:"96%",
         height:"10%",
@@ -199,14 +329,29 @@ const styles = StyleSheet.create({
         alignItems:"center",
         justifyContent:"center",
         padding:"2%",
-        shadowOffset:{  width: 2,  height: 2,  },
+        shadowOffset:{  width: 1,  height: 1,  },
         shadowColor: "grey",
-        shadowOpacity: 1.0,
-        
-
-        
-        
+        shadowOpacity: 1.0,    
     },
+    infoDark:{
+        width:"96%",
+        height:"10%",
+        backgroundColor:"#1F1F1F",
+        borderRadius:15,
+        marginVertical:"5%",
+        flexDirection:"row",
+        alignItems:"center",
+        justifyContent:"center",
+        padding:"2%",
+        shadowOffset:{  width: 1,  height: 1,  },
+        shadowColor: "#1F1F1F",
+        shadowOpacity: 1.0,    
+    },
+
+
+
+
+
 
     generalInfo:{
         width:"100%",
@@ -224,6 +369,13 @@ container:{
     flex:1,
     backgroundColor:"white"
 },
+containerdark:{
+    flex:1,
+    backgroundColor:"#121212"
+
+},
+
+
 addImageContainer:{
     width:"100%",
     height:"30%",   
@@ -247,6 +399,7 @@ addImage:{
 
 
 },
+
 image:{
     width:"90%",
     height:"100%",
@@ -254,9 +407,19 @@ image:{
     borderRadius:25,
     shadowOffset:{width:1,height:1},
     shadowColor:"white"
-
-
 },
+imageDark:{
+    width:"90%",
+    height:"100%",
+    resizeMode:"stretch",
+    borderRadius:25,
+    shadowOffset:{width:1,height:1},
+    shadowColor:"#1F1F1F"
+},
+
+
+
+
 menu: {
 
     position: "absolute",
@@ -278,8 +441,27 @@ menu: {
       justifyContent:"center",
       marginHorizontal:5
     },
+    TitleDark:{
+        fontSize:22,
+        color:"white",
+        fontWeight:"600",
+        letterSpacing:1,
+        justifyContent:"center",
+        marginHorizontal:5
+      },
+
+
     imageTitle:{
         fontWeight:"500",
-        color:"black"
+        color:"black",
+        margin:3
+    },
+    
+    imageTitleDark:{
+        fontWeight:"500",
+        color:"white",
+        margin:3
+
     }
+
 })
