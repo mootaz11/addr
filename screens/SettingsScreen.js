@@ -396,20 +396,21 @@ addImage:{
 },
 
 image:{
-    width:"90%",
-    height:"100%",
+    width:85,
+    height:85,
     resizeMode:"stretch",
-    borderRadius:25,
+    borderRadius:85,
     shadowOffset:{width:1,height:1},
-    shadowColor:"white"
+    shadowColor:"white",
 },
 imageDark:{
-    width:"90%",
-    height:"100%",
+    width:85,
+    height:85,
     resizeMode:"stretch",
-    borderRadius:25,
+    borderRadius:85,
     shadowOffset:{width:1,height:1},
-    shadowColor:"#1F1F1F"
+    shadowColor:"#1F1F1F",
+
 },
 
 

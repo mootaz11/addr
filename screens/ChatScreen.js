@@ -79,7 +79,7 @@ return(
                         </View>
                         <View style={styles.messageBody}>
                             <Text style={dark ? styles.senderDark : styles.sender}>{item.type=="personal" ? item.users[item.users.findIndex(u=>{return u._id != user._id})].firstName+" "+item.users[item.users.findIndex(u=>{return u._id != user._id})].lastName: item.title }</Text>
-                            <Text style={styles.message}>{item.messages[item.messages.length-1].content}</Text>
+                            <Text numberOfLines={1}  style={styles.message}>{item.messages[item.messages.length-1].content.length>20 ? item.messages[item.messages.length-1].content.substr(0,20)+"...":item.messages[item.messages.length-1].content}</Text>
                         </View>
                         <View style ={styles.messageMeta}>
                         <Text style={styles.time}>{item.messages[item.messages.length-1].date.split('T')[1].split(':')[0]+":"+item.messages[item.messages.length-1].date.split('T')[1].split(':')[1]}</Text>
@@ -112,7 +112,7 @@ return(
                         </View>
                         <View style={styles.messageBody}>
                             <Text style={dark ? styles.senderDark : styles.sender}>{item.type=="personal" ? item.users[item.users.findIndex(u=>{return u._id != user._id})].firstName+" "+item.users[item.users.findIndex(u=>{return u._id != user._id})].lastName: item.title }</Text>
-                            <Text style={styles.message}>{item.messages[item.messages.length-1].content}</Text>
+                            <Text numberOfLines={1}  style={styles.message}>{item.messages[item.messages.length-1].content.length>20 ? item.messages[item.messages.length-1].content.substr(0,20)+"...":item.messages[item.messages.length-1].content}</Text>
                         </View>
                         <View style ={styles.messageMeta}>
                         <Text style={styles.time}>{item.messages[item.messages.length-1].date.split('T')[1].split(':')[0]+":"+item.messages[item.messages.length-1].date.split('T')[1].split(':')[1]}</Text>
@@ -308,7 +308,9 @@ seenNumber:{
             message:{
                 color:"#bababa",
                 overflow:"visible",
-                fontSize:15
+                fontSize:15,
+                
+            
             },
             time:{
                 color:"#bababa",
