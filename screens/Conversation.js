@@ -116,7 +116,7 @@ export default function Conversation(props) {
                             return (
                                    message.sender._id == context.user._id ?
                                     (<View style={styles.messageSentContainer} key={index}>
-                                        <Image style={styles.userImage} source={require("../assets/mootaz.jpg")} />
+                                        <Image style={styles.userImage} source={{uri:context.user.photo}} />
                                         <View style={dark ? styles.messageSentDark :styles.messageSent}>
                                               <Text style={dark ? styles.textMessageDark : styles.textMessage}>{message.content}</Text>
                                            { message.content.includes("mon code est   :") ? 
