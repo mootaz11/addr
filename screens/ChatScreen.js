@@ -52,7 +52,7 @@ return(
                     <View style={styles.friendContainer} key={key}>
                         <TouchableOpacity onPress={()=>{checkConversation(conversation)}}>
                             <View  style={styles.headUserImageContainer}>
-                             <Image style={styles.headUserImage} source = {require("../assets/mootaz.jpg")}/>
+                             <Image style={styles.headUserImage} source = {conversation.users[conversation.users.findIndex(u=>{return u._id != user._id})].photo ? {uri:conversation.users[conversation.users.findIndex(u=>{return u._id != user._id})].photo} : require('../assets/user_image.png')}/>
                              <Text style={styles.friendHeadName}>{conversation.type=="personal" ? conversation.users[conversation.users.findIndex(u=>{return u._id != user._id})].firstName+" "+conversation.users[conversation.users.findIndex(u=>{return u._id != user._id})].lastName: conversation.lastName }</Text>
                             </View>
                         </TouchableOpacity>
@@ -75,7 +75,7 @@ return(
                 <TouchableOpacity   onPress={() => {checkConversation(item)}}>
                   <View style={styles.conversationContainer} >
                         <View style={styles.ConvimageContainer}>
-                            <Image source={require("../assets/mootaz.jpg")} style={styles.convImage}/>
+                            <Image source = {item.users[item.users.findIndex(u=>{return u._id != user._id})].photo ? {uri:item.users[item.users.findIndex(u=>{return u._id != user._id})].photo} : require('../assets/user_image.png')} style={styles.convImage}/>
                         </View>
                         <View style={styles.messageBody}>
                             <Text style={dark ? styles.senderDark : styles.sender}>{item.type=="personal" ? item.users[item.users.findIndex(u=>{return u._id != user._id})].firstName+" "+item.users[item.users.findIndex(u=>{return u._id != user._id})].lastName: item.title }</Text>
@@ -108,7 +108,7 @@ return(
                 <TouchableOpacity   onPress={() => {checkConversation(item)}}>
                   <View style={styles.conversationContainer} >
                         <View style={styles.ConvimageContainer}>
-                            <Image source={require("../assets/mootaz.jpg")} style={styles.convImage}/>
+                        <Image source = {item.users[item.users.findIndex(u=>{return u._id != user._id})].photo ? {uri:item.users[item.users.findIndex(u=>{return u._id != user._id})].photo} : require('../assets/user_image.png')} style={styles.convImage}/>
                         </View>
                         <View style={styles.messageBody}>
                             <Text style={dark ? styles.senderDark : styles.sender}>{item.type=="personal" ? item.users[item.users.findIndex(u=>{return u._id != user._id})].firstName+" "+item.users[item.users.findIndex(u=>{return u._id != user._id})].lastName: item.title }</Text>

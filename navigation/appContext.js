@@ -124,13 +124,12 @@ useEffect(()=>{
         if(conversations ){
 
             socket.on('send-message',(message)=>{
-                socket.off('send-message')
                 const _conversations = [...conversations];
                     const _notSeenConversations = [...notSeenConversations];
 
                     const conv_index =_conversations.findIndex(conv => {return conv._id == message.conversation});
                     const not_seenIndex =_notSeenConversations.findIndex(conv => {return conv._id == message.conversation});
-                    
+                    console.log(not_seenIndex);
                      if(conv_index >=0 && not_seenIndex>=0){    
                          let _convReal = {..._conversations[conv_index]};
                           let _convNotSeen = {..._notSeenConversations[not_seenIndex]};
@@ -145,6 +144,7 @@ useEffect(()=>{
                           _convNotSeen.notSeen+=1;
                          _notSeenConversations.push(_convNotSeen);
                          _conversations.push(_convReal);
+                         console.log(_conversations);
 
                      setNotSeenConversations(_notSeenConversations);
                      setConversations(_conversations)
@@ -168,6 +168,8 @@ useEffect(()=>{
                     }
                     setConversations([c, ...conversations]);
                 })
+
+
              }
        
     },[conversations,notSeenConversations,seenConversations])  
@@ -178,14 +180,10 @@ useEffect(()=>{
 
 
     const handleConversation =(conversation)=>{
-        console.log("handle",conversation);
+
         setConversations(conversations=>[...conversations,conversation]);
         setSeenConversations(seenConversations=>[...seenConversations,conversation]);    
     }
-
-
-
-
 
 
     const markAsReadConversation = (conv_id)=>{
@@ -205,6 +203,9 @@ useEffect(()=>{
                 console.log(" not seen",notSeen)
                 console.log("  seen",_SeenConversations)
                 console.log("all",all)
+                setSeenConversations(_SeenConversations);
+                setNotSeenConversations(notSeen);
+                setConversations(all);
 
             }).catch(err=>{console.log(err)});
 
