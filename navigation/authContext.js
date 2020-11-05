@@ -10,8 +10,6 @@ export default React.createContext({
     historyDeliveries:[],
     conversations:[],
     socket:null,
-    notSeenConversations:[],
-    seenConversations:[],
     location:null
 
 }) 

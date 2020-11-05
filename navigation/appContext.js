@@ -18,10 +18,6 @@ import AsyncStorage from '@react-native-community/async-storage'
         return token;
       }
 
-
-
-
-
 export default  function AppContext(props){
     const [socket, setSocket] = useState(io("http://192.168.1.7:3000"));
     const [location,setLocation]=useState(null);
@@ -62,33 +58,26 @@ export default  function AppContext(props){
 
 useEffect(()=>{
     if(user){
-        console.log("use effectxxxxx");
-
       getUserConversations().then(_conversations=>{
-                        let _notSeen =[];
-                        let _Seen =[];
-                        _conversations.map(conversation=>{
+                _conversations.map(conversation=>{
                             let notSeenSum=0;
                             let conv = {...conversation};
                             conv.messages.map(message=>{
                                 if(message.sender._id != user._id && message.seen.length==0){
                                     notSeenSum+=1;}})
-                                    if(notSeenSum>0)
-                                    {conv.notSeen=notSeenSum;  
-                                    _notSeen.push(conv);
-                                    }
-                                    else {
-                                        _Seen.push(conv);
-                                    }
-                        })
-                        setSeenConversations([..._Seen]);
-                        setNotSeenConversations([..._notSeen]);
-                        setConversations(_conversations);
-
+                                 conv.notSeen=notSeenSum;
+                                 conv.last=conv.messages[conv.messages.length-1].date;
+                           })
+                 let _convs = [..._conversations];
+                 const _convSorted = _convs.sort((a,b)=>a.last-b.last);       
+                setConversations(_convSorted);
                 }).catch(err=>{console.log(err)})
             }
             },[user])
     
+
+
+
     useEffect(()=>{
         if(user){
             console.log("use effect 1");
@@ -120,101 +109,48 @@ useEffect(()=>{
     useEffect(()=>{
         socket.off('send-message');
         socket.off('create-conversation');
-        
         if(conversations ){
-
             socket.on('send-message',(message)=>{
                 const _conversations = [...conversations];
-                    const _notSeenConversations = [...notSeenConversations];
-
                     const conv_index =_conversations.findIndex(conv => {return conv._id == message.conversation});
-                    const not_seenIndex =_notSeenConversations.findIndex(conv => {return conv._id == message.conversation});
-                    console.log(not_seenIndex);
-                     if(conv_index >=0 && not_seenIndex>=0){    
+                    if(conv_index >=0){
                          let _convReal = {..._conversations[conv_index]};
-                          let _convNotSeen = {..._notSeenConversations[not_seenIndex]};
-                          let notSeenMessages = [..._convNotSeen.messages];
-                          notSeenMessages.push(message);
-                    
+                         let notSeenMessages = [..._convReal.messages];
+                         notSeenMessages.push(message);
                           _convReal.messages=notSeenMessages
-                          _convNotSeen.messages=notSeenMessages
-                    
                           _conversations.splice(conv_index,1);
-                          _notSeenConversations.splice(not_seenIndex,1);
-                          _convNotSeen.notSeen+=1;
-                         _notSeenConversations.push(_convNotSeen);
+                          _convReal.notSeen+=1;
                          _conversations.push(_convReal);
-                         console.log(_conversations);
-
-                     setNotSeenConversations(_notSeenConversations);
                      setConversations(_conversations)
                     }
                 })
             socket.on('create-conversation',(conversation)=>{
-                    const _notSeen = [...notSeenConversations]; 
                     let notSeenSum=0;
-                    let c ={...conversation};
                     conversation.messages.map(message=>{
                         if(message.sender._id != user._id && message.seen.length==0){
                         notSeenSum+=1;}})
-                        if(notSeenSum>0)
-                        {
-                            conversation.notSeen=notSeenSum;
-                        _notSeen.push(conversation);
-                        setNotSeenConversations(_notSeen);
-                       }
-                       else {
-                            setSeenConversations([c,...seenConversations]);
-                    }
-                    setConversations([c, ...conversations]);
-                })
-
-
+                        conversation.notSeen=notSeenSum;
+                       setConversations([conversation, ...conversations]);
+            })
              }
        
-    },[conversations,notSeenConversations,seenConversations])  
+    },[conversations])  
     
-
-
-
-
-
     const handleConversation =(conversation)=>{
-
         setConversations(conversations=>[...conversations,conversation]);
-        setSeenConversations(seenConversations=>[...seenConversations,conversation]);    
     }
-
-
     const markAsReadConversation = (conv_id)=>{
-        if(notSeenConversations.findIndex(conversation=>{return conversation._id==conv_id})>=0){
-
             markAsreadConversation(conv_id).then(_conv=>{
-                let _notSeenConversations = [...notSeenConversations];
-                let _SeenConversations = [...seenConversations];
                 let _conversations = [...conversations];
-    
-                let notSeen =  _notSeenConversations.filter(conversation => { conversation._id != _conv._id});
-                let all =      _conversations.filter(conversation => { conversation._id != _conv._id});
-                
-                _SeenConversations.push(_conv);
-                all.push(_conv);
-                
-                console.log(" not seen",notSeen)
-                console.log("  seen",_SeenConversations)
-                console.log("all",all)
-                setSeenConversations(_SeenConversations);
-                setNotSeenConversations(notSeen);
-                setConversations(all);
-
-            }).catch(err=>{console.log(err)});
-
-            
-          
+                const index = _conversations.findIndex(conversation=>{return conversation._id ==_conv._id})                    
+                if(index>=0){
+                    _conversation_found = {..._conversations[index]};
+                    _conversation_found.notSeen=0;
+                    _conversations.splice(index,1);
+                    let _newConversations = [conversation_found,..._conversations];
+                    setConversations(_newConversations)} 
+            }).catch(err=>{console.log(err)});          
         }
-    }
-
-
     const startNewConversation = (data)=>{
         return new Promise((resolve,reject)=>{
             createConversation(data).then(data=>{
@@ -222,8 +158,6 @@ useEffect(()=>{
             }).catch(err=>{reject(err)})
         }).catch(err=>{reject(err)})
     }
-
-
     const openConversationHandler = (id,Users) =>{
         console.log(id);
     if(conversations)
@@ -265,29 +199,18 @@ useEffect(()=>{
        
         }
     }
-
-    
-
-
     const send_message = (message)=>{
              sendMessage(message).then(message=>{
                 let _conversations=[...conversations];
-                let _SeenConversations = [...seenConversations];
                 const index = _conversations.findIndex(conversation=>{return conversation._id==message.conversation});
-               const index_1 = _conversations.findIndex(conversation=>{return conversation._id ==message.conversation});
-                if(index>=0 && index_1>=0){
+                if(index>=0){
                     let _conv = {..._conversations[index]};
                     let _messages = [..._conv.messages];
-                    
                     _messages.push(message);
                     _conv.messages=_messages;
                     _conversations.splice(index,1)
-                    _SeenConversations.splice(index_1,1)
-                    _conversations.push(_conv);
-                    _SeenConversations.push(_conv);
-
-                    setConversations(_conversations);
-                    setSeenConversations(_conversations);
+                    let _newConversations = [_conv,..._conversations]
+                    setConversations(_newConversations);
                 }
 
          }).catch(err=>{alert(err)})
@@ -319,8 +242,6 @@ useEffect(()=>{
         setUser(null);
     }
 
-
-
     const updateUserLocation =(_location)=>{
         console.log("hello")
         if(!location){
@@ -337,6 +258,8 @@ useEffect(()=>{
             .catch(err=>{alert(err)})
         }
     }
+
+
 
 
 return(

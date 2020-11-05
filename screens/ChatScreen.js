@@ -19,11 +19,9 @@ export default function Chat({navigation}){
     useEffect(()=>{
         setDark(context.darkMode)
         setConversations(context.conversations);
-        setnotSeenConversations(context.notSeenConversations);
-        setSeenConversations(context.seenConversations);
         
 
-    },[context.conversations,context.notSeenConversations,context.seenConversations,context.socket,context.darkMode])
+    },[context.conversations,context.darkMode])
     
         
     
@@ -68,47 +66,14 @@ return(
      <View style={dark ? styles.conversationsDark :styles.conversations}>
          <View style={styles.convContainer} >
                  <View style={styles.conversationImagecontainer}>
-                 {notSeenConversations ? 
+                 {conversations ? 
                  <FlatList
-                    data={notSeenConversations}
+                    data={conversations}
                     renderItem={({ item }) =>
                 <TouchableOpacity   onPress={() => {checkConversation(item)}}>
                   <View style={styles.conversationContainer} >
                         <View style={styles.ConvimageContainer}>
                             <Image source = {item.users[item.users.findIndex(u=>{return u._id != user._id})].photo ? {uri:item.users[item.users.findIndex(u=>{return u._id != user._id})].photo} : require('../assets/user_image.png')} style={styles.convImage}/>
-                        </View>
-                        <View style={styles.messageBody}>
-                            <Text style={dark ? styles.senderDark : styles.sender}>{item.type=="personal" ? item.users[item.users.findIndex(u=>{return u._id != user._id})].firstName+" "+item.users[item.users.findIndex(u=>{return u._id != user._id})].lastName: item.title }</Text>
-                            <Text numberOfLines={1}  style={styles.message}>{item.messages[item.messages.length-1].content.length>20 ? item.messages[item.messages.length-1].content.substr(0,20)+"...":item.messages[item.messages.length-1].content}</Text>
-                        </View>
-                        <View style ={styles.messageMeta}>
-                        <Text style={styles.time}>{item.messages[item.messages.length-1].date.split('T')[1].split(':')[0]+":"+item.messages[item.messages.length-1].date.split('T')[1].split(':')[1]}</Text>
-                       {
-                           item.notSeen>0 ?
-                        <View style={styles.seen}>
-                            <Text style={styles.seenNumber}>{item.notSeen.toString()}</Text>
-                        </View>
-                        : null
-                        }
-                        </View>
-                  </View>
-                </TouchableOpacity>
-
-              }
-
-              keyExtractor={item => item._id}
-            />
-            :null
-            }
-
-{SeenConversations ? 
-                 <FlatList
-                    data={SeenConversations}
-                    renderItem={({ item }) =>
-                <TouchableOpacity   onPress={() => {checkConversation(item)}}>
-                  <View style={styles.conversationContainer} >
-                        <View style={styles.ConvimageContainer}>
-                        <Image source = {item.users[item.users.findIndex(u=>{return u._id != user._id})].photo ? {uri:item.users[item.users.findIndex(u=>{return u._id != user._id})].photo} : require('../assets/user_image.png')} style={styles.convImage}/>
                         </View>
                         <View style={styles.messageBody}>
                             <Text style={dark ? styles.senderDark : styles.sender}>{item.type=="personal" ? item.users[item.users.findIndex(u=>{return u._id != user._id})].firstName+" "+item.users[item.users.findIndex(u=>{return u._id != user._id})].lastName: item.title }</Text>
