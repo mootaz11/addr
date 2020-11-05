@@ -11,6 +11,7 @@ export default React.createContext({
     conversations:[],
     socket:null,
     notSeenConversations:[],
-    seenConversations:[]
+    seenConversations:[],
+    location:null
 
 }) 

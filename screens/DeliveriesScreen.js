@@ -1,24 +1,73 @@
 import React,{useContext,useState,useEffect} from 'react';
-import { View, Text, StyleSheet, Platform, TouchableOpacity, Image, TextInput, ScrollView } from 'react-native'
+import { View, Text, StyleSheet, Platform, TouchableOpacity, Image, TextInput, ScrollView,Alert } from 'react-native'
 import { Icon } from 'react-native-elements';
 import  AuthContext from '../navigation/AuthContext';
 import {close_order,deleteOrder} from "../rest/ordersApi";
+
+
+
+import { BarCodeScanner } from 'expo-barcode-scanner';
+import * as Permissions from 'expo-permissions';
+import { set } from 'react-native-reanimated';
+
+
+
 
 export default function Deliveries(props)
 {   const context = useContext(AuthContext);
     const [actifDeliveries, setActifDeliveries] = useState(context.actifDeliveries);
     const [historyDeliveries, setHistoryDeliveries] = useState(context.historyDeliveries);
     const [dark,setDark] = useState(true);
+    const [hasPermission, setHasPermission] = useState(null);
+    const [scanned, setScanned] = useState(false);
+    const [scan,setScan]=useState(false);
+
+
     useEffect(()=>{
         setDark(context.darkMode);
+
       },[context.darkMode])
     
+
+
+      
+
+
+
     const openDrawer = () => {
         props.navigation.openDrawer();
     }
 
-    const detectQrCode = () => {
-        alert("hello")             }
+    const detectQrCode =async () => {
+            setScan(true);
+            const { status } = await BarCodeScanner.requestPermissionsAsync();
+            setHasPermission(status === 'granted');   
+    }
+
+    const handleBarCodeScanned = ({  data }) => {
+        setScanned(true);
+        Alert.alert(
+            `code is ${data}`,
+            [
+              {
+                text: "okey",
+                onPress: () => {
+                        setScan(false);
+                    },
+              },
+              { text: "close", onPress: () =>{setScanned(false); setScan(false)}}
+            ],
+            { cancelable: false }
+          );
+      if (hasPermission === null) {
+        alert("requesting for camera")
+      }
+      if (hasPermission === false) {
+         alert("No access to camera")
+         }
+        };
+
+
     
         const closeDelivery= (deliveryToClose)=>{
             close_delivery(deliveryToClose._id).then(res=>{
@@ -57,6 +106,19 @@ export default function Deliveries(props)
         
     return (
         <View style={dark ? styles.containerDark : styles.container}>
+
+        { scan &&
+            <BarCodeScanner
+            onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
+            style={StyleSheet.absoluteFillObject}
+            barCodeTypes={[BarCodeScanner.Constants.BarCodeType.qr]}
+          />
+
+
+}
+         
+
+
             <View style={styles.menu}>
                 <Icon color={"white"} style={{ flex: 1, padding: 0 }} name="menu" onPress={openDrawer} />
                 <Text style={styles.Title}>Livraisons</Text>

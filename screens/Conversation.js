@@ -11,13 +11,14 @@ import AuthContext from '../navigation/AuthContext';
    
 export default function Conversation(props) {
     const context = useContext(AuthContext);
-    
+
     const [message, setMessage] = useState("");
     const [messages, setMessages] = useState(props.route.params.conversation.messages);
     const [conversation, setConversation] = useState(props.route.params.conversation);
     const [dark,setDark]=useState(context.darkMode);
     useEffect(()=>{
-        
+     
+
         if(conversation){
             context.markAsReadConversation(conversation._id);
         }
@@ -25,17 +26,21 @@ export default function Conversation(props) {
     },[])
 
 
+
     useEffect(()=>{
         setDark(context.darkMode)
+
+    },[context.darkMode])
+
+    useEffect(()=>{
         let _conversations = [...context.conversations];
         const index = _conversations.findIndex(conv=>{return conv._id==conversation._id});
         if(index>=0){
           let _conversation = _conversations[index];
-          setMessages(messages => [...messages,_conversation.messages[_conversation.messages.length-1]]);
+          setMessages(_conversation.messages);
           setConversation(_conversation);        
         }
-       // console.log(conv.messages[conv.messages.length-1])
-    },[context.conversations,context.socket,context.darkMode])
+    },[context.conversations])
     
    
 
@@ -49,9 +54,9 @@ export default function Conversation(props) {
                  content:"mon code est   :"+context.user.locationCode,
              }
              context.startNewConversation(data).then(conversation=>{
-                setConversation(conversation);
-                setMessages(conversation.messages);
-            }).catch(err=>{console.log(err)})
+                  setConversation(conversation);
+
+            }).catch(err=>{alert(err)})
          }
          else {
             const data={
@@ -59,12 +64,8 @@ export default function Conversation(props) {
                 content:"mon code est   :"+context.user.locationCode,
                 code:context.user.locationCode
             }
-            setMessages(messages=>[...messages,data]);
             context.send_message(data);
         }
-
-        
-
     }
 
     const sendMessage = () => {
@@ -78,7 +79,6 @@ export default function Conversation(props) {
             }
             context.startNewConversation(data).then(conversation=>{
                 setConversation(conversation);
-                setMessages(conversation.messages)
                 context.handleConversation(conversation);
             }).catch(err=>{console.log(err)})
 
@@ -88,9 +88,7 @@ export default function Conversation(props) {
                 conversationId:conversation._id,
                 content:message
             }
-            context.send_message(data).then(m=>{
-                setMessages(messages=>[...messages,m]);
-            }).catch(err=>console.log(err));
+            context.send_message(data)
 
         }
         setMessage("");
@@ -107,7 +105,7 @@ export default function Conversation(props) {
             <View style={styles.menu}>
                 <FontAwesome color={"white"} style={{  padding: 0, fontSize: 20 }} name="arrow-left" onPress={goBack} />
                 <Image style={styles.friendImage} source={props.route.params.conversation.image} />
-                <Text style={styles.Title}>{props.route.params.conversation.other ? props.route.params.conversation.other : props.route.params.conversation.other}</Text>
+                <Text style={styles.Title}>{props.route.params.conversation.other ? props.route.params.conversation.other :props.route.params.conversation.users.filter(user=>user._id != context.user._id)[0].firstName+" "+props.route.params.conversation.users.filter(user=>user._id != context.user._id)[0].lastName }</Text>
             </View>
             <ScrollView style={dark ? styles.ConversationBodyDark : styles.ConversationBody}
             >

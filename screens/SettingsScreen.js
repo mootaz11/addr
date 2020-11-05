@@ -1,14 +1,12 @@
 import React,{useEffect,useState} from 'react'
-import {View,Text,StyleSheet,Platform,Image,TouchableOpacity,Dimensions,Alert} from 'react-native'
+import {View,Text,StyleSheet,Platform,Image,TouchableOpacity,Dimensions,Alert,KeyboardAvoidingView} from 'react-native'
 import { Icon } from 'react-native-elements';
 import { TextInput } from 'react-native-paper';
 import  AuthContext from '../navigation/AuthContext';
 import * as ImagePicker from 'expo-image-picker';
 import * as Permissions from 'expo-permissions';
 import {useActionSheet} from '@expo/react-native-action-sheet';
-
-import {updateImage,updateInfo,updatePassword} from '../rest/userApi';
-import { Form } from 'formik';
+import {updateInfo,updatePassword,updateImage} from '../rest/userApi';
 
 const BUTTONS = [
     'Take Photo', 
@@ -26,6 +24,7 @@ export default function Settings({navigation}){
     const [editlocation,setEditlocation]=useState(false);
     const [dark,setDark]=useState(context.darkMode);
     const [userImage,setUserImage] = useState(null);
+    const [enabledKeyBoard,setEnabledKeyBoard]=useState(false);
   
     useEffect(()=>{
       setDark(context.darkMode);
@@ -87,8 +86,12 @@ export default function Settings({navigation}){
 
 
     const chooseFromCamera=async ()=>{
-        await Permissions.askAsync(Permissions.CAMERA);
-        await Permissions.askAsync(Permissions.CAMERA_ROLL);
+        const permResult1 =  await Permissions.askAsync(Permissions.CAMERA);
+       const permResult2 = await Permissions.askAsync(Permissions.CAMERA_ROLL);
+        
+       if(permResult1.status !=="granted" && permResult2.status !="granted"){
+           Alert.alert("permission required");
+       }
 
         let image=await ImagePicker.launchCameraAsync({
             allowsEditing: true,
@@ -98,7 +101,9 @@ export default function Settings({navigation}){
         console.log(image.uri)
         setUser({...user,photo:image.uri})
         const formdata= new FormData();
-
+        formdata.append('profileImage',{type:'image/png',uri:image.uri,name:'upload.png'});
+        updateImage(formdata).then(res=>{Alert.prompt(res.data.photo)}).catch(err=>{console.log(err)});
+        context.updateUser(user);
         
 
     }
@@ -116,11 +121,10 @@ export default function Settings({navigation}){
             aspect: [4, 3],
             quality: 1,
           });
-          console.log(image.uri)
           setUser({...user,photo:image.uri})
-
           const formdata= new FormData();
-        
+          formdata.append('profileImage',{type:'image/png',uri:image.uri,name:'upload.png'});
+          updateImage(formdata).then(res=>{Alert.prompt(res.data.photo)}).catch(err=>{console.log(err)});
     }
 
         const changePicture = () => {
@@ -158,6 +162,7 @@ export default function Settings({navigation}){
         };
     
     return(
+        
         <View style={dark ? styles.containerdark :styles.container}>
 
             <View style={dark ? styles.menu: styles.menu}>
@@ -198,6 +203,9 @@ export default function Settings({navigation}){
                    { editEmail && <Image style={styles.edit}  source={require("../assets/done.png") }/>}
                 </TouchableOpacity> 
                 </View>
+
+
+
                 
                 
                 <View style={dark ? styles.infoDark :styles.info}>

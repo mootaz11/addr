@@ -1,5 +1,5 @@
 import React,{useContext, useEffect, useState} from 'react';
-import { View, Text, StyleSheet,Platform,Image,TouchableOpacity,Dimensions} from 'react-native';
+import { View, Text, StyleSheet,Platform,Image,TouchableOpacity} from 'react-native';
 import { Icon } from 'react-native-elements';
 import { ScrollView ,FlatList } from 'react-native-gesture-handler';
 import AuthContext from '../navigation/AuthContext';

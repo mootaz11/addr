@@ -2,9 +2,10 @@ import React, { useState,useEffect } from 'react'
 import AuthContext from './AuthContext';
 import io  from 'socket.io-client';
 import {createConversation, getUserConversations,sendMessage,markAsreadConversation} from '../rest/conversationApi';
-
+import {getLocation,addLocation,updateLocation,addTemporarlyLocation} from '../rest/locationApi';
 import {getConnectedUser} from '../rest/userApi';
 import {getUserActifOrders,getUserHistoryOrders,getUserActifDeliveries} from '../rest/ordersApi';
+
 
 import AsyncStorage from '@react-native-community/async-storage'
   const getToken = async () => {
@@ -22,7 +23,8 @@ import AsyncStorage from '@react-native-community/async-storage'
 
 
 export default  function AppContext(props){
-    const [socket, setSocket] = useState(io("http://127.0.0.1:3000"));
+    const [socket, setSocket] = useState(io("http://192.168.1.7:3000"));
+    const [location,setLocation]=useState(null);
     const [user, setUser] = useState(null)
     const [historyOrders,setHistoryOrders] =useState([]);
     const [actifOrders,setActifOrders]=useState([]);
@@ -32,7 +34,7 @@ export default  function AppContext(props){
     const [actifDeliveries,setActifDeliveries]=useState([]);
     const [historyDeliveries,setHistoryDeliveries]=useState([])
     const [darkMode,setDarkMode]=useState(false);
-    const token_init = getToken();  //localStorage.getItem("token") ; 
+    const token_init = localStorage.getItem("token") ; //getToken();   
     const [token,setToken]=useState(token_init)
     const [isloading,setIsloading]=useState(true);
 
@@ -41,6 +43,12 @@ export default  function AppContext(props){
             getConnectedUser().then(res=>{  
                 setDarkMode(false);
                 setUser(res.data.connectedUser);
+                if(res.data.connectedUser.locationState){
+                    console.log(res.data.connectedUser.locationCode);
+                    getLocation(res.data.connectedUser.locationCode).then(location=>{
+                        setLocation(location);
+                    }).catch(err=>{alert("error occured while setting Location")})
+                }
                 socket.emit('connectuser',token);
                 setIsloading(false);  
             }).catch(err=>{
@@ -119,7 +127,7 @@ useEffect(()=>{
                 socket.off('send-message')
                 const _conversations = [...conversations];
                     const _notSeenConversations = [...notSeenConversations];
-                    
+
                     const conv_index =_conversations.findIndex(conv => {return conv._id == message.conversation});
                     const not_seenIndex =_notSeenConversations.findIndex(conv => {return conv._id == message.conversation});
                     
@@ -165,15 +173,24 @@ useEffect(()=>{
     },[conversations,notSeenConversations,seenConversations])  
     
 
+
+
+
+
     const handleConversation =(conversation)=>{
+        console.log("handle",conversation);
         setConversations(conversations=>[...conversations,conversation]);
         setSeenConversations(seenConversations=>[...seenConversations,conversation]);    
     }
 
 
-    const markAsReadConversation = (conv_id)=>{
 
+
+
+
+    const markAsReadConversation = (conv_id)=>{
         if(notSeenConversations.findIndex(conversation=>{return conversation._id==conv_id})>=0){
+
             markAsreadConversation(conv_id).then(_conv=>{
                 let _notSeenConversations = [...notSeenConversations];
                 let _SeenConversations = [...seenConversations];
@@ -207,6 +224,7 @@ useEffect(()=>{
 
 
     const openConversationHandler = (id,Users) =>{
+        console.log(id);
     if(conversations)
         if(!Users.other.isPartner){
          
@@ -221,7 +239,6 @@ useEffect(()=>{
             })
           if(conversation_found){
               conversation_found.other = Users.other.firstName+" "+Users.other.lastName;
-
             return conversation_found;
           }
           else {
@@ -249,21 +266,36 @@ useEffect(()=>{
     }
 
     
+
+
     const send_message = (message)=>{
-         return new Promise((resolve,reject)=>{
              sendMessage(message).then(message=>{
-                 console.log(message);
-                resolve(message);
-            }).catch(err=>reject(err))
-         })
+                let _conversations=[...conversations];
+                let _SeenConversations = [...seenConversations];
+                const index = _conversations.findIndex(conversation=>{return conversation._id==message.conversation});
+               const index_1 = _conversations.findIndex(conversation=>{return conversation._id ==message.conversation});
+                if(index>=0 && index_1>=0){
+                    let _conv = {..._conversations[index]};
+                    let _messages = [..._conv.messages];
+                    
+                    _messages.push(message);
+                    _conv.messages=_messages;
+                    _conversations.splice(index,1)
+                    _SeenConversations.splice(index_1,1)
+                    _conversations.push(_conv);
+                    _SeenConversations.push(_conv);
+
+                    setConversations(_conversations);
+                    setSeenConversations(_conversations);
+                }
+
+         }).catch(err=>{alert(err)})
         }
 
 
-
-
-
-
-
+    const updateUser=(user)=>{
+            setUser(user)
+        }
 
 
     const modifyDarkModeHandler =()=>{
@@ -273,18 +305,38 @@ useEffect(()=>{
     }
     
     const LoginHandler = async ({ user, token }) => {
-         await AsyncStorage.setItem('token', token);
-        //localStorage.setItem("token",token);
+         //await AsyncStorage.setItem('token', token);
+        localStorage.setItem("token",token);
         setToken(token);
         setUser(user);
     }
 
     const logoutHandler =  async () => {
-        //localStorage.removeItem("token");
-        await AsyncStorage.removeItem('token');
+        localStorage.removeItem("token");
+        //await AsyncStorage.removeItem('token');
         setToken(null);
         setUser(null);
     }
+
+
+
+    const updateUserLocation =(_location)=>{
+        console.log("hello")
+        if(!location){
+            addLocation(_location).then(loc=>{
+                console.log(loc);
+                setLocation(loc.location);
+            }).catch(err=>{console.log(err)})
+        }
+        else {
+            updateLocation(_location['location']).then(res=>{
+                setLocation(_location['location']);
+                alert(res)
+            })
+            .catch(err=>{alert(err)})
+        }
+    }
+
 
 return(
 <AuthContext.Provider value={{
@@ -293,6 +345,7 @@ return(
     socket:socket,
     conversations:conversations,
     notSeenConversations:notSeenConversations,
+    location:location,
     LoginHandler:LoginHandler,
     openConversationHandler:openConversationHandler,
     logoutHandler:logoutHandler,
@@ -306,7 +359,9 @@ return(
     send_message:send_message,
     seenConversations:seenConversations,
     handleConversation:handleConversation,
-    markAsReadConversation:markAsReadConversation
+    markAsReadConversation:markAsReadConversation,
+    updateUser:updateUser,
+    updateUserLocation:updateUserLocation
 
 }
 }>

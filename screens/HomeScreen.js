@@ -1,15 +1,21 @@
 import React, { useState ,useContext,useEffect} from 'react'
-import { StyleSheet, Dimensions, View, Image, Platform, Text, Clipboard, Modal, SafeAreaView,Alert } from 'react-native';
+import { StyleSheet, Dimensions, View, Image, Platform, Text, Clipboard, Modal, SafeAreaView,Alert,Linking,TouchableOpacity} from 'react-native';
+export default function Home({navigation}){
+  return (<View></View>)
+}
+/*
 import MapView, { Marker } from 'react-native-maps';
 import { Icon, SearchBar } from 'react-native-elements';
-import { ScrollView, TouchableOpacity } from 'react-native-gesture-handler';
+import { ScrollView } from 'react-native-gesture-handler';
 import { TextInput } from 'react-native-paper';
 import { FlatList } from 'react-native-gesture-handler';
 import _ from 'lodash';
 import AuthContext from '../navigation/AuthContext';
 import * as Location from 'expo-location';
+import MapViewDirections from 'react-native-maps-directions';
 
 
+const api_directions_key = "AIzaSyDcbXzRxlL0q_tM54tnAWHMlGdmPByFAfE";
 const partnersData = [
   {
     name:"papadom",
@@ -64,6 +70,7 @@ const domains = [
 
   export default function Home({ navigation }) {
    const context = useContext(AuthContext);
+  const [user,setUser]=useState(context.user);
   const [dark,setDark] = useState(context.darkMode);
   const [dropDown, setdropDown] = useState(false);
   const [Markers, setMarkers] = useState([]);
@@ -72,13 +79,42 @@ const domains = [
   
   const [partners, setPartners] = useState([]);
 
-  const [smartCode, setSmartCode] = useState("eads1945");
+  const [smartCode, setSmartCode] = useState(context.user.locationCode);
   const [domain, setDomain] = useState("");
   const [search, setSearch] = useState("");
   const [searchResult, setSearchResult] = useState(cities);
   const [city, setCity] = useState("");
   const [showModal,setShowmodal]=useState(false);
+  useEffect(()=>{
+    if(!user.locationState){
+      Alert.alert(
+        "Are you at Home",
+        "press yes if you are",
+        [
+          {
+            text: "yes",
+            onPress: () => {
 
+            },
+            style: "ok"
+          },
+          { text: "no", onPress: async () => {
+              const _location =await Location.getCurrentPositionAsync({});
+              const body ={locationCode: user.locationCode,
+              location: {
+                      latitude:_location.coords.latitude,
+                       longitude:_location.coords.longitude  
+              },
+              user: user._id
+              }
+              context.updateUserLocation(body);
+          } }
+        ],
+        { cancelable: false }
+      );
+  
+    }
+  },[])
 
   useEffect(()=>{
     (async () => {
@@ -88,12 +124,11 @@ const domains = [
       }
       
       let location = await Location.getCurrentPositionAsync({});
-      console.log(location);
       setLocation({latitude:location.coords.latitude,longitude:location.coords.longitude});
     })();
 
     setDark(context.darkMode);
-  },[context.darkMode])
+  },[location,context.darkMode,context.user])
 
 
 
@@ -123,6 +158,21 @@ const domains = [
 
   }
 
+
+  const _pressCall =()=>{
+    let phoneNumber = "28896426";
+
+    if (Platform.OS !== 'android') {
+      phoneNumber = `telprompt:${"28896426"}`;
+    }
+    else  {
+      phoneNumber = `tel:${"28896426"}`;
+    }    Linking.openURL(phoneNumber)
+
+  }
+
+
+
   const openDrawer = () => {
     navigation.openDrawer();
   }
@@ -143,15 +193,14 @@ const domains = [
       >
         <Marker
           coordinate={{
-            latitude: location.latitude
+            latitude: location ? location.latitude : 0
 
             ,
-            longitude:location.longitude
+            longitude:location ? location.longitude : 0
 
           }}
-
         >
-          <Image source={require('../assets/mootaz.jpg')} style={{ height: 30, width: 30, borderRadius: 30 }} />
+          <Image  source={  require('../assets/mootaz.jpg') } style={{ height: 30, width: 30, borderRadius: 30,borderColor:"white" ,borderWidth:2}} />
 
         </Marker>
 
@@ -163,9 +212,20 @@ const domains = [
           }}
 
         >
-          <Image source={require('../assets/mootaz.jpg')} style={{ height: 30, width: 30, borderRadius: 30 }} />
+          <Image source={require('../assets/mootaz.jpg')} style={{ height: 30, width: 30, borderRadius: 30,borderColor:"white" ,borderWidth:2}} />
 
         </Marker>
+        <MapViewDirections
+          apikey={api_directions_key}
+           origin={location}
+          destination={{
+            latitude: 35.7773,
+            longitude: 10.8313
+
+          }}
+          strokeWidth={3}
+          strokeColor= { dark ? "#24A9E1":"#3d3d3d"}      
+        />
 
       </MapView>
 
@@ -186,7 +246,7 @@ const domains = [
 
       <View style={styles.imageContainer}>
         <TouchableOpacity onPress={checkProfile}>
-          <Image style={styles.imageUser} source={require("../assets/mootaz.jpg")} />
+          <Image style={styles.imageUser} source={user.photo ? {uri:user.photo} : require('../assets/user_image.png')} />
         </TouchableOpacity>
 
       </View>
@@ -195,7 +255,7 @@ const domains = [
         <View style={styles.geoInfo}>
           <View style={styles.coordinatesSettings}>
             <Image style={styles.coordSettingsIcon} source={require("../assets/copy-dark.png")} />
-            <TouchableOpacity onPress={() => { Clipboard.setString(smartCode) }}>
+            <TouchableOpacity onPress={() => { Clipboard.setString(user.locationCode) }}>
               <Text style={styles.codeManup}>copier mon code</Text>
             </TouchableOpacity>
 
@@ -285,12 +345,22 @@ const domains = [
                   <View style={styles.SinglePartner} >
                     <View style={styles.PartnerImageContainer}></View>
                     <View style={styles.operations}>
-                    <TouchableOpacity onPress={() => { setDomain(value.title) }}>
+                     
+                      <View style={styles.call}>
+                      <TouchableOpacity style={{width:"100%",height:"100%"}} onPress={_pressCall}>
 
-                      <View style={styles.call}></View>
+                      <Image style={styles.messagingImage} source={require("../assets/phone-call.png")}/>
                       </TouchableOpacity>
 
-                      <View style={styles.messaging}></View>
+                      </View>
+
+
+                      <View style={styles.messaging}>
+                        <TouchableOpacity style={{width:"100%",height:"100%"}} >
+                        <Image   style={styles.messagingImage}  source={require("../assets/speech-bubble.png")}/>
+
+                        </TouchableOpacity>
+                      </View>
                     </View>
 
                   </View>
@@ -585,7 +655,10 @@ const styles = StyleSheet.create({
       zIndex:50,
       elevation:10,
       borderColor:"white",
-      borderWidth:0.2
+      borderWidth:0.2,
+      flexDirection:"column",
+      justifyContent:"center",
+      alignItems:"center"
     },
     messaging:{
         width:"100%",
@@ -598,7 +671,18 @@ const styles = StyleSheet.create({
         zIndex:50,
         elevation:10,
         borderColor:"white",
-        borderWidth:0.2
+        borderWidth:0.2,
+        flexDirection:"column",
+        justifyContent:"center",
+        alignItems:"center",
+        
+    },
+    messagingImage:{
+      width:"100%",
+      height:"100%",
+      resizeMode:"contain",
+      shadowColor:"white",
+      shadowOffset:{width:2,height:2}
     },
   service: {
     margin: 4,
@@ -814,3 +898,5 @@ const darkStyle = [
     ]
   }
 ]
+
+*/

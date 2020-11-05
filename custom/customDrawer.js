@@ -86,8 +86,8 @@ export default function CustomDrawer(props) {
 
                     icon={({ color, size }) => (
                         <Switch
-                            trackColor={{ false: "#767577", true: "#81b0ff" }}
-                            thumbColor={isEnabled ? "#f5dd4b" : "#f4f3f4"}
+                            trackColor={{ false: "black", true: "white" }}
+                            thumbColor={isEnabled ? "black" : "white"}
                             ios_backgroundColor="#3e3e3e"
                             onValueChange={toggleSwitch}
                             value={isEnabled}
