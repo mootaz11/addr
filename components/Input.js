@@ -77,7 +77,7 @@ const Input = (props) => {
     }; 
     
     return(
-        <View>
+        <View style={styles.container}>
         <View style={styles.inputContainer}>
             <Image 
             style={styles.image} 
@@ -101,6 +101,10 @@ const Input = (props) => {
 };
 
 const styles = StyleSheet.create({
+    container: {
+        //backgroundColor: 'gray',
+        height: Dimensions.get('window').height * 0.085
+    },
     inputContainer:{
         flexDirection: 'row',
         alignItems: 'center',

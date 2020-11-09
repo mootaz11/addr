@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
+import {View, Text, StyleSheet, TouchableOpacity, Dimensions} from 'react-native';
 
 import Colors from '../constants/Colors';
 const MainButton = (props) => {
@@ -24,7 +24,7 @@ const styles = StyleSheet.create({
     },
     buttonActiveText:{
         color: 'white',
-        fontSize: 16,
+        fontSize: 16 ,
     },
     buttonInActive:{
         backgroundColor: 'white',

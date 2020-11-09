@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, StyleSheet, Text, TouchableOpacity} from 'react-native';
+import {View, StyleSheet, Text, TouchableOpacity, Dimensions} from 'react-native';
 
 import Colors from '../constants/Colors';
 const SubmitButton = (props) =>{
@@ -15,8 +15,8 @@ const SubmitButton = (props) =>{
 const styles = StyleSheet.create({
     button: {
         backgroundColor: Colors.primary,
-        paddingVertical: 9,
-        paddingHorizontal: 20,
+        paddingVertical: Dimensions.get('window').height * 0.01, //9
+        paddingHorizontal: Dimensions.get('window').width * 0.04, //20
         borderRadius: 30,
         marginVertical:2,
 
@@ -29,7 +29,7 @@ const styles = StyleSheet.create({
     },
     buttonText: {
         color: Colors.accent,
-        fontSize: 19
+        fontSize: Dimensions.get('window').width > 392 ? 19 : 17
     }
 });
 

@@ -9,11 +9,17 @@ import {
     TouchableWithoutFeedback,
     Keyboard,
     Dimensions,  
+    Platform,
+    Alert
 } from 'react-native';
 import MainButton from '../components/MainButton';
 import Colors from '../constants/Colors';
 import SignUpForm from '../components/SignUpForm';
 import LoginForm from '../components/LoginForm';
+import * as Facebook from 'expo-facebook';
+
+const app_id_facebook = "231706591544026";
+
 
 
 const FirstScreen = (props) => {
@@ -45,7 +51,35 @@ const FirstScreen = (props) => {
     };
   }, []);
 
+  const facebookLoginHandler = async () => {
+    try {
+      await Facebook.initializeAsync({
+        appId: app_id_face,
+      });
+      const {
+        type,
+        token,
+        expirationDate,
+        permissions,
+        declinedPermissions,
+      } = await Facebook.logInWithReadPermissionsAsync({
+        permissions: ['public_profile', 'email'],
+      });
+      if (type === 'success') {
+        // Get the user's name using Facebook's Graph API
+        const response = await fetch(`https://graph.facebook.com/me?access_token=${token}&fields=id,name,email,birthday,picture.type(large)`);
+        /*const user =  await response.json();
+        console.log(user);*/
+        Alert.alert('Logged in!', `Hi ${(await response.json()).name}! `);
+        Facebook.logOutAsync()
+      } else {
+        // type === 'cancel'
+      }
+    } catch ({ message }) {
+      alert(`Facebook Login Error: ${message}`);
+    }
 
+  };
 
     return (
       <TouchableWithoutFeedback onPress={()=> Keyboard.dismiss()}>
@@ -60,7 +94,7 @@ const FirstScreen = (props) => {
             <View style={styles.partTwo}>
                 <View style={styles.partTwoPartOne}>
                     <View style={styles.SharedPart}>
-                        <View style={styles.buttonCon}>
+                        <View style={Platform.OS ==='ios' ? styles.buttonConIOS : styles.buttonConAndroid}>
                             <View style={styles.loginSingupContainer}>
                                 <MainButton  onPress={() => clickSignupHandler(false)} clickSignup={!signupClicked}
                                 > 
@@ -90,7 +124,9 @@ const FirstScreen = (props) => {
                 </View>
                 {signupClicked ? <View style={styles.lastPart}>
                     <Text style={{marginTop: Dimensions.get('window').height * 0.04 }}>or Connect with</Text>
-                    <View style={{...styles.logoApis, ...{marginTop: isKeyboardVisible ? Dimensions.get('window').height *0.02 :Dimensions.get('window').height *0.06}}}>
+                    
+                    {Platform.OS === 'ios' ? 
+                    <View style={styles.logoApis}>
                         <TouchableOpacity  onPress={()=>{}} >
                             <Image style={styles.logoApi} source={require('../assets/images/google.png')} />
                         </TouchableOpacity>
@@ -98,6 +134,16 @@ const FirstScreen = (props) => {
                             <Image style={styles.logoApi} source={require('../assets/images/facebook1.png')}/>
                         </TouchableOpacity>
                     </View>
+                    :
+                    <View style={{...styles.logoApis,...{marginTop: isKeyboardVisible ? Dimensions.get('window').height *0.02 :Dimensions.get('window').height *0.06}}}>
+                        <TouchableOpacity  onPress={googleSignUpHandler} >
+                            <Image style={styles.logoApi} source={require('../assets/images/google.png')} />
+                        </TouchableOpacity>
+                        <TouchableOpacity  onPress={facebookLoginHandler} >
+                            <Image style={styles.logoApi} source={require('../assets/images/facebook1.png')}/>
+                        </TouchableOpacity>
+                    </View> 
+                    }
             </View>: null}
             </View>
 
@@ -143,9 +189,14 @@ const styles = StyleSheet.create({
         height: '100%',   // peut etre modifier 
         //backgroundColor:'grey'
     },
-    buttonCon:{
-        alignItems: "center"
+    buttonConIOS:{
+        alignItems: "center",
+        zIndex: 1,
     },
+    buttonConAndroid: {
+        alignItems:'center'
+    },
+
     loginSingupContainer: {
         flexDirection: 'row',
         justifyContent: 'center',
@@ -176,7 +227,6 @@ const styles = StyleSheet.create({
         width: '100%'
     },
     logoApis: {
-         //35
         flexDirection: 'row',
         justifyContent: 'space-around',
         //backgroundColor:'yellow',

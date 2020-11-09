@@ -1,5 +1,5 @@
-import React, {useReducer, useCallback, useState, useEffect} from 'react';
-import {View, StyleSheet, ScrollView, Dimensions, Keyboard, Alert} from 'react-native';
+import React, {useReducer, useCallback, useState} from 'react';
+import {View, StyleSheet, ScrollView, Dimensions, Keyboard, Alert, Platform} from 'react-native';
 
 import Input from '../components/Input';
 import SubmitButton from '../components/SubmitButton';
@@ -84,91 +84,91 @@ const SignUpForm = (props) => {
 
     return(
     <View style={styles.formSignupContainerAll}>
-    <View style={styles.formContainerSignup}>
-        <ScrollView style={styles.FormSignupListContainer}>
+        <View style={styles.formContainerSignup}>
+            <ScrollView style={styles.FormSignupListContainer}>
             <View style={styles.listItem}>
                 <Input 
-            inputId="username"
-            style={styles.input}
-            imageSrc={require("../assets/images/login.png")} 
-            placeholder="username" 
-            errorText ="please enter a valid username"
-            onInputChange={inputChangeHandler}
-            required
-                />
+                inputId="username"
+                style={styles.input}
+                imageSrc={require("../assets/images/login.png")} 
+                placeholder="username" 
+                errorText ="please enter a valid username"
+                onInputChange={inputChangeHandler}
+                required
+                    />
             </View>
             <View style={styles.listItem}>
                 <Input 
-            inputId="email"
-            style={styles.input}
-            imageSrc={require("../assets/images/email.png")} 
-            placeholder="E_mail" 
-            errorText ="please enter a valid email"
-            autoCapitalize="none"
-            onInputChange={inputChangeHandler}
-            required
-            email
-                />
+                inputId="email"
+                style={styles.input}
+                imageSrc={require("../assets/images/email.png")} 
+                placeholder="E_mail" 
+                errorText ="please enter a valid email"
+                autoCapitalize="none"
+                onInputChange={inputChangeHandler}
+                required
+                email
+                    />
             </View>
             <View style={styles.listItem}>
                 <Input 
-            inputId="password"
-            style={styles.input}
-            imageSrc={require("../assets/images/password.png")} 
-            placeholder="password" 
-            errorText ="please enter a valid password"
-            onInputChange={inputChangeHandler}
-            required
-            secureTextEntry
+                inputId="password"
+                style={styles.input}
+                imageSrc={require("../assets/images/password.png")} 
+                placeholder="password" 
+                errorText ="please enter a valid password"
+                onInputChange={inputChangeHandler}
+                required
+                secureTextEntry
 
-            onLostFocus={getPasswordHandler}
+                onLostFocus={getPasswordHandler}
                 />
             </View>
             <View style={styles.listItem}>
                 <Input 
-            inputId="repeatPassword"
-            secureTextEntry={true}
-            style={styles.input}
-            imageSrc={require("../assets/images/password.png")} 
-            placeholder="repeat password" 
-            errorText ="please repeat your password"
-            onInputChange={inputChangeHandler}
-            required
-            repeatpw={password}
+                inputId="repeatPassword"
+                secureTextEntry={true}
+                style={styles.input}
+                imageSrc={require("../assets/images/password.png")} 
+                placeholder="repeat password" 
+                errorText ="please repeat your password"
+                onInputChange={inputChangeHandler}
+                required
+                repeatpw={password}
                 />
             </View>
             <View style={styles.listItem}>
                 <Input 
-            inputId="phone"
-            style={styles.input}
-            imageSrc={require("../assets/images/phone.png")} 
-            placeholder="phone" 
-            errorText ="please enter a valid phone"
-            multiline
-            numberOfLines={2}
-            keyboardType="number-pad"
-            onInputChange={inputChangeHandler}
-            required
-            minLength={8}
-            maxLength={8}
+                inputId="phone"
+                style={styles.input}
+                imageSrc={require("../assets/images/phone.png")} 
+                placeholder="phone" 
+                errorText ="please enter a valid phone"
+                multiline
+                numberOfLines={2}
+                keyboardType="number-pad"
+                onInputChange={inputChangeHandler}
+                required
+                minLength={8}
+                maxLength={8}
                 />
             </View>
             <View style={styles.listItem}>
                 <Input 
-            inputId="address"
-            style={styles.input}
-            imageSrc={require("../assets/images/home.png")} 
-            placeholder="Specify the address if you live in builder"
-            errorText ="please enter your address"
-            onInputChange={inputChangeHandler}
-            required
+                inputId="address"
+                style={styles.input}
+                imageSrc={require("../assets/images/home.png")} 
+                placeholder="Specify the address if you live in builder"
+                errorText ="please enter your address"
+                onInputChange={inputChangeHandler}
+                required
                 />
             </View>
     </ScrollView>
-    </View>
-    <View style={styles.submitSignUpButtonContainer}>
-        <SubmitButton onPress={signupHandler}>Create account</SubmitButton>
-    </View>
+        </View>
+        <View style={styles.submitSignUpButtonContainer}>
+            <SubmitButton onPress={signupHandler}>Create account</SubmitButton>
+        </View>
     </View>
     );
 };
@@ -209,6 +209,8 @@ const styles = StyleSheet.create({
         width:'45%',
         position:'absolute',
         bottom: '-5%',
+        //zIndex: 2
+        //backgroundColor: 'red'
     },
 });
 

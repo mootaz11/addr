@@ -1,5 +1,5 @@
 import React, {useReducer, useCallback} from 'react';
-import {View, StyleSheet, ScrollView, Text, Dimensions, Keyboard, Alert} from 'react-native';
+import {View, StyleSheet, ScrollView, Text, Dimensions, Keyboard, Alert, Platform} from 'react-native';
 
 import Colors from '../constants/Colors';
 import Input from '../components/Input';
@@ -73,10 +73,10 @@ const LoginForm = (props) => {
     return(
     <View style={styles.formLoginContainerAll}>
     <View style={styles.formContainerLogin}>
-    <ScrollView style={styles.FormLoginListContainer}>
+        <ScrollView style={styles.FormLoginListContainer}>
         <View style={styles.listItem}>
             <Input 
-                        style={styles.input} 
+            style={styles.input} 
             inputId="email"
             imageSrc={require("../assets/images/login.png")} 
             placeholder="email"
@@ -105,9 +105,17 @@ const LoginForm = (props) => {
         </View>
     </ScrollView>
     </View>
-    <View style={{...styles.submitLoginButtonContainer,...{bottom:  props.isKeyboardVisible ? '20%' : '45%'}}}>
-        <SubmitButton onPress={loginHandler}>Get started</SubmitButton>
-    </View>
+
+    {
+        Platform.OS === 'ios' ? 
+        <View style={{...styles.submitLoginButtonContainer,...{bottom: '43%'}}}>
+            <SubmitButton onPress={loginHandler}>Get started</SubmitButton>
+         </View>
+        :  
+        <View style={{...styles.submitLoginButtonContainer,...{bottom:  props.isKeyboardVisible ? '17%' : '43%'}}}>
+            <SubmitButton onPress={loginHandler}>Get started</SubmitButton>
+        </View>
+    }
     </View>
     );
 };
@@ -144,7 +152,8 @@ const styles = StyleSheet.create({
         height: 30,
     },
     forgetPass: {
-        alignItems: 'flex-end'
+        marginTop: 3,
+        alignItems: 'flex-end',
     },
     forgetPassText: {
         color: Colors.placeholder
