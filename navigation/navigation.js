@@ -12,7 +12,10 @@ import CustomDrawer from '../custom/customDrawer'
 import Login from '../screens/LoginScreen';
 import forgotPassword from '../screens/forgotPassword';
 import Settings from '../screens/SettingsScreen';
-
+import Brand from '../screens/brandScreen';
+import SingleBrand from '../screens/singleBrand';
+import genderCategory from '../screens/genderScreen';
+import Products from '../screens/productsScreen';
 
 
 
@@ -69,6 +72,10 @@ return(
             <drawerStack.Screen name="logout"  component={Login}/>
             <drawerStack.Screen  name="forgotPassword" component={forgotPassword} />
             <drawerStack.Screen name="conversation"  component={Conversation}/>
+            <drawerStack.Screen name ="brand" component={Brand}/>
+            <drawerStack.Screen name ="singleBrand" component={SingleBrand}/>
+            <drawerStack.Screen name="gender" component={genderCategory}/>
+            <drawerStack.Screen name="products" component={Products}/>
 
           </drawerStack.Navigator>
         

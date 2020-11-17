@@ -3,14 +3,18 @@ import { View, Text, StyleSheet, Platform, TouchableOpacity, Image, TextInput, S
 import { Icon } from 'react-native-elements';
 import  AuthContext from '../navigation/AuthContext';
 import {close_order,deleteOrder} from "../rest/ordersApi";
+import _ from 'lodash';
+
 
 
 export default function Orders(props) {
     const context = React.useContext(AuthContext);
     const [actifOrders, setActifOrders] = useState(context.actifOrders);
-    const [historyOrders, setHistoryOrders] = useState(context.historyOrders);
+   const [historyOrders, setHistoryOrders] = useState(context.historyOrders);
     const [dark,setDark]=useState(context.darkMode);
-  
+    const [search, setSearch] = useState("");
+    const [searchResult, setSearchResult] = useState(context.historyOrders);
+
     useEffect(()=>{
       setDark(context.darkMode);
     },[context.darkMode])
@@ -27,6 +31,8 @@ export default function Orders(props) {
         close_order(orderToClose._id).then(res=>{
             setActifOrders(actifOrders.filter(order=>orderToClose._id != order._id));
             setHistoryOrders(historyOrders=>[...historyOrders,orderToClose]);
+            setSearchResult(searchResult=>[...searchResult,orderToClose]);
+
             })
             .catch(err=>{alert(err.message)}) 
     }
@@ -44,6 +50,7 @@ export default function Orders(props) {
         deleteOrder(orderToDelete._id).then(res=>{
             alert(res.data.message);
             setHistoryOrders(historyOrders.filter(order=>orderToDelete._id != order._id));
+            setSearchResult(searchResult.filter(order=>orderToDelete._id != order._id));
 
         }).catch(err=>{
             alert(err.message);
@@ -59,6 +66,19 @@ export default function Orders(props) {
         }).catch(err=>{alert(err.message)})
 
     }
+
+    const filtreList = (text) => {
+        setSearch(text)
+        const query = text.toLowerCase();
+            const hist_orders = _.filter(historyOrders, order => {
+                return _.includes(order.title.toLowerCase(), query)
+              })
+              setSearchResult(hist_orders)
+      
+       
+      }
+    
+
    return (
         <View style={dark ? styles.containerDark : styles.container}>
             <View style={styles.menu}>
@@ -74,7 +94,9 @@ export default function Orders(props) {
                         placeholder="search here ..."
                         style={styles.searchInput}
                         underlineColor={"white"}
-
+                        value={search}
+                        onChangeText={filtreList}
+            
                     />
                 </View>
 
@@ -139,8 +161,8 @@ export default function Orders(props) {
                 <View style={styles.deliveriesContainer}>
 
                 {
-                        historyOrders ?
-                        historyOrders.map((value, index) => {
+                        searchResult ?
+                        searchResult.map((value, index) => {
                                 return(
                                     <View style={dark ? styles.deliveryDark : styles.delivery} key={index}>
                                         <View style={styles.clientImageContainer}>
@@ -156,7 +178,7 @@ export default function Orders(props) {
                                         </View>
                                         <View style={styles.actions}>
                                             <View style={styles.sendMessageContainer}>
-                                                <TouchableOpacity style={{ width: "50%", height: "50%", margin: 5 }}>
+                                                <TouchableOpacity  onPress={()=>{startConversation(value)}} style={{ width: "50%", height: "50%", margin: 5 }}>
                                                     <Image style={{ width: "100%", height: "100%", resizeMode: "contain" }} source={require("../assets/message.png")} />
 
                                                 </TouchableOpacity>
@@ -175,6 +197,7 @@ export default function Orders(props) {
                             : null}
                 </View>
             </ScrollView>
+            <View style={styles.footer}></View>
         </View>
     );
 }
@@ -300,7 +323,7 @@ const styles = StyleSheet.create({
         flexDirection: "column",
         position: "absolute",
         top: "25%",
-        height: "75%",
+        height: "70%",
         width: "100%",
     },
     container: {
@@ -379,6 +402,12 @@ const styles = StyleSheet.create({
         width: "80%",
         height: "80%",
         resizeMode: "contain"
+    },
+    footer:{
+     position:"absolute",
+     top:"95%",
+     height:"5%",
+     width:"100%"   
     }
 
 })

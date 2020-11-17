@@ -3,8 +3,7 @@ import { StyleSheet, Dimensions, View, Image, Platform, Text, Clipboard, Modal, 
 export default function Home({navigation}){
   return (<View></View>)
 }
-/*
-import MapView, { Marker } from 'react-native-maps';
+/*import MapView, { Marker } from 'react-native-maps';
 import { Icon, SearchBar } from 'react-native-elements';
 import { ScrollView } from 'react-native-gesture-handler';
 import { TextInput } from 'react-native-paper';
@@ -12,6 +11,7 @@ import { FlatList } from 'react-native-gesture-handler';
 import _ from 'lodash';
 import AuthContext from '../navigation/AuthContext';
 import * as Location from 'expo-location';
+import * as Permissions from 'expo-permissions';
 import MapViewDirections from 'react-native-maps-directions';
 
 
@@ -19,11 +19,11 @@ const api_directions_key = "AIzaSyDcbXzRxlL0q_tM54tnAWHMlGdmPByFAfE";
 const partnersData = [
   {
     name:"papadom",
-    image:require("../assets/mootaz.jpg")
+    image:require("../assets/papadom.png")
   },
   {
-    name:"papadom",
-    image:require("../assets/mootaz.jpg")
+    name:"Bershka",
+    image:require("../assets/bershka.jpg")
   },{
     name:"papadom",
     image:require("../assets/mootaz.jpg")
@@ -74,19 +74,21 @@ const domains = [
   const [dark,setDark] = useState(context.darkMode);
   const [dropDown, setdropDown] = useState(false);
   const [Markers, setMarkers] = useState([]);
-  const [location, setLocation] = useState(null);
+  const [location, setLocation] = useState(context.location);
   const [temporaryLocation, setTemporaryLocation] = useState(false);
-  
   const [partners, setPartners] = useState([]);
-
+  const[seviceChosen,setServiceChosen]=useState(false);
   const [smartCode, setSmartCode] = useState(context.user.locationCode);
   const [domain, setDomain] = useState("");
   const [search, setSearch] = useState("");
   const [searchResult, setSearchResult] = useState(cities);
   const [city, setCity] = useState("");
   const [showModal,setShowmodal]=useState(false);
+  const [locationState,setLocationState]=useState(context.locationState)
   useEffect(()=>{
-    if(!user.locationState){
+    
+
+    if(!locationState){
       Alert.alert(
         "Are you at Home",
         "press yes if you are",
@@ -94,41 +96,81 @@ const domains = [
           {
             text: "yes",
             onPress: () => {
-
+                context.updateUserLocationState(user._id)
             },
             style: "ok"
           },
           { text: "no", onPress: async () => {
+
+
+            let { status } =  await Permissions.askAsync(Permissions.LOCATION);
+
+             if (status !== 'granted') {
+              Alert.alert('Permission to access location was denied');
+                           }
+              else {
               const _location =await Location.getCurrentPositionAsync({});
+             
+             
               const body ={locationCode: user.locationCode,
               location: {
                       latitude:_location.coords.latitude,
                        longitude:_location.coords.longitude  
               },
-              user: user._id
+              userId: user._id
               }
-              context.updateUserLocation(body);
-          } }
+            context.updateUserLocation(body);
+          }
+        
+        }
+        
+        }
         ],
         { cancelable: false }
       );
   
     }
-  },[])
+  },[context.location,context.locationState,context.temporaryLocation])
+
+
+
+
+
+
 
   useEffect(()=>{
+    if(!context.location)
+{
     (async () => {
-      let { status } = await Location.requestPermissionsAsync();
+      let { status } =  await Permissions.askAsync(Permissions.LOCATION);
+
+     
       if (status !== 'granted') {
         Alert.alert('Permission to access location was denied');
       }
-      
-      let location = await Location.getCurrentPositionAsync({});
-      setLocation({latitude:location.coords.latitude,longitude:location.coords.longitude});
+      else {
+        let location = await Location.getCurrentPositionAsync({});
+        setLocation({latitude:location.coords.latitude,longitude:location.coords.longitude});
+      }
     })();
+  }
+
+  else {
+      if(context.location.temperarlyLocation){
+        setLocation({latitude:context.location.temperarlyLocation.latitude
+          ,longitude:context.location.temperarlyLocation.longitude});
+          setTemporaryLocation(true);
+      }
+      else {
+        setLocation({latitude:context.location.location.latitude
+          ,longitude:context.location.location.longitude});
+      }
+    }
+
+
 
     setDark(context.darkMode);
-  },[location,context.darkMode,context.user])
+  },[context.darkMode])
 
 
 
@@ -142,14 +184,19 @@ const domains = [
     setSearchResult(citiesResult)
   }
 
-  const LeaveHome = () => {
+  const turnTemporaryLocation =async () => {
     if (temporaryLocation) {
       setTemporaryLocation(false);
-      //back to home
+      context.deleteTemprorayLocation();
     }
     else {
       setTemporaryLocation(true);
-      //change temporary location 
+      let _location = await Location.getCurrentPositionAsync();
+      context.handleTemporaryLocation({location: {
+        latitude:_location.coords.latitude,
+         longitude:_location.coords.longitude  
+        }}
+,user._id)
     }
   }
 
@@ -192,13 +239,26 @@ const domains = [
         provider="google"
       >
         <Marker
-          coordinate={{
+          coordinate={
+            Platform.OS=='ios' ?
+            {
             latitude: location ? location.latitude : 0
 
             ,
             longitude:location ? location.longitude : 0
 
-          }}
+          } :
+          {
+            latitude: location ? Number(location.latitude) : 0
+
+            ,
+            longitude:location ? Number(location.longitude) : 0
+
+          }
+
+        
+        
+        }
         >
           <Image  source={  require('../assets/mootaz.jpg') } style={{ height: 30, width: 30, borderRadius: 30,borderColor:"white" ,borderWidth:2}} />
 
@@ -266,7 +326,7 @@ const domains = [
           </View>
           <View style={styles.coordinatesSettings}>
             <Image style={styles.coordSettingsIcon} source={require("../assets/temporary-dark.png")} />
-            <TouchableOpacity onPress={LeaveHome}>
+            <TouchableOpacity onPress={turnTemporaryLocation}>
               <Text style={styles.codeManup}>postion temporaire({temporaryLocation ? "activé" : "desactivé"})</Text>
             </TouchableOpacity>
           </View>
@@ -282,7 +342,7 @@ const domains = [
 
 
       <ScrollView horizontal
-        style={styles.domains}
+        style={seviceChosen ? styles.domainswithPartners :styles.domainswithoutPartners}
         showsHorizontalScrollIndicator={false}
 
 
@@ -300,10 +360,10 @@ const domains = [
         }}
         >
         {
-            domains.map((value, index) => {
+           domains && domains.map((value, index) => {
             return (
               <View style={styles.domainsContainer} key={index}>
-                <TouchableOpacity onPress={() => { setDomain(value.title) }}>
+                <TouchableOpacity onPress={() => { setDomain(value.title); setServiceChosen(true) }}>
                   <View style={domain == value.title ? styles.serviceChosen : styles.service} >
                     <Image style={styles.imageService} source={value.imageDark} />
                   </View>
@@ -319,7 +379,7 @@ const domains = [
       </ScrollView>
       
 
-
+        
       <ScrollView horizontal
         style={styles.partners}
         showsHorizontalScrollIndicator={false}
@@ -339,11 +399,15 @@ const domains = [
         }}
       >
         {
-          domains.map((value, index) => {
+         seviceChosen && partnersData.map((value, index) => {
             return (
               <View style={styles.partnersContainer} key={index}>
                   <View style={styles.SinglePartner} >
-                    <View style={styles.PartnerImageContainer}></View>
+                    <View style={styles.PartnerImageContainer}>
+                      <Image style={styles.partnerImage} source={value.image}/>
+                      <Text style={styles.partnerTitle}>{value.name}</Text>
+
+                    </View>
                     <View style={styles.operations}>
                      
                       <View style={styles.call}>
@@ -455,9 +519,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     flexDirection: "column",
-    width: "20%",
+    width: 180,
+    marginRight:8,
     height: "94%",
-    overflow: "hidden"
+    overflow: "hidden",
 
   },
 
@@ -587,7 +652,15 @@ const styles = StyleSheet.create({
     height: "8%",
     borderRadius: 10,
   },
-  domains: {
+  domainswithoutPartners: {
+    position: "absolute",
+    top: "74%",
+    left: "14%",
+    height: "18%",
+    marginTop: Platform.OS == 'ios' ? 30 : 20,
+    elevation: 10,
+  },
+  domainswithPartners: {
     position: "absolute",
     top: "55%",
     left: "14%",
@@ -602,6 +675,7 @@ const styles = StyleSheet.create({
     height: "18%",
     marginTop: Platform.OS == 'ios' ? 30 : 20,
     elevation: 10,
+    flexWrap:"wrap"
   },
   SinglePartner:{
 
@@ -626,7 +700,22 @@ const styles = StyleSheet.create({
       shadowColor:"white",
       shadowOffset:{width:3,height:3},
       shadowOpacity:0.3,
-      borderRadius:8
+      borderRadius:8,
+      flexDirection:"column",
+      alignItems:"center",
+      justifyContent:"center"
+    },
+    partnerImage:{
+        width:60,
+        height:60,
+        borderColor:"white",
+        borderWidth:1,
+        borderRadius:70,
+        resizeMode:"cover"
+    },
+    partnerTitle:{
+      color:"white",
+      fontWeight:"500"
     },
     operations:{
       backgroundColor:"#219dd1",

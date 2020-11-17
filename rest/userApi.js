@@ -4,8 +4,8 @@ import axios from "../rest/customAxios";
 
 export const updateLocationState =(userId)=>{
     return new Promise((resolve,reject)=>{
-        axios.patch(`/user/location-state/${userId}`,info).then(res=>{
-            resolve(res);
+        axios.patch(`/user/location-state/${userId}`,{locationState:true}).then(res=>{
+            resolve(res.data.user);
         })
         .catch(err=>{reject(err)})
     })

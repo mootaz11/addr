@@ -3,7 +3,7 @@ import AuthContext from './AuthContext';
 import io  from 'socket.io-client';
 import {createConversation, getUserConversations,sendMessage,markAsreadConversation} from '../rest/conversationApi';
 import {getLocation,addLocation,updateLocation,addTemporarlyLocation} from '../rest/locationApi';
-import {getConnectedUser} from '../rest/userApi';
+import {getConnectedUser,updateLocationState} from '../rest/userApi';
 import {getUserActifOrders,getUserHistoryOrders,getUserActifDeliveries} from '../rest/ordersApi';
 
 
@@ -19,7 +19,7 @@ import AsyncStorage from '@react-native-community/async-storage'
       }
 
 export default  function AppContext(props){
-    const [socket, setSocket] = useState(io("http://192.168.1.7:3000"));
+    const [socket, setSocket] = useState(io("http://localhost:3000"));
     const [location,setLocation]=useState(null);
     const [user, setUser] = useState(null)
     const [historyOrders,setHistoryOrders] =useState([]);
@@ -30,7 +30,8 @@ export default  function AppContext(props){
     const [actifDeliveries,setActifDeliveries]=useState([]);
     const [historyDeliveries,setHistoryDeliveries]=useState([])
     const [darkMode,setDarkMode]=useState(false);
-    const token_init = localStorage.getItem("token") ; //getToken();   
+    const [locationState,setLocationState]=useState(false);
+    const token_init = localStorage.getItem("token") ;   //getToken();   //
     const [token,setToken]=useState(token_init)
     const [isloading,setIsloading]=useState(true);
 
@@ -39,8 +40,8 @@ export default  function AppContext(props){
             getConnectedUser().then(res=>{  
                 setDarkMode(false);
                 setUser(res.data.connectedUser);
+                setLocationState(res.data.connectedUser.locationState);
                 if(res.data.connectedUser.locationState){
-                    console.log(res.data.connectedUser.locationCode);
                     getLocation(res.data.connectedUser.locationCode).then(location=>{
                         setLocation(location);
                     }).catch(err=>{alert("error occured while setting Location")})
@@ -112,14 +113,22 @@ useEffect(()=>{
         if(conversations ){
             socket.on('send-message',(message)=>{
                 const _conversations = [...conversations];
+                console.log(_conversations);    
                     const conv_index =_conversations.findIndex(conv => {return conv._id == message.conversation});
                     if(conv_index >=0){
                          let _convReal = {..._conversations[conv_index]};
                          let notSeenMessages = [..._convReal.messages];
+                        
                          notSeenMessages.push(message);
+                         let notSeenSum = 0
+                         notSeenMessages.map(message=>{
+                            if(message.sender._id != user._id && message.seen.length==0){
+                                notSeenSum+=1;}})          
+
                           _convReal.messages=notSeenMessages
                           _conversations.splice(conv_index,1);
-                          _convReal.notSeen+=1;
+                          _convReal.notSeen=notSeenSum;
+                          console.log(_convReal);
                          _conversations.push(_convReal);
                      setConversations(_conversations)
                     }
@@ -130,6 +139,7 @@ useEffect(()=>{
                         if(message.sender._id != user._id && message.seen.length==0){
                         notSeenSum+=1;}})
                         conversation.notSeen=notSeenSum;
+                        console.log(conversation);
                        setConversations([conversation, ...conversations]);
             })
              }
@@ -144,10 +154,11 @@ useEffect(()=>{
                 let _conversations = [...conversations];
                 const index = _conversations.findIndex(conversation=>{return conversation._id ==_conv._id})                    
                 if(index>=0){
-                    _conversation_found = {..._conversations[index]};
+                    let _conversation_found = {..._conversations[index]};
                     _conversation_found.notSeen=0;
                     _conversations.splice(index,1);
-                    let _newConversations = [conversation_found,..._conversations];
+                    let _newConversations = [_conversation_found,..._conversations];
+                    console.log("neww",_newConversations);
                     setConversations(_newConversations)} 
             }).catch(err=>{console.log(err)});          
         }
@@ -223,44 +234,53 @@ useEffect(()=>{
 
 
     const modifyDarkModeHandler =()=>{
-        console.log("hhhhh");
         setDarkMode(darkMode=>!darkMode);
         
     }
     
     const LoginHandler = async ({ user, token }) => {
-         //await AsyncStorage.setItem('token', token);
+       //await AsyncStorage.setItem('token', token);
         localStorage.setItem("token",token);
         setToken(token);
         setUser(user);
     }
 
     const logoutHandler =  async () => {
-        localStorage.removeItem("token");
+         localStorage.removeItem("token");
         //await AsyncStorage.removeItem('token');
         setToken(null);
         setUser(null);
     }
 
     const updateUserLocation =(_location)=>{
-        console.log("hello")
         if(!location){
             addLocation(_location).then(loc=>{
                 console.log(loc);
-                setLocation(loc.location);
+                setLocation(loc);
             }).catch(err=>{console.log(err)})
         }
         else {
-            updateLocation(_location['location']).then(res=>{
-                setLocation(_location['location']);
-                alert(res)
+            updateLocation({location:_location['location']}).then(res=>{
+                setLocation({...location,location:_location['location']});
             })
             .catch(err=>{alert(err)})
         }
     }
+    const updateUserLocationState =(user_id)=>{
+        updateLocationState(user_id).then(user=>{
+            setLocationState(user.locationState)
+        }).catch(err=>alert("update location state failed"))
+        }
 
 
-
+    const handleTemporaryLocation = (loc,user_id)=>{  
+        addTemporarlyLocation(user_id,loc).then(_location=>{
+            setLocation({...location,temperarlyLocation:_location["temperarlyLocation"]})
+        })
+    }
+    const deleteTemprorayLocation = ()=>{
+        setLocation({...location,temperarlyLocation:null})
+    }
 
 return(
 <AuthContext.Provider value={{
@@ -268,8 +288,8 @@ return(
     user:user,
     socket:socket,
     conversations:conversations,
-    notSeenConversations:notSeenConversations,
     location:location,
+    locationState:locationState,
     LoginHandler:LoginHandler,
     openConversationHandler:openConversationHandler,
     logoutHandler:logoutHandler,
@@ -281,12 +301,13 @@ return(
     historyDeliveries:historyDeliveries,
     startNewConversation:startNewConversation,
     send_message:send_message,
-    seenConversations:seenConversations,
     handleConversation:handleConversation,
     markAsReadConversation:markAsReadConversation,
     updateUser:updateUser,
-    updateUserLocation:updateUserLocation
-
+    updateUserLocation:updateUserLocation,
+    updateUserLocationState:updateUserLocationState,
+    handleTemporaryLocation:handleTemporaryLocation,
+    deleteTemprorayLocation:deleteTemprorayLocation
 }
 }>
 

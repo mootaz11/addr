@@ -21,16 +21,7 @@ export default function Conversation(props) {
     
     
     
-    useEffect(() => {
-
-
-        if (conversation) {
-            context.markAsReadConversation(conversation._id);
-        }
-
-    }, [])
-
-
+    
 
     useEffect(() => {
         setDark(context.darkMode)
@@ -49,10 +40,6 @@ export default function Conversation(props) {
             setConversation(_conversation);
         }
     }, [context.conversations])
-
-
-
-
     const sendQrCode = () => {
         if (messages.length == 0) {
             const data = {
@@ -177,7 +164,9 @@ export default function Conversation(props) {
                         placeholder={"Type a message.."}
                         underlineColor={dark ? "#292929" : "white"}
                         underlineColorAndroid={dark ? "#292929" : "white"}
-
+                        onFocus={()=>{ if (conversation) {
+                            context.markAsReadConversation(conversation._id);
+                        }}}
                         //placeholderTextColor={"##919191"}
                         value={message}
                         onChangeText={(text) => { setMessage(text); }}

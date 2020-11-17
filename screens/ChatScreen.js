@@ -3,7 +3,6 @@ import { View, Text, StyleSheet,Platform,Image,TouchableOpacity} from 'react-nat
 import { Icon } from 'react-native-elements';
 import { ScrollView ,FlatList } from 'react-native-gesture-handler';
 import AuthContext from '../navigation/AuthContext';
-import _ from 'lodash';
 
 
 
@@ -11,8 +10,6 @@ export default function Chat({navigation}){
     const context = useContext(AuthContext);
     const [conversations,setConversations]=useState(context.conversations);
     const [user,setUser]=useState(context.user)
-    const [notSeenConversations,setnotSeenConversations] = useState(context.notSeenConversations);    
-    const [SeenConversations,setSeenConversations] = useState(context.seenConversations)
     const [dark,setDark]=useState(true);
 
 
@@ -39,33 +36,36 @@ return(
         <Icon color={"white"} style={{ flex: 1, padding: 0 }} name="menu" onPress={openDrawer} />
         <Text style={styles.Title}>Chat</Text>
      </View>
-        <ScrollView style={styles.friends}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          >
-           {
-               conversations ? 
-               conversations.map((conversation,key)=>{
-                   return (
-                    <View style={styles.friendContainer} key={key}>
-                        <TouchableOpacity onPress={()=>{checkConversation(conversation)}}>
+       
+        <View style={styles.friends}>
+
+       {conversations &&
+            <FlatList
+                data={conversations}
+                renderItem={({item})=>
+                    <View style={styles.friendContainer}>
+                        <TouchableOpacity onPress={()=>{checkConversation(item)}}>
                             <View  style={styles.headUserImageContainer}>
-                             <Image style={styles.headUserImage} source = {conversation.users[conversation.users.findIndex(u=>{return u._id != user._id})].photo ? {uri:conversation.users[conversation.users.findIndex(u=>{return u._id != user._id})].photo} : require('../assets/user_image.png')}/>
-                             <Text style={styles.friendHeadName}>{conversation.type=="personal" ? conversation.users[conversation.users.findIndex(u=>{return u._id != user._id})].firstName+" "+conversation.users[conversation.users.findIndex(u=>{return u._id != user._id})].lastName: conversation.lastName }</Text>
+                             <Image style={styles.headUserImage} source = {item.users[item.users.findIndex(u=>{return u._id != user._id})].photo ? {uri:item.users[item.users.findIndex(u=>{return u._id != user._id})].photo} : require('../assets/user_image.png')}/>
+                             <Text numberOfLines={1} style={styles.friendHeadName}>{item.type=="personal" ? item.users[item.users.findIndex(u=>{return u._id != user._id})].firstName: item.lastName }</Text>
+                             <Text numberOfLines={1} style={styles.friendHeadName}>{item.type=="personal" ?  item.users[item.users.findIndex(u=>{return u._id != user._id})].lastName.length>8 ? item.users[item.users.findIndex(u=>{return u._id != user._id})].lastName.substring(0,8)+".." :item.users[item.users.findIndex(u=>{return u._id != user._id})].lastName : item.lastName }</Text>
+                            
                             </View>
                         </TouchableOpacity>
                     </View>
-                   )
-               })
-               :null
-           }
+                
+            }
+            keyExtractor={item => item._id}
+            />
+            
+       }      
+            </View>
+           
 
             
 
-        </ScrollView>
      <View style={dark ? styles.conversationsDark :styles.conversations}>
          <View style={styles.convContainer} >
-                 <View style={styles.conversationImagecontainer}>
                  {conversations ? 
                  <FlatList
                     data={conversations}
@@ -103,7 +103,6 @@ return(
         </View>
      </View>
 
-</View>
 )
 
         }
@@ -190,7 +189,8 @@ seenNumber:{
             justifyContent: "center",
             alignContent:"center",
             flexDirection: "column",
-            flexWrap:"wrap",
+            width:100,
+            height:120,
             overflow: "hidden",
             margin:8,
         },
@@ -215,7 +215,8 @@ seenNumber:{
                 ,fontSize:15,
                 marginVertical:"1%",
                 fontWeight:"100",
-                letterSpacing:1
+                letterSpacing:1,
+                textAlign:"center"
                 
             },
             convContainer:{

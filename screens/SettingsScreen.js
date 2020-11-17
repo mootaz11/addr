@@ -25,7 +25,7 @@ export default function Settings({navigation}){
     const [dark,setDark]=useState(context.darkMode);
     const [userImage,setUserImage] = useState(null);
     const [enabledKeyBoard,setEnabledKeyBoard]=useState(false);
-  
+    const [newpassword,setNewPassword]=useState("");
     useEffect(()=>{
       setDark(context.darkMode);
     },[context.darkMode])
@@ -39,8 +39,18 @@ export default function Settings({navigation}){
         {setEditUsername(true);}
         else {
             updateInfo({username:user.username}).then(res=>{
-                alert(res.data.message);
-        }).catch(err=>{alert(err.message)})
+                Alert.alert(
+                    "",
+                    res.data.message,
+                    [
+                      
+                      { text: "OK", onPress: () => console.log("OK Pressed") }
+                    ],
+                    { cancelable: false }
+                  );
+                
+                
+            }).catch(err=>{alert("update failed")})          
        
         setEditEmail(false);
                 setEditUsername(false)
@@ -52,8 +62,15 @@ export default function Settings({navigation}){
         }
         else {
             updateInfo({email:user.email}).then(res=>{
-                    alert(res.data.message);
-            }).catch(err=>{alert(err.message)})
+                Alert.alert(
+                    "",
+                    res.data.message,
+                    [
+                      
+                      { text: "OK", onPress: () => console.log("OK Pressed") }
+                    ],
+                    { cancelable: false }
+                  );                }).catch(err=>{alert("update failed")})          
            
             setEditEmail(false);
         
@@ -66,11 +83,34 @@ export default function Settings({navigation}){
         if(!editPassword){
             setEditPassword(true)
 
+
         }
         else {
-            //update user
-            console.log(user);
-            setEditPassword(false);
+            if(newpassword.length>=8){
+                console.log(newpassword)
+                updatePassword({newPassword:newpassword}).then(res=>{
+                    Alert.alert(
+                        "",
+                        "password updated !",
+                        [
+                          
+                          { text: "OK", onPress: () => console.log("OK Pressed") }
+                        ],
+                        { cancelable: false }
+                      );                    
+                      setNewPassword("");
+
+    
+                }).catch(err=>{alert("update failed")})          
+                setEditPassword(false);
+            }
+            else {
+                alert("your password is weak");
+                setEditPassword(false);
+                setNewPassword("");
+
+            }
+           
         }
     }
     const changetoTextInputLocation =()=>{
@@ -184,7 +224,7 @@ export default function Settings({navigation}){
 
 
                { !editUsername &&<Text style={dark ? styles.userInfoDark :styles.userInfo}>{user.username}</Text>}
-                 {editUsername && <TextInput  style={dark ? styles.userInfoInputDark :styles.userInfoInput} value={user.username} onChangeText={(text)=>setUser({username:text,email:user.email,password:user.password,address:user.address})} />} 
+                 {editUsername && <TextInput  style={dark ? styles.userInfoInputDark :styles.userInfoInput} value={user.username} onChangeText={(text)=>setUser({...user,username:text})} />} 
                 <TouchableOpacity style={styles.buttonEdit} onPress={changetoTextInputUsername}>
                    { !editUsername && <Image style={styles.edit}  source={require("../assets/edit.png") }/>}
                    { editUsername && <Image style={styles.edit}  source={require("../assets/done.png") }/>}
@@ -211,7 +251,7 @@ export default function Settings({navigation}){
                 <View style={dark ? styles.infoDark :styles.info}>
                 <Image style={styles.infoImage} source={require("../assets/passwordProfile.png")}/>
                 {!editPassword&&<Text style={dark ? styles.userInfoDark :styles.userInfo}>*********</Text>}
-                {editPassword && <TextInput style={dark ? styles.userInfoInputDark :styles.userInfoInput} value={""}  onChangeText={(text)=>setUser({...user,password:text})}  />} 
+                {editPassword && <TextInput secureTextEntry={true} style={dark ? styles.userInfoInputDark :styles.userInfoInput} value={newpassword}  onChangeText={(text)=>setNewPassword(text)}  />} 
                 <TouchableOpacity style={styles.buttonEdit} onPress={changetoTextInputPassword}>
                 { !editPassword && <Image style={styles.edit}  source={require("../assets/edit.png") }/>}
                    { editPassword && <Image style={styles.edit}  source={require("../assets/done.png") }/>}
@@ -222,7 +262,7 @@ export default function Settings({navigation}){
                 <View style={dark ? styles.infoDark :styles.info}>
                 <Image style={styles.infoImage} source={require("../assets/locationProfile.png")}/>
                 {!editlocation &&<Text style={dark ? styles.userInfoDark :styles.userInfo}>{user.address}</Text>}
-                {editlocation && <TextInput  style={dark ? styles.userInfoInputDark :styles.userInfoInput} value={user.address} onChangeText={(text)=>setUser({address:text,email:user.email,username:user.username,password:user.password})}  />} 
+                {editlocation && <TextInput  style={dark ? styles.userInfoInputDark :styles.userInfoInput} value={user.address} onChangeText={(text)=>setUser({...user,address:text})}  />} 
                 <TouchableOpacity style={styles.buttonEdit} onPress={changetoTextInputLocation}>
                 { !editlocation && <Image style={styles.edit}  source={require("../assets/edit.png") }/>}
                    { editlocation && <Image style={styles.edit}  source={require("../assets/done.png") }/>}

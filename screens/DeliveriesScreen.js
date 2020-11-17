@@ -74,7 +74,7 @@ export default function Deliveries(props)
                 setHistoryDeliveries(actifDeliveries.filter(delivery=>deliveryToClose._id != delivery._id));
                 setHistoryDeliveries(historyDeliveries=>[...historyDeliveries,deliveryToClose]);
                 })
-                .catch(err=>{alert(err.message)}) 
+                .catch(err=>{alert("close operation failed")}) 
         }
     
     
@@ -86,9 +86,8 @@ export default function Deliveries(props)
                 alert(res.data.message);
                 setHistoryDeliveries(historyDeliveries.filter(delivery=>deliveryToDelete._id != delivery._id));
     
-            }).catch(err=>{
-                alert(err.message);
-            })
+            }).catch(err=>{alert("delete operation failed")}) 
+
     
         }
         const startConversation = (order)=>{
@@ -100,7 +99,8 @@ export default function Deliveries(props)
             deletedelivery(deliveryToDelete._id).then(res=>{
                 alert(res.data.message);
                 setActifDeliveries(actifDeliveries.filter(delivery=>deliveryToDelete._id != delivery._id));
-            }).catch(err=>{alert(err.message)})
+            }).catch(err=>{alert("delete operation failed")}) 
+
         }
 
         
