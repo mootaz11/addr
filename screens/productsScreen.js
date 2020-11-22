@@ -27,8 +27,8 @@ export default function Products(props){
     const goBack = ()=> {
         props.navigation.navigate("gender")
     }
-    const checkBrand=(value)=>{
-        props.navigation.navigate("singleBrand",{partner:value})
+    const checkSingleProduct=(value)=>{
+        props.navigation.navigate("singleProduct",{product:value})
     }
         
     return(
@@ -55,7 +55,7 @@ export default function Products(props){
                     data={products}
                     numColumns={2}
                     renderItem={({item})=>
-                    <TouchableOpacity style={{width:"45%",height:250,margin:8,}} onPress={()=>{checkBrand(item)}} onMagicTap={()=>{setmagicTap(magictap=>!magictap)}}>
+                    <TouchableOpacity style={{width:"45%",height:250,margin:8,}} onPress={()=>{checkSingleProduct(item)}} onMagicTap={()=>{setmagicTap(magictap=>!magictap)}}>
                     <View style={ magictap ? styles.partnerContainerTapped : styles.partnerContainer} >
                         <Image style={styles.partnerImage} source={item.image}/>    
                         <View style={styles.productinfo}>

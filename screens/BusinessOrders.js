@@ -9,8 +9,9 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
 const order_pipeline = [
     { step: "Order placed", _id: "1" },
-    { step: "Order during delivery", _id: "2" },
-    { step: "Historique", _id: "3" },
+    { step: "waiting order", _id: "2" },
+    { step: "Order to Deliver", _id: "3" },
+    { step: "Order to Deliver", _id: "4" },
 ];
 
 const placedorder_data = [
@@ -66,7 +67,7 @@ const historique = [
 
 ]
 
-export default function Orders(props) {
+export default function  BusinessOrders (props) {
     const context = React.useContext(AuthContext);
     const [placedOrdersData, setPlacedOrdersData] = useState(context.actifOrders);
     const [historyOrdersData, setHistoryOrdersData] = useState(context.historyOrders);

@@ -16,6 +16,12 @@ import Brand from '../screens/brandScreen';
 import SingleBrand from '../screens/singleBrand';
 import genderCategory from '../screens/genderScreen';
 import Products from '../screens/productsScreen';
+import SingleProduct from '../screens/SingleProduct';
+import bag from '../screens/bagScreen';
+import deliveryAdress from '../screens/DeliveryAdress';
+import orderReview from '../screens/orderReview';
+import foodProduct from '../screens/FoodProduct';
+import BusinessOrders from '../screens/BusinessOrders';
 
 
 
@@ -76,6 +82,12 @@ return(
             <drawerStack.Screen name ="singleBrand" component={SingleBrand}/>
             <drawerStack.Screen name="gender" component={genderCategory}/>
             <drawerStack.Screen name="products" component={Products}/>
+            <drawerStack.Screen name="singleProduct" component={SingleProduct}/>
+            <drawerStack.Screen name="bag" component={bag}/>
+            <drawerStack.Screen name="deliveryAdress" component={deliveryAdress}/>
+            <drawerStack.Screen name="orderReview" component={orderReview}/>
+            <drawerStack.Screen name="food" component={foodProduct}/>
+            <drawerStack.Screen name="businessorders" component={BusinessOrders}/>
 
           </drawerStack.Navigator>
         
