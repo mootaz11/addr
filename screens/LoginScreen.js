@@ -54,7 +54,7 @@ export default function Login  (props)  {
     
     useEffect(() => {
         if(!context.isloading && context.user){
-            props.navigation.navigate("orders");
+            props.navigation.navigate("addProduct");
         }
     },[context.user,context.isloading])
 

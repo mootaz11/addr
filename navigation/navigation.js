@@ -21,7 +21,13 @@ import bag from '../screens/bagScreen';
 import deliveryAdress from '../screens/DeliveryAdress';
 import orderReview from '../screens/orderReview';
 import foodProduct from '../screens/FoodProduct';
-import BusinessOrders from '../screens/BusinessOrders';
+import BusinessOrders from '../screens/business/BusinessOrders';
+
+import BusinessDashboardScreen from '../screens/business/BusinessDashboardScreen';
+import ListProductsScreen from '../screens/business/ListProductsScreen';
+import DeliveryDashboardScreen from '../screens/business/DeliveryDashboardScreen';
+import AddProductScreen from '../screens/business/AddProductScreen';
+
 
 
 
@@ -87,10 +93,13 @@ return(
             <drawerStack.Screen name="deliveryAdress" component={deliveryAdress}/>
             <drawerStack.Screen name="orderReview" component={orderReview}/>
             <drawerStack.Screen name="food" component={foodProduct}/>
-            <drawerStack.Screen name="businessorders" component={BusinessOrders}/>
 
+            <drawerStack.Screen name="businessorders" component={BusinessOrders}/>
+            <drawerStack.Screen name="businessDash" component={BusinessDashboardScreen}/>
+            <drawerStack.Screen name="addProduct" component={AddProductScreen}/>
+            <drawerStack.Screen name="listProducts" component={ListProductsScreen}/>
+            <drawerStack.Screen name="deliveryDash" component={DeliveryDashboardScreen}/>
           </drawerStack.Navigator>
-        
       </NavigationContainer>
 
 

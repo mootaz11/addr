@@ -1,21 +1,44 @@
-import axios from 'axios';
-import AuthContext from '../navigation/AuthContext'
-import AsyncStorage from '@react-native-community/async-storage';
+import axios from 'axios'
+import AsyncStorageService from '../rest/AsyncStorageService'
+const production = false;
+const host = production ? 'https://addresti-back-end.herokuapp.com' : 'http://localhost:3000'
+const custom_axios = axios.create({
+    baseURL: host,
 
-// 192.168.1.7
-const custom_axios =  axios.create({
-    baseURL:   "http://localhost:3000"   //'https://addresti-back-end.herokuapp.com'   
 })
 
-custom_axios.interceptors.request.use(async config => {
-  const token =    localStorage.getItem('token')  // //await AsyncStorage.getItem('token') 
-  if (token) {
-    config.headers.Authorization = token
-  }
-  return config
+custom_axios.interceptors.request.use(
+    config => {
+        const accessToken = AsyncStorageService.getAccessToken();
+        if (accessToken) {
+            config.headers['Authorization'] = 'Bearer ' + accessToken;
+        }
+        return config;
+    },
+    error => {
+        Promise.reject(error)
+    });
+custom_axios.interceptors.response.use((response) => {
+    return response
 },
-error => {
-  return Promise.reject(error)
-})
+    function (error) {
+        const originalRequest = error.config;
+        if (error.response.status === 401 && !originalRequest._retry) {
+            originalRequest._retry = true;
+            return axios.post(`${host}/user/token`, { refreshToken: AsyncStorageService.getRefreshToken() })
+                .then(res => {
+                    if (res.status === 200) {
+                        // 1) put token to LocalStorage
+                        AsyncStorageService.setAccessToken(res.data.accessToken);
 
-export default custom_axios ;
+                        // 2) Change Authorization header
+                        axios.defaults.headers.common['Authorization'] = 'Bearer ' + AsyncStorageService.getAccessToken();
+
+                        // 3) return originalRequest object with Axios.
+                        return axios(originalRequest);
+                    }
+                })
+        } else return Promise.reject(error)
+    });
+
+export default custom_axios;

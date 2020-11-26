@@ -1,40 +1,23 @@
 import React, { useState,useEffect } from 'react'
 import AuthContext from './AuthContext';
 import io  from 'socket.io-client';
+import AsyncStorageService from '../rest/AsyncStorageService'
 import {createConversation, getUserConversations,sendMessage,markAsreadConversation} from '../rest/conversationApi';
 import {getLocation,addLocation,updateLocation,addTemporarlyLocation} from '../rest/locationApi';
 import {getConnectedUser,updateLocationState} from '../rest/userApi';
 import {getUserActifOrders,getUserHistoryOrders,getUserActifDeliveries} from '../rest/ordersApi';
 
-
-import AsyncStorage from '@react-native-community/async-storage'
-  const getToken = async () => {
-        let token = '';
-        try {
-          token = await AsyncStorage.getItem('token') || 'none';
-        } catch (error) {
-          console.log(error.message);
-        }
-        return token;
-      }
-
 export default  function AppContext(props){
     const [socket, setSocket] = useState(io("http://localhost:3000"));
     const [location,setLocation]=useState(null);
     const [user, setUser] = useState(null)
-    const [historyOrders,setHistoryOrders] =useState([]);
-    const [actifOrders,setActifOrders]=useState([]);
     const [conversations,setConversations]=useState(null);
-    const [notSeenConversations,setNotSeenConversations]=useState([]);
-    const [seenConversations,setSeenConversations]=useState([]);
-    const [actifDeliveries,setActifDeliveries]=useState([]);
-    const [historyDeliveries,setHistoryDeliveries]=useState([])
     const [darkMode,setDarkMode]=useState(false);
     const [locationState,setLocationState]=useState(false);
-    const token_init = localStorage.getItem("token") ;   //getToken();   //
+    const token_init = AsyncStorageService.getAccessToken();
     const [token,setToken]=useState(token_init)
     const [isloading,setIsloading]=useState(true);
-
+    
     useEffect(() => {
         if (token) {
             getConnectedUser().then(res=>{  
@@ -79,31 +62,7 @@ useEffect(()=>{
 
 
 
-    useEffect(()=>{
-        if(user){
-            console.log("use effect 1");
-
-            getUserActifOrders(user._id).then(res=>{
-                setActifOrders(res.data.orders)
-            }).catch(err=>{console.log(err)})
-        
-            getUserHistoryOrders(user._id).then(res=>{
-                setHistoryOrders(res.data.orders)
-            }).catch(err=>{console.log(err.message)})
-        
-        
-            getUserActifDeliveries(user._id).then(res=>{
-                setActifDeliveries(res.data.orders)
-            }).catch(err=>{console.log(err)})
-        
-            getUserHistoryOrders(user._id).then(res=>{
-                setHistoryDeliveries(res.data.orders)
-            }).catch(err=>{console.log(err.message)})
-
-        }
-    },[user])
-
-
+   
 //markasread-conversation
 
 
@@ -239,15 +198,13 @@ useEffect(()=>{
     }
     
     const LoginHandler = async ({ user, token }) => {
-       //await AsyncStorage.setItem('token', token);
-        localStorage.setItem("token",token);
+        AsyncStorageService.setToken(token);
         setToken(token);
         setUser(user);
     }
 
     const logoutHandler =  async () => {
-         localStorage.removeItem("token");
-        //await AsyncStorage.removeItem('token');
+        AsyncStorageService.clearToken();
         setToken(null);
         setUser(null);
     }
@@ -295,10 +252,6 @@ return(
     logoutHandler:logoutHandler,
     modifyDarkModeHandler:modifyDarkModeHandler,
     isloading:isloading,
-    actifOrders:actifOrders,
-    historyOrders:historyOrders,
-    actifDeliveries:actifDeliveries,
-    historyDeliveries:historyDeliveries,
     startNewConversation:startNewConversation,
     send_message:send_message,
     handleConversation:handleConversation,

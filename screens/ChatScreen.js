@@ -12,7 +12,6 @@ export default function Chat({navigation}){
     const [user,setUser]=useState(context.user)
     const [dark,setDark]=useState(true);
 
-
     useEffect(()=>{
         setDark(context.darkMode)
         setConversations(context.conversations);

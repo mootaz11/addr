@@ -7,10 +7,11 @@ import {Picker} from'@react-native-community/picker'
 export default function SingleProduct(props){
     const [selectedColor, setSelectedColor] = useState("");
     const [selectedSize, setSelectedSize] = useState("");
+    const [dark,setDark]=useState(true)
    const checkBag = ()=>{
        console.log(selectedSize);
        console.log(selectedColor);
-       props.navigation.navigate("bag");
+       props.navigation.navigate("bag",{product:props.route.params.product});
    }
 
     const goBack = ()=>{
@@ -18,7 +19,7 @@ export default function SingleProduct(props){
     }
 
 return(
-    <View style={ styles.container}>
+    <View style={ dark ? styles.containerDark : styles.container}>
 
 
 
@@ -30,21 +31,21 @@ return(
         </TouchableOpacity>
         <FontAwesome color={"black"} style={{ padding: 0, fontSize: 24, position: "absolute", top: "5%", right: "2%" }} name="shopping-bag" />
     </View>
-    <View style={styles.productBodyContainer}>
+    <View style={ dark ? styles.productBodyContainerDark : styles.productBodyContainer}>
         <View style={styles.productInfo}>
         <View style={styles.productTitle}>
-        <Text style={{fontSize:28,fontWeight:"600"}}>{props.route.params.product.name}</Text>
+        <Text style={dark ? {fontSize:28,fontWeight:"600",color:"white"}:{fontSize:28,fontWeight:"600"}}>{props.route.params.product.name}</Text>
         </View>
         <View style={styles.productDetails}>
-        <Text style={{fontSize:14,fontWeight:"100"}}>322/0495 - WHITE</Text>
+        <Text style={dark  ? {fontSize:14,fontWeight:"100",color:"white"}:{fontSize:14,fontWeight:"100"}}>322/0495 - WHITE</Text>
         </View>
         <View style={styles.productDescription}>
-            <Text style={{fontSize:14,fontWeight:"100"}}>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et 
+            <Text style={dark ?{fontSize:14,fontWeight:"100",color:"white"}: {fontSize:14,fontWeight:"100"}}>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et 
             dolore magna aliqua. Ut enim ad minim veniam, quis nostrud </Text>
         </View>
         </View>
     </View>
-    <View style={styles.productValues}>
+    <View style={dark ? styles.productValuesDark : styles.productValues}>
         <View style={styles.colorAndSize}>
         <Picker
         selectedValue={selectedColor}
@@ -69,10 +70,10 @@ return(
         </View>
         <View style={styles.cost}>
             <View >
-                <Text style={{fontSize:20,fontWeight:"600"}}>Cost</Text>
+                <Text style={dark ?  {fontSize:20,fontWeight:"600",color:"white"}:{fontSize:20,fontWeight:"600"}}>Cost</Text>
             </View>
             <View >
-                <Text style={{fontSize:20,fontWeight:"600"}}>129,99TND</Text>
+                <Text style={dark ?  {fontSize:20,fontWeight:"600",color:"white"}:{fontSize:20,fontWeight:"600"}}>129,99TND</Text>
             </View>
         </View>
 
@@ -110,6 +111,12 @@ const styles = StyleSheet.create({
         backgroundColor: "#2474F1",
   
     },
+    addButtonDark:{
+        backgroundColor:"#121212",
+        height:"80%",
+        width:"94%",
+        borderRadius:8,
+    },
     cost:{
         height:"30%",
         marginVertical:6,
@@ -130,6 +137,12 @@ const styles = StyleSheet.create({
         height:"18%",
         width:"100%",
         backgroundColor:"#F2F6FF",
+    },
+    productValuesDark:{
+        height:"18%",
+        width:"100%",
+        backgroundColor:"#121212"
+
     },
     productInfo:{
         height:"100%"
@@ -158,6 +171,8 @@ flex: 1,
 flexDirection: "column",
 height: Dimensions.get("window").height,
 width: Dimensions.get("window").width,
+backgroundColor:"#121212",
+
 },
 
 
@@ -178,6 +193,14 @@ productBodyContainer:{
     height:"30%",
     width:"100%",
     backgroundColor:"white"
+
+},
+productBodyContainerDark:{
+    height:"28%",
+    width:"100%",
+    backgroundColor:"#121212"
+    
+    
 
 },
 

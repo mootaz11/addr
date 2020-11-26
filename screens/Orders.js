@@ -1,11 +1,15 @@
+
+// Linking.openURL(url);
+
 import React, { useState, useEffect } from 'react'
-import { View, Text, StyleSheet, Platform, TouchableOpacity, Image, TextInput, ScrollView } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native'
 import { Icon } from 'react-native-elements';
 import AuthContext from '../navigation/AuthContext';
-import { close_order, deleteOrder } from "../rest/ordersApi";
 import _ from 'lodash';
 import { FlatList } from 'react-native-gesture-handler';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import {getClientOrders,markOrderAsReceived} from "../rest/ordersApi"
+
 
 const order_pipeline = [
     { step: "Order placed", _id: "1" },
@@ -13,63 +17,12 @@ const order_pipeline = [
     { step: "Historique", _id: "3" },
 ];
 
-const placedorder_data = [
-    {
-        nomLivreur: "sara sara ",
-        productname: "zgougou",
-        Date: "11.08.2020",
-        _id: "1"
-    },
-    {
-        nomLivreur: "sara sara ",
-        productname: "zgougou",
-        Date: "11.08.2020", _id: "2"
-    },
-    {
-        nomLivreur: "sara sara ",
-        productname: "zgougou",
-        Date: "11.08.2020",
-        _id: "3"
-    },
-    {
-        nomLivreur: "sara sara ",
-        productname: "zgougou",
-        Date: "11.08.2020", _id: "4"
-    }
-]
-
-
-const order_during_deliv = [
-
-    {
-        nomLivreur: "sara sara ",
-        productname: "zgougou",
-        Date: "11.08.2020", _id: "2"
-    },
-    {
-        nomLivreur: "sara sara ",
-        productname: "zgougou",
-        Date: "11.08.2020",
-        _id: "3"
-    },
-
-]
-const historique = [
-
-    {
-        nomLivreur: "sara sara ",
-        productname: "zgougou",
-        Date: "11.08.2020", _id: "2"
-    },
-
-
-
-]
 
 export default function Orders(props) {
     const context = React.useContext(AuthContext);
-    const [placedOrdersData, setPlacedOrdersData] = useState(context.actifOrders);
-    const [historyOrdersData, setHistoryOrdersData] = useState(context.historyOrders);
+
+    const [placedOrdersData, setPlacedOrdersData] = useState([]);
+    const [historyOrdersData, setHistoryOrdersData] = useState([]);
     const [orderDuringDeliveryData, setOrderDuringDeliveryData] = useState([]);
 
     const [checkedStep, setCheckedStep] = useState(order_pipeline[0])
@@ -77,18 +30,44 @@ export default function Orders(props) {
     const [orderPlaced, setOrderPlaced] = useState(true);
     const [orderDuringDelivery, setOrderDuringDelivery] = useState(false);
     const [history, setHistory] = useState(false);
-    const [Done, setDone] = useState(false);
 
 
-    const [dark, setDark] = useState(context.darkMode);
-    const [search, setSearch] = useState("");
-    const [searchResult, setSearchResult] = useState(context.historyOrders);
+    const [dark, setDark] = useState(true);
+
+    useEffect(()=>{
+        getClientOrders().then(orders=>{
+            let _placedOrders =[];
+            let _orderDuringDelivery=[];
+            let _historyOrders = [];
+            if(orders.length>0){
+                orders.map(order=>{
+                    if(order.actif==true && order.taked==false && order.prepared==false){
+                        _placedOrders.push(order);
+                    }
+                    if(order.actif==true && order.taked==true && order.prepared==true)
+                    {
+                        _orderDuringDelivery.push(order);
+                    }
+                    if(order.actif==false){
+                        _historyOrders.push(order);
+                    }
+                })
+            }
+        
+            setHistoryOrdersData(_historyOrders);
+            setPlacedOrdersData(_placedOrders);
+            setOrderDuringDeliveryData(_orderDuringDelivery);
 
 
-    useEffect(() => {
+        }).catch(err=>{
+            alert(err.message);
+        })
+    },[])
+
+/*    useEffect(() => {
         setDark(context.darkMode);
     }, [context.darkMode])
-
+*/
 
     const openDrawer = () => {
         props.navigation.openDrawer();
@@ -105,7 +84,11 @@ export default function Orders(props) {
     // }
 
     const orderDone = (item) => {
-        setDone(true);
+        markOrderAsReceived(item._id).then(res=>{
+            item.actif=false;
+            setOrderDuringDeliveryData(orderDuringDeliveryData.filter(order=>order._id!=item._id));
+            setHistoryOrdersData(historyOrdersData=>[item,...historyOrdersData])
+        })
     }
 
     const checkStep = (item) => {
@@ -131,15 +114,15 @@ export default function Orders(props) {
 
 
     return (
-        <View style={styles.container}>
-            <View style={styles.menu}>
+        <View style={ dark ? styles.containerDark : styles.container}>
+            <View style={dark ? styles.menuDark :  styles.menu}>
                 <TouchableOpacity style={styles.leftArrowContainer}>
                     <View >
-                        <Icon color={"#2474F1"} style={{ flex: 1, padding: 0 }} name="menu" onPress={openDrawer} />
+                        <Icon color={ dark ? "white" : "#2474F1"} style={{ flex: 1, padding: 0 }} name="menu" onPress={openDrawer} />
                     </View>
                 </TouchableOpacity>
                 <View style={styles.titleContainer}>
-                    <Text style={styles.Title}>Commande</Text>
+                    <Text style={dark ? styles.TitleDark : styles.Title}>Commande</Text>
                 </View>
 
             </View>
@@ -148,13 +131,11 @@ export default function Orders(props) {
                     data={order_pipeline}
                     numColumns={2}
                     renderItem={({ item }) =>
-                        <TouchableOpacity style={checkedStep && item._id == checkedStep._id ? styles.stepChecked : styles.step} onPress={() => checkStep(item)}>
+                        <TouchableOpacity style={checkedStep && item._id == checkedStep._id ? styles.stepChecked : (dark ? styles.stepDark :styles.step)} onPress={() => checkStep(item)}>
                             <View style={{ width: "100%", height: "100%", flexDirection: "column", justifyContent: "center", alignItems: "center", }}>
-                                <Text style={checkedStep && item._id == checkedStep._id ? { color: "white", fontSize: 15, textAlign: "center" } : { color: "black", fontSize: 15, textAlign: "center" }}>{item.step}</Text>
+                                <Text style={checkedStep && item._id == checkedStep._id ? { color: "white", fontSize: 15, textAlign: "center" } : (dark ?  {color: "white", fontSize: 15, textAlign: "center"} :{color: "black", fontSize: 15, textAlign: "center"} )}>{item.step}</Text>
                             </View>
                         </TouchableOpacity>
-
-
                     }
                     keyExtractor={item => item._id}
                 >
@@ -165,17 +146,17 @@ export default function Orders(props) {
             <View style={styles.ordersContainer}>
 
                 <FlatList
-                    data={orderPlaced ? placedorder_data : orderDuringDelivery ? order_during_deliv : history ? historique : null}
+                    data={orderPlaced ? placedOrdersData : orderDuringDelivery ? orderDuringDeliveryData : history ? historyOrdersData : null}
                     renderItem={({ item }) =>
                     <TouchableOpacity>
-                        <View style={styles.delivery} >
+                        <View style={dark ? styles.deliveryDark : styles.delivery} >
                             <View style={styles.clientImageContainer}>
                                 <Image style={{ width: "80%", height: "80%", resizeMode: "contain" }} source={require("../assets/mootaz.jpg")} />
                             </View>
                             <View style={styles.deliveryInfo}>
-                                <Text style={styles.info}>Nom de Livreur: {item.nomLivreur} </Text>
-                                <Text style={styles.info}>Nom de Produit: {item.productname} </Text>
-                                <Text style={styles.info}>Date: {item.Date}</Text>
+                                <Text style={dark ? styles.infoDark :styles.info}>Nom de Livreur: {item.deliverer.firstName +" "+item.deliverer.lastName} </Text>
+                                <Text style={dark ? styles.infoDark :styles.info}>Numero Telephone:  {item.deliverer.phone ?item.deliverer.phone :"no phone yet"} </Text>
+                                <Text style={dark ? styles.infoDark :styles.info}>Date: {item.date.split('T')[0]}</Text>
                                 {   history &&
                                     <TouchableOpacity>
                                         <Text style={{ fontSize: 12, fontWeight: "600", color: "#2474F1", textDecorationLine: "underline" }}>your opinion about the product</Text>
@@ -191,7 +172,7 @@ export default function Orders(props) {
                                     <View style={{ width: "25%", height: "100%", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
 
                                         <TouchableOpacity onPress={() => { orderDone(item) }}>
-                                            <FontAwesome color={Done ? "#4BB543" : "#cccccc"} style={{ padding: 0, fontSize: 30, }} name="check" />
+                                            <FontAwesome color={ "#4BB543" } style={{ padding: 0, fontSize: 30, }} name="check" />
 
                                         </TouchableOpacity>
 
@@ -233,6 +214,11 @@ const styles = StyleSheet.create({
         fontSize: 12,
         fontWeight: "600"
     },
+    infoDark:{
+        fontSize: 12,
+        fontWeight: "600",
+        color:"white"
+    },
     clientImageContainer: {
         width: "15%",
         height: "100%",
@@ -257,6 +243,20 @@ const styles = StyleSheet.create({
 
 
     },
+    deliveryDark:{
+        backgroundColor:"#292929",
+        width: "100%",
+        height: 80,
+        shadowColor: "grey",
+        shadowOffset: { width: 1, height: 1 },
+        shadowOpacity: 0.1,
+        flexDirection: "row",
+        flexWrap: 'wrap',
+        justifyContent: "flex-start",
+        borderRadius: 12,
+        marginVertical: 6,
+
+    },
     crud: {
         width: "60%",
         height: "100%",
@@ -275,6 +275,13 @@ const styles = StyleSheet.create({
         backgroundColor: "white",
         margin: 6
     },
+    stepDark:{
+        backgroundColor:"#292929",
+        width: "45%",
+        height: 40,
+        borderRadius: 14,
+        margin: 6
+    },
     stepChecked: {
         width: "45%",
         height: 40,
@@ -290,10 +297,24 @@ const styles = StyleSheet.create({
         flexDirection: "column",
 
     },
+
+    containerDark:{
+        backgroundColor: "#121212",
+        width: "100%",
+        height: "100%",
+        flexDirection: "column",
+    },
     menu: {
         width: "100%",
         height: "8%",
         backgroundColor: "white",
+        flexDirection: "row",
+        marginBottom: 8
+    },
+    menuDark:{
+        width: "100%",
+        height: "8%",
+        backgroundColor: "#121212",
         flexDirection: "row",
         marginBottom: 8
     },
@@ -319,6 +340,12 @@ const styles = StyleSheet.create({
     Title: {
         fontWeight: "700",
         fontSize: 28
+    },
+    TitleDark:{
+        fontWeight: "700",
+        fontSize: 28,
+        color:"white"
+        
     },
     headerElements: {
         width: "94%",

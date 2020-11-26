@@ -18,13 +18,13 @@ const newArrivals = [
 ];
 export default function SingleBrand(props) {
     const context = useContext(AuthContext)
-    const [darkmode, setDarkmode] = useState(true);
+    const [dark, setDark] = useState(true);
     const [magictap, setmagicTap] = useState(false)
 
-    useEffect(() => {
+   /* useEffect(() => {
         setDarkmode(context.darkMode)
     }, [context.darkMode])
-
+*/
     const goBack = () => {
         props.navigation.navigate("brand")
     }
@@ -33,7 +33,7 @@ export default function SingleBrand(props) {
         props.navigation.navigate("gender",{gender:item.name})
     }
     return (
-        <View style={!darkmode ? styles.container : styles.containerDark}>
+        <View style={!dark ? styles.container : styles.containerDark}>
 
 
 
@@ -79,12 +79,12 @@ export default function SingleBrand(props) {
             <View style={styles.newArrivals}>
                 <View style={styles.newArrivalsHeader}>
                     <View style={{ marginLeft: 5 }}>
-                        <Text style={{ fontSize: 24, color: "black", fontWeight: "500" }}>New Arrivals</Text>
+                        <Text style={dark ? { fontSize: 24, color: "white", fontWeight: "500" }:{ fontSize: 24, color: "black", fontWeight: "500" }}>New Arrivals</Text>
                     </View>
                     <TouchableOpacity>
                         <View style={{ flexDirection: "row", alignItems: "center", alignContent: "center", justifyContent: "space-between", marginRight: 5 }}>
-                            <Text style={{ fontSize: 15, color: "black" }}>show all</Text>
-                            <FontAwesome color={"black"} style={{ marginHorizontal: 3, fontSize: 15 }} name="caret-right" onPress={showall} />
+                            <Text style={dark ? { fontSize: 15, color: "white" }:{ fontSize: 15, color: "black" }}>show all</Text>
+                            <FontAwesome color={dark ? "white":"black"} style={{ marginHorizontal: 3, fontSize: 15 }} name="caret-right" onPress={showall} />
 
 
                         </View>
@@ -96,9 +96,9 @@ export default function SingleBrand(props) {
                         horizontal
                         renderItem={
                             ({ item }) =>
-                                <View style={styles.product}>
+                                <View style={dark ? styles.productDark :styles.product}>
                                     <Image style={styles.productImage} source={item.image} />
-                                    <Text style={styles.productTitle}>{item.name}</Text>
+                                    <Text style={dark ? styles.productTitleDark: styles.productTitle}>{item.name}</Text>
                                     <Text style={styles.price}>{item.price}</Text>
                                 </View>
                         }
@@ -112,12 +112,12 @@ export default function SingleBrand(props) {
             <View style={styles.newArrivals}>
                 <View style={styles.newArrivalsHeader}>
                     <View style={{ marginLeft: 5 }}>
-                        <Text style={{ fontSize: 24, color: "black", fontWeight: "500" }}>Top Trends</Text>
+                        <Text style={dark  ?{ fontSize: 24, color: "white", fontWeight: "500" }:{ fontSize: 24, color: "black", fontWeight: "500" }}>Top Trends</Text>
                     </View>
                     <TouchableOpacity>
                         <View style={{ flexDirection: "row", alignItems: "center", alignContent: "center", justifyContent: "space-between", marginRight: 5 }}>
-                            <Text style={{ fontSize: 15, color: "black" }}>show all</Text>
-                            <FontAwesome color={"black"} style={{ marginHorizontal: 3, fontSize: 15 }} name="caret-right" onPress={showall} />
+                            <Text style={dark ? { fontSize: 15, color: "white" }:{ fontSize: 15, color: "black" }}>show all</Text>
+                            <FontAwesome color={dark ? "white":"black"} style={{ marginHorizontal: 3, fontSize: 15 }} name="caret-right" onPress={showall} />
 
 
                         </View>
@@ -129,9 +129,9 @@ export default function SingleBrand(props) {
                         horizontal
                         renderItem={
                             ({ item }) =>
-                                <View style={styles.product}>
+                                <View style={dark ? styles.productDark : styles.product}>
                                     <Image style={styles.productImage} source={item.image} />
-                                    <Text style={styles.productTitle}>{item.name}</Text>
+                                    <Text style={dark ? styles.productTitleDark : styles.productTitle}>{item.name}</Text>
                                     <Text style={styles.price}>{item.price}</Text>
                                 </View>
                         }
@@ -164,6 +164,7 @@ const styles = StyleSheet.create({
         flexDirection: "column",
         height: Dimensions.get("window").height,
         width: Dimensions.get("window").width,
+        backgroundColor:"#121212"
     },
 
 
@@ -260,6 +261,15 @@ const styles = StyleSheet.create({
         borderRadius: 8
 
     },
+    productDark:{
+        height: "100%",
+        width: 140,
+        marginHorizontal: 8,
+        borderRadius: 8,
+        backgroundColor:"#292929",
+
+
+    },
     productImage: {
         height: "70%",
         width: "100%",
@@ -270,6 +280,12 @@ const styles = StyleSheet.create({
     productTitle: {
         fontSize: 16,
         color: "black",
+        fontWeight: "400",
+
+    },
+    productTitleDark:{
+        fontSize: 16,
+        color: "white",
         fontWeight: "400",
 
     },

@@ -4,7 +4,9 @@ import AuthContext from '../navigation/AuthContext';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { FlatList } from 'react-native-gesture-handler';
 
+
 const partners=[
+   
     {name:"nike",image:require("../assets/nike.jpg"),_id:"55"},
     {name:"adidas",image:require("../assets/adidas.jpg"),_id:"56"},
     {name:"h&m",image:require("../assets/hm.png"),_id:"57"},
@@ -19,13 +21,16 @@ const partners=[
 
 export default function Brand(props){
     const context = useContext(AuthContext)
-    const [darkmode,setDarkmode] =  useState(true);
+    const [dark,setDark] =  useState(true);
     const [magictap,setmagicTap]= useState(false)
+
+    /*
 
     useEffect(()=>{
         setDarkmode(context.darkMode)
     },[context.darkMode])
-    
+    */
+
     const goBack = ()=> {
 
     }
@@ -34,27 +39,27 @@ export default function Brand(props){
     }
         
     return(
-        <View style={!darkmode ? styles.container: styles.containerDark}>
+        <View style={!dark ? styles.container: styles.containerDark}>
                 <View style={styles.categories}>
                     <View style={styles.brand}>
                         <Text style={{fontSize:20,color:"white",fontWeight:"500"}}>Brand</Text>
                     </View>
-                    <View style={styles.other}>
-                    <Text style={{fontSize:20,color:"black",fontWeight:"500"}}>Others</Text>
+                    <View style={dark ? styles.otherDark : styles.other}>
+                    <Text style={dark ? {fontSize:20,color:"white",fontWeight:"500"} :{fontSize:20,color:"black",fontWeight:"500"}}>Others</Text>
                     
                     </View>
                     
                 </View>
 
-                <View style={styles.menu}>
+                <View style={dark ? styles.menuDark : styles.menu}>
                     <View style={styles.leftArrowContainer}>
-                    <Image style={styles.leftArrow} source={require("../assets/left-arrow.png")}/>
+                    <Image style={styles.leftArrow} source={dark ? require("../assets/left-arrow-dark.png") : require("../assets/left-arrow.png")}/>
                     </View>
                  <View style={styles.titleContainer}>
-                 <Text style={styles.Title}>Brand</Text>
-                </View>   
+                 <Text style={ dark ? styles.TitleDark : styles.Title}>Brand</Text>
+                </View>     
                 <View style={styles.searchContainer}>
-                <FontAwesome color={"black"} style={{ padding: 0, fontSize: 24 }} name="search" onPress={goBack} />
+                <FontAwesome color={dark ? "white" : "black"} style={{ padding: 0, fontSize: 24 }} name="search" onPress={goBack} />
 
                 </View>
             
@@ -67,9 +72,9 @@ export default function Brand(props){
                     renderItem={({item})=>
                     <TouchableOpacity style={{width:"45%",height:140,margin:8,}} onPress={()=>{checkBrand(item)}} onMagicTap={()=>{setmagicTap(magictap=>!magictap)}}>
 
-                    <View style={ magictap ? styles.partnerContainerTapped : styles.partnerContainer} >
+                    <View style={ magictap ? styles.partnerContainerTapped : (dark ? styles.partnerContainerDark : styles.partnerContainer)} >
                         <Image style={styles.partnerImage} source={item.image}/>        
-                        <Text style={styles.partnerName}>{item.name}</Text>
+                        <Text style={dark ? styles.partnerNameDark : styles.partnerName}>{item.name}</Text>
                     </View>
                     </TouchableOpacity>
 
@@ -125,6 +130,16 @@ const styles = StyleSheet.create({
 
         
     },
+    otherDark:{
+        height:"90%",
+        width:120,
+        backgroundColor:"#292929",
+        borderRadius:20,
+        marginHorizontal:10,
+        flexDirection:"column",
+        alignItems:"center",
+        justifyContent:"center"
+    },
 container : {
     flex:1,
     flexDirection:"column",
@@ -138,13 +153,19 @@ containerDark : {
     flexDirection:"column",
     height:Dimensions.get("window").height,
     width:Dimensions.get("window").width,
-    backgroundColor:"#292929"
+    backgroundColor: "#121212",
 
 },
 menu:{
     width:"100%",
     height:"10%",
     backgroundColor:"white",
+    flexDirection:"row",
+},
+menuDark:{
+    width:"100%",
+    height:"10%",
+    backgroundColor: "#121212",
     flexDirection:"row",
 },
 leftArrowContainer:{
@@ -170,6 +191,11 @@ Title:{
     fontWeight:"700",
     fontSize:28
 },
+TitleDark:{
+    fontWeight:"700",
+    fontSize:28,
+    color:"white"
+},
 searchContainer:{
     width:"10%",
     height:"100%",
@@ -186,6 +212,15 @@ partnerContainer:{
     height:"100%",
     backgroundColor:"white",
     borderRadius:8,
+    flexDirection:"column",
+    alignItems:"center",
+    justifyContent:"center"
+},
+partnerContainerDark:{
+    width:"100%",
+    height:"100%",
+    borderRadius:8,
+    backgroundColor:"#292929",
     flexDirection:"column",
     alignItems:"center",
     justifyContent:"center"
@@ -207,8 +242,14 @@ partnerImage:{
 },
 partnerName:{
     fontSize:18,
-    color:"back",
+    color:"black",
     fontWeight:"500"
+},
+partnerNameDark:{
+    fontSize:18,
+    color:"white",
+    fontWeight:"500"
+
 }
 
 

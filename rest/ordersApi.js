@@ -12,48 +12,57 @@ export const createOrder =(order )=>{
        }
     })
 }
-export const getUserHistoryDeliveries = (userId)=>{
-    return new Promise((resolve ,reject)=>{
-        axios.get(`/order/deliverer/history/${userId}`).then(res=>{
-            resolve(res);
-        }).catch(err=>{reject(err)})
+export const getClientOrders = ()=>{
+    return new Promise((resolve,reject)=>{
+        axios.get("/order/client").then(res=>{
+            resolve(res.data.orders);
+        })
+        .catch(err=>{reject(err)})
     })
 }
-export const   getUserActifDeliveries =(userId)=>{
-    return new Promise((resolve ,reject)=>{
-        axios.get(`/order/deliverer/actif/${userId}`).then(res=>{
-            resolve(res);
-        }).catch(err=>{reject(err)})
+export const  getPartnerOrders = (partnerId)=>{
+    return new Promise((resolve,reject)=>{
+        axios.get(`/order/partner/${partnerId}`).then(res=>{
+            resolve(res.data.orders);
+        })
+        .catch(err=>{reject(err)})
     })
 }
-export const getUserActifOrders =(userId)=>{
-    return new Promise((resolve ,reject)=>{
-        axios.get(`/order/client/actif/${userId}`).then(res=>{
-            resolve(res);
-        }).catch(err=>{reject(err)})
-    })
-}
-
-export const getUserHistoryOrders = (userId)=>{
-    return new Promise((resolve ,reject)=>{
-        axios.get(`/order/client/history/${userId}`).then(res=>{
-            resolve(res);
-        }).catch(err=>{reject(err)})
+export const   getDelivererOrders = ()=>{
+    return new Promise((resolve,reject)=>{
+        axios.get(`/order/deliverer`).then(res=>{
+            resolve(res.data.orders);
+        })
+        .catch(err=>{reject(err)})
     })
 }
 
-export const close_order = (orderId)=>{
-    return new Promise((resolve ,reject)=>{
-        axios.patch(`/order/state/${orderId}`).then(res=>{
-            resolve(res);
-        }).catch(err=>{reject(err)})
+export const   markOrderAsPrepared = (orderId)=>{
+    return new Promise((resolve,reject)=>{
+        axios.get(`/order/mark-prepared/${orderId}`).then(res=>{
+            resolve(res.data.message);
+        })
+        .catch(err=>{reject(err)})
+    })
+}
+export const   markOrderAsTaked = (orderId)=>{
+    return new Promise((resolve,reject)=>{
+        axios.patch(`/order/mark-taked/${orderId}`,{}).then(res=>{
+            resolve(res.data.message);
+        })
+        .catch(err=>{reject(err)})
     })
 }
 
-export const deleteOrder = (orderId)=>{
-    return new Promise((resolve ,reject)=>{
-        axios.delete(`/order/${orderId}`).then(res=>{
-            resolve(res);
-        }).catch(err=>{reject(err)})
+
+export const   markOrderAsReceived = (orderId)=>{
+    return new Promise((resolve,reject)=>{
+        axios.patch(`/order/mark-received/${orderId}`,{}).then(res=>{
+            resolve(res.data.message);
+        })
+        .catch(err=>{reject(err)})
     })
 }
+
+
+

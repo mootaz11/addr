@@ -1,100 +1,73 @@
 import React, { useState, useEffect } from 'react'
 import { View, Text, StyleSheet, Platform, TouchableOpacity, Image, TextInput, ScrollView } from 'react-native'
 import { Icon } from 'react-native-elements';
-import AuthContext from '../navigation/AuthContext';
-import { close_order, deleteOrder } from "../rest/ordersApi";
+import AuthContext from '../../navigation/AuthContext';
 import _ from 'lodash';
 import { FlatList } from 'react-native-gesture-handler';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import {markOrderAsPrepared,getPartnerOrders} from '../../rest/ordersApi'
 
 const order_pipeline = [
-    { step: "Order placed", _id: "1" },
-    { step: "waiting order", _id: "2" },
-    { step: "Order to Deliver", _id: "3" },
-    { step: "Order to Deliver", _id: "4" },
+    { step: "Order to prepare", _id: "1" },
+    { step: "Prepared Order", _id: "2" },
+    { step: "Order Delivered", _id: "3" }
 ];
 
-const placedorder_data = [
-    {
-        nomLivreur: "sara sara ",
-        productname: "zgougou",
-        Date: "11.08.2020",
-        _id: "1"
-    },
-    {
-        nomLivreur: "sara sara ",
-        productname: "zgougou",
-        Date: "11.08.2020", _id: "2"
-    },
-    {
-        nomLivreur: "sara sara ",
-        productname: "zgougou",
-        Date: "11.08.2020",
-        _id: "3"
-    },
-    {
-        nomLivreur: "sara sara ",
-        productname: "zgougou",
-        Date: "11.08.2020", _id: "4"
-    }
-]
-
-
-const order_during_deliv = [
-
-    {
-        nomLivreur: "sara sara ",
-        productname: "zgougou",
-        Date: "11.08.2020", _id: "2"
-    },
-    {
-        nomLivreur: "sara sara ",
-        productname: "zgougou",
-        Date: "11.08.2020",
-        _id: "3"
-    },
-
-]
-const historique = [
-
-    {
-        nomLivreur: "sara sara ",
-        productname: "zgougou",
-        Date: "11.08.2020", _id: "2"
-    },
-
-
-
-]
 
 export default function  BusinessOrders (props) {
     const context = React.useContext(AuthContext);
-    const [placedOrdersData, setPlacedOrdersData] = useState(context.actifOrders);
-    const [historyOrdersData, setHistoryOrdersData] = useState(context.historyOrders);
-    const [orderDuringDeliveryData, setOrderDuringDeliveryData] = useState([]);
+    
+    const [orderstoPrepare, setOrderstoPrepare] = useState(orderToPrepare);
+    const [preparedOrders,setPreparedOrders]=useState(orders_prepared);
+    const [deliveredOrders,setDeliveredOrders] = useState(historique_orders);
 
     const [checkedStep, setCheckedStep] = useState(order_pipeline[0])
 
-    const [orderPlaced, setOrderPlaced] = useState(true);
-    const [orderDuringDelivery, setOrderDuringDelivery] = useState(false);
-    const [history, setHistory] = useState(false);
-    const [Done, setDone] = useState(false);
+    const [OrderToPrepare, setOrderToPrepare] = useState(true);
+    const [preparedOrder, setPreparedOrder] = useState(false);
+    const [deliveredOrder, setDeliveredOrder] = useState(false);
 
 
     const [dark, setDark] = useState(context.darkMode);
-    const [search, setSearch] = useState("");
-    const [searchResult, setSearchResult] = useState(context.historyOrders);
+    useEffect(()=>{
+        getPartnerOrders(context.user._id).then(orders=>{
+            let _ordersToPrepare =[]
+            let _preparedOrders =[]
+            let _deliveredOrders=[]
 
+            orders.map(order=>{
+                if(order.actif==true && order.taked==false && order.prepared==false){
+                    _ordersToPrepare.push(order);
+                }
+                if(order.actif==true && order.taked==false && order.prepared==true)
+                {
+                    _preparedOrders.push(order);
+                }
+                if(order.actif==false && order.taked==true &&order.prepared==true)
+                {
+                    _deliveredOrders.push(order);
+                }
+            })
+            setDeliveredOrders(_deliveredOrders);
+            setPreparedOrders(_preparedOrders);
+            setOrderstoPrepare(_ordersToPrepare);
+        })
+    },[])
 
     useEffect(() => {
         setDark(context.darkMode);
     }, [context.darkMode])
 
 
+
+
     const openDrawer = () => {
         props.navigation.openDrawer();
     }
 
+    const changeOrderState = (item)=>{
+
+    }
 
 
 
@@ -111,20 +84,20 @@ export default function  BusinessOrders (props) {
 
     const checkStep = (item) => {
         setCheckedStep(item)
-        if (item.step == "Order placed") {
-            setOrderPlaced(true);
-            setHistory(false);
-            setOrderDuringDelivery(false);
+        if (item.step == "Order to prepare") {
+            setPreparedOrder(false);
+            setDeliveredOrder(false);
+            setOrderToPrepare(false);
         }
-        if (item.step == "Order during delivery") {
-            setOrderPlaced(false);
-            setHistory(false);
-            setOrderDuringDelivery(true);
+        if (item.step == "Prepared Order") {
+            setPreparedOrder(true)
+            setDeliveredOrder(false);
+            setOrderToPrepare(false);
         }
-        if (item.step == "Historique") {
-            setOrderPlaced(false);
-            setHistory(true);
-            setOrderDuringDelivery(false);
+        if (item.step == "Order Delivered") {
+            setOrderToPrepare(false);
+            setDeliveredOrder(true);
+            setPreparedOrder(false);
         }
     }
 
@@ -166,19 +139,19 @@ export default function  BusinessOrders (props) {
             <View style={styles.ordersContainer}>
 
                 <FlatList
-                    data={orderPlaced ? placedorder_data : orderDuringDelivery ? order_during_deliv : history ? historique : null}
+                    data={orderToPrepare ? orderstoPrepare : preparedOrder ? preparedOrders : deliveredOrder ? deliveredOrders : null}
                     renderItem={({ item }) =>
                     <TouchableOpacity>
                         <View style={styles.delivery} >
                             <View style={styles.clientImageContainer}>
-                                <Image style={{ width: "80%", height: "80%", resizeMode: "contain" }} source={require("../assets/mootaz.jpg")} />
+                                <Image style={{ width: "80%", height: "80%", resizeMode: "contain" }} source={require("../../assets/mootaz.jpg")} />
                             </View>
                             <View style={styles.deliveryInfo}>
                                 <Text style={styles.info}>Nom de Livreur: {item.nomLivreur} </Text>
                                 <Text style={styles.info}>Nom de Produit: {item.productname} </Text>
                                 <Text style={styles.info}>Date: {item.Date}</Text>
-                                {   history &&
-                                    <TouchableOpacity>
+                                {   orderToPrepare &&
+                                    <TouchableOpacity onPress={()=>{changeOrderState(item)}}>
                                         <Text style={{ fontSize: 12, fontWeight: "600", color: "#2474F1", textDecorationLine: "underline" }}>your opinion about the product</Text>
                                     </TouchableOpacity>
                                     

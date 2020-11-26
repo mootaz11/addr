@@ -68,7 +68,7 @@ const LoginForm = (props) => {
         Keyboard.dismiss();
         login(formState.inputValues).then(res=>{
             Alert.alert('', 'Login Done!', [{text: 'Okay'}]);
-            context.LoginHandler({user:res.data.user,token:res.data.token})
+            context.LoginHandler({user:res.data.user,token:{accessToken:res.data.accessToken,refreshToken:res.data.refreshToken}})
                 }).catch(err=>{
                     alert("failed")
                   console.log(err.message)})         

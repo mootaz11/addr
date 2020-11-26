@@ -17,13 +17,14 @@ const products=[
 
 export default function Products(props){
     const context = useContext(AuthContext)
-    const [darkmode,setDarkmode] =  useState(true);
+    const [dark,setDark] =  useState(true);
     const [magictap,setmagicTap]= useState(false)
 
-    useEffect(()=>{
+    /*useEffect(()=>{
         setDarkmode(context.darkMode)
     },[context.darkMode])
-    
+    */
+
     const goBack = ()=> {
         props.navigation.navigate("gender")
     }
@@ -32,21 +33,21 @@ export default function Products(props){
     }
         
     return(
-        <View style={!darkmode ? styles.container: styles.containerDark}>
+        <View style={!dark ? styles.container: styles.containerDark}>
              
 
-                <View style={styles.menu}>
+                <View style={dark ? styles.menuDark  : styles.menu}>
                 <TouchableOpacity  style={styles.leftArrowContainer} onPress={goBack}>
                     <View >
-                    <Image style={styles.leftArrow} source={require("../assets/left-arrow.png")}/>
+                    <Image style={styles.leftArrow} source={dark ?require("../assets/left-arrow-dark.png") : require("../assets/left-arrow.png")}/>
                     </View>
                     </TouchableOpacity>
                  <View style={styles.titleContainer}>
-                 <Text style={styles.Title}>Products</Text>
+                 <Text style={dark ?styles.TitleDark :  styles.Title}>Products</Text>
                 </View>   
                 <View style={styles.searchContainer}>
 
-                <FontAwesome color={"black"} style={{ padding: 0, fontSize: 24 }} name="search" />
+                <FontAwesome color={dark ?"white" :  "black"} style={{ padding: 0, fontSize: 24 }} name="search" />
                 </View>
             
             </View>
@@ -56,10 +57,10 @@ export default function Products(props){
                     numColumns={2}
                     renderItem={({item})=>
                     <TouchableOpacity style={{width:"45%",height:250,margin:8,}} onPress={()=>{checkSingleProduct(item)}} onMagicTap={()=>{setmagicTap(magictap=>!magictap)}}>
-                    <View style={ magictap ? styles.partnerContainerTapped : styles.partnerContainer} >
+                    <View style={ magictap ? styles.partnerContainerTapped :(dark ? styles.partnerContainerDark :  styles.partnerContainer)} >
                         <Image style={styles.partnerImage} source={item.image}/>    
                         <View style={styles.productinfo}>
-                        <Text style={styles.productTitle}>{item.name}</Text>
+                        <Text style={dark ? styles.productTitleDark : styles.productTitle}>{item.name}</Text>
                         <Text style={styles.price}>{item.price}</Text>
 
                             </View>    
@@ -89,6 +90,12 @@ const styles = StyleSheet.create({
         fontWeight: "400",
 
     },
+    productTitleDark:{
+        fontSize: 16,
+        color: "white",
+        fontWeight: "400",
+
+    },
     price: {
         fontSize: 14,
         color: "grey",
@@ -107,7 +114,15 @@ containerDark : {
     flexDirection:"column",
     height:Dimensions.get("window").height,
     width:Dimensions.get("window").width,
-    backgroundColor:"#292929"
+    backgroundColor: "#121212",
+
+},
+menuDark:{
+    width:"100%",
+    height:"10%",
+    flexDirection:"row",
+    backgroundColor: "#121212",
+
 
 },
 menu:{
@@ -139,6 +154,12 @@ Title:{
     fontWeight:"700",
     fontSize:28
 },
+TitleDark:{
+    fontWeight:"700",
+    fontSize:28,
+    color:"white"
+
+},
 searchContainer:{
     width:"10%",
     height:"100%",
@@ -159,6 +180,17 @@ partnerContainer:{
     alignItems:"center",
     justifyContent:"center"
 },
+partnerContainerDark:{
+    width:"100%",
+    height:"100%",
+    borderRadius:8,
+    backgroundColor:"#292929",
+    flexDirection:"column",
+    alignItems:"center",
+    justifyContent:"center"
+
+},
+
 partnerContainerTapped:{
     width:"100%",
     height:"100%",

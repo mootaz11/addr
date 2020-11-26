@@ -31,7 +31,7 @@ export default function deliveryAdress(props) {
     const [locationChosen,setlocationChosen]=useState(false)
     const [deliveryOption,setDeliveryOption]=useState(null);
     const [phoneNumber,setPhoneNumber]=useState("");
-
+    const [dark,setDark]=useState(true)
     
     const goBack = () => {
         props.navigation.navigate("bag")
@@ -45,16 +45,16 @@ export default function deliveryAdress(props) {
 
 
     return (
-        <View style={styles.container}>
+        <View style={dark ? styles.containerDark : styles.container}>
 
-            <View style={styles.menu}>
+            <View style={dark  ? styles.menuDark : styles.menu}>
                 <TouchableOpacity style={styles.leftArrowContainer} onPress={goBack}>
                     <View >
-                        <Image style={styles.leftArrow} source={require("../assets/left-arrow.png")} />
+                        <Image style={styles.leftArrow} source={dark ? require("../assets/left-arrow-dark.png"):require("../assets/left-arrow.png")} />
                     </View>
                 </TouchableOpacity>
                 <View style={styles.titleContainer}>
-                    <Text style={styles.Title}>delivery address</Text>
+                    <Text style={dark ?  styles.TitleDark:styles.Title}>delivery address</Text>
                 </View>
 
             </View>
@@ -62,45 +62,45 @@ export default function deliveryAdress(props) {
 
             <View style={styles.infoadressContainer}>
                 <View style={styles.getDeliveryTo}>
-                    <Text style={{ fontSize: 20, fontWeight: "700" }}>Get delivery to your</Text>
+                    <Text style={dark ? { fontSize: 20, fontWeight: "700" ,color:"white"}: { fontSize: 20, fontWeight: "700" }}>Get delivery to your</Text>
                 </View>
-                <TouchableOpacity style={locationChosen ?  styles.otherPosition :styles.home } onPress={()=>{setlocationChosen(locationChosen=>!locationChosen)}}>
+                <TouchableOpacity style={locationChosen ?  styles.otherPosition :(dark ? styles.homeDark: styles.home) } onPress={()=>{setlocationChosen(locationChosen=>!locationChosen)}}>
                     <View style={{ width: "100%", height: "100%", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
-                        <Text style={locationChosen ? { fontSize: 18, fontWeight: "400", color: "white" }:{ fontSize: 18, fontWeight: "400", color: "black" }}>Home</Text>
+                        <Text style={locationChosen ? { fontSize: 18, fontWeight: "400", color: "white" }:(dark ? {fontSize:18,fontWeight:"400",color:"white"}:{ fontSize: 18, fontWeight: "400", color: "black" })}>Home</Text>
                     </View>
                 </TouchableOpacity>
-                <TouchableOpacity  style={!locationChosen ? styles.otherPosition : styles.home} onPress={()=>{setlocationChosen(locationChosen=>!locationChosen)}}>
+                <TouchableOpacity  style={!locationChosen ? styles.otherPosition : (dark ?styles.homeDark : styles.home)} onPress={()=>{setlocationChosen(locationChosen=>!locationChosen)}}>
                     <View style={{ width: "100%", height: "100%", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
-                        <Text style={!locationChosen ? { fontSize: 18, fontWeight: "400", color: "white" }:{ fontSize: 18, fontWeight: "400", color: "black" }}>Other position</Text>
+                        <Text style={!locationChosen ? { fontSize: 18, fontWeight: "400", color: "white" }:(dark ? {fontSize:18,fontWeight:"400",color:"white"}:{ fontSize: 18, fontWeight: "400", color: "black" })}>Other position</Text>
                     </View>
                 </TouchableOpacity>
-                <View style={styles.phoneNumberContainer}>
+                <View style={dark ? styles.phoneNumberContainerDark :styles.phoneNumberContainer}>
                     <Image style={{ width: "20%", height: "50%", resizeMode: "contain" }} source={require("../assets/phone_delivery.png")} />
-                    <TextInput placeholder={"PHONE NUMBER"} placeholderTextColor="#bfbfbf" style={{ width: "80%", height: "50%", borderBottomColor: "#bfbfbf", }} />
+                    <TextInput placeholder={"PHONE NUMBER"} placeholderTextColor={dark ?"white" :"#bfbfbf"} style={dark ?{ width: "80%", height: "50%", borderBottomColor: "#121212" }: { width: "80%", height: "50%", borderBottomColor: "#bfbfbf", }} />
                 </View>
 
 
             </View>
 
             <View style={{ width: "100%", height: "10%", justifyContent: "center", alignItems: "center", flexDirection: "column" }}>
-                <View style={{ borderColor: "#bfbfbf", borderWidth: 1, width: "94%", height: 1 }}></View>
+                <View style={dark ? { borderColor: "white", borderWidth: 1, width: "94%", height: 1 }:{ borderColor: "#bfbfbf", borderWidth: 1, width: "94%", height: 1 }}></View>
             </View>
 
             <View style={styles.deliveries}>
-                <Text style={{fontSize:20,fontWeight:"600"}}>Choose your delivery Option</Text>
+                <Text style={dark ? {fontSize:20,fontWeight:"600",color:"white"}:{fontSize:20,fontWeight:"600"}}>Choose your delivery Option</Text>
                 <FlatList data={deliveryOptions}
                     renderItem={({ item }) =>
                         <TouchableOpacity onPress={()=>{setDeliveryOption(item)}}>
 
-                        <View style={deliveryOption && item._id == deliveryOption._id ? styles.deliveryOptionChosen:styles.deliveryOption}>
+                        <View style={deliveryOption && item._id == deliveryOption._id ? styles.deliveryOptionChosen:(dark ? styles.deliveryOptionDark : styles.deliveryOption)}>
                             <View style={styles.deliveryOptionContainer}>
                                 <View style={styles.deliveryImageContainer}>
                                     <Image style={{ width: "100%", height: "100%", resizeMode: "cover", borderRadius: 12 }} source={item.image} />
                                 </View>
                                 <View style={styles.deliveryOptionInfoContainer}>
                                     <View style={styles.delivererInfo}>
-                                        <Text style={ deliveryOption && item._id == deliveryOption._id ?{textAlign:"center" ,fontSize:15,fontWeight:'600',color:"white"}:{textAlign:"center" ,fontSize:15,fontWeight:'600'}}>name : {item.name}</Text>
-                                        <Text style={ deliveryOption && item._id == deliveryOption._id ?{textAlign:"center" ,fontSize:15,fontWeight:'600',color:"white"}:{textAlign:"center" ,fontSize:15,fontWeight:'600'}}>price : {item.price} TND</Text>
+                                        <Text style={ deliveryOption && item._id == deliveryOption._id ?{textAlign:"center" ,fontSize:15,fontWeight:'600',color:"white"}:(dark ? {textAlign:"center" ,fontSize:15,fontWeight:'600',color:"white"}:{textAlign:"center" ,fontSize:15,fontWeight:'600'})}>name : {item.name}</Text>
+                                        <Text style={ deliveryOption && item._id == deliveryOption._id ?{textAlign:"center" ,fontSize:15,fontWeight:'600',color:"white"}:(dark ? {textAlign:"center" ,fontSize:15,fontWeight:'600',color:"white"}:{textAlign:"center" ,fontSize:15,fontWeight:'600'})}>price : {item.price} TND</Text>
                                     </View>
                                     
                                     <View style={styles.ratingsContainer}>
@@ -112,7 +112,7 @@ export default function deliveryAdress(props) {
                                 </View>
                                 <View style={styles.openDays}>
                                 <View style={styles.delivererInfo}>
-                                        <Text style={deliveryOption && item._id==deliveryOption._id ?{textAlign:"center" ,fontSize:16,fontWeight:'600',color:"white"}:{textAlign:"center" ,fontSize:16,fontWeight:'600'}}>{item.workdays}</Text>
+                                        <Text style={deliveryOption && item._id==deliveryOption._id ?{textAlign:"center" ,fontSize:16,fontWeight:'600',color:"white"}:(dark ?{textAlign:"center" ,fontSize:16,fontWeight:'600',color:"white"}: {textAlign:"center" ,fontSize:16,fontWeight:'600'})}>{item.workdays}</Text>
                                     </View>
                                 </View>
                             </View>
@@ -180,6 +180,20 @@ const styles = StyleSheet.create({
         borderRadius:12,
         shadowColor:"#ededed"
 
+    },
+    deliveryOptionDark:{
+        width: "92%",
+        height: 90,
+        flexDirection: "column",
+        borderRadius: 12,
+        marginVertical: 8,
+        alignSelf: "center",
+        justifyContent:"center",
+        shadowOffset:{height:1,width:1},
+        shadowOpacity:0.2,
+        borderRadius:12,
+        shadowColor:"#ededed",
+        backgroundColor:"#292929"
     },
     deliveryOptionChosen: {
         width: "92%",
@@ -258,6 +272,17 @@ const styles = StyleSheet.create({
         borderColor: "#bfbfbf",
         borderRadius: 14,
     },
+    homeDark:{
+        backgroundColor:"#292929",
+        width: "95%",
+        height: "20%",
+        margin: 6,
+        alignSelf: "center",
+        borderWidth: 1,
+        borderColor: "#bfbfbf",
+        borderRadius: 14,
+
+    },
     phoneNumberContainer: {
         width: "95%",
         height: "20%",
@@ -271,6 +296,21 @@ const styles = StyleSheet.create({
         borderTopColor: "white",
         borderWidth: 1
 
+    },     
+
+    phoneNumberContainerDark:{
+        width: "95%",
+        height: "20%",
+        margin: 6,
+        alignSelf: "center",
+        flexDirection: "row",
+        alignItems: "center",
+        borderBottomColor: "#292929",
+        borderLeftColor: "#292929",
+        borderRightColor: "#292929",
+        borderTopColor: "#292929",
+        borderWidth: 1,
+        borderRadius:10
     },
     getDeliveryTo: {
         width: "95%",
@@ -290,12 +330,27 @@ const styles = StyleSheet.create({
         height: Dimensions.get("window").height,
 
     },
+    containerDark:{
+        backgroundColor: "white",
+        width: Dimensions.get("window").width,
+        height: Dimensions.get("window").height,
+        backgroundColor: "#121212",
+
+    },
     menu: {
         width: "100%",
         height: "8%",
         backgroundColor: "white",
         flexDirection: "row",
         marginBottom: 8
+    },
+    menuDark:{
+        width: "100%",
+        height: "8%",
+        backgroundColor: "#121212",
+        flexDirection: "row",
+        marginBottom: 8
+
     },
     leftArrowContainer: {
         width: "10%",
@@ -320,6 +375,12 @@ const styles = StyleSheet.create({
         fontWeight: "700",
         fontSize: 28
     },
+    TitleDark:{
+        fontWeight: "700",
+        fontSize: 28,
+        color:"white"
+
+    }
 
 
 })

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {View,Text, StyleSheet,Dimensions,Image,TouchableOpacity} from 'react-native'
 import { FlatList } from 'react-native-gesture-handler';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
@@ -18,6 +18,8 @@ const categories = [
 
 
 export default function genderCategory(props){
+    const [dark,setDark] = useState(true);
+
     const goBack= ()=>{
         props.navigation.navigate("singleBrand");
     }
@@ -25,19 +27,19 @@ export default function genderCategory(props){
         props.navigation.navigate("products")
     }
     return(
-        <View style={styles.container}>
-                <View style={styles.menu}>
+        <View style={dark ? styles.containerDark : styles.container}>
+                <View style={dark ? styles.menuDark : styles.menu}>
                     <View style={styles.leftArrowContainer}>
                         <TouchableOpacity style={styles.leftArrow} onPress={goBack}>
-                        <Image style={{width:"100%", height:"100%"}}  source={require("../assets/left-arrow.png")}/>
+                        <Image style={{width:"100%", height:"100%"}}  source={dark ? require("../assets/left-arrow-dark.png"):require("../assets/left-arrow.png")}/>
 
                         </TouchableOpacity>
                     </View>
                  <View style={styles.titleContainer}>
-                 <Text style={styles.Title}>{/*props.route.params.gender*/}hello</Text>
+                 <Text style={dark ? styles.TitleDark : styles.Title}>{/*props.route.params.gender*/}hello</Text>
                 </View>   
                 <View style={styles.searchContainer}>
-                <FontAwesome color={"black"} style={{ padding: 0, fontSize: 24 }} name="search"  />
+                <FontAwesome color={dark ? "white" : "black"} style={{ padding: 0, fontSize: 24 }} name="search"  />
 
                 </View>
             
@@ -50,10 +52,10 @@ export default function genderCategory(props){
                         <TouchableOpacity onPress={()=>{checkCategory(item)}}>
                         <View style={styles.category}>
                             <View style={{marginLeft:8}}>
-                                <Text style={{fontSize:20,fontWeight:"400"}}>{item.name}</Text>
+                                <Text style={dark ? {fontSize:20,fontWeight:"400",color:"white"}:{fontSize:20,fontWeight:"400"}}>{item.name}</Text>
                             </View>
                             <View style={{width:30, height:"80%",justifyContent:"center",alignItems:"center" ,marginRight:8}}>
-                             <Image style={styles.arrowright} source={require("../assets/right-arrow.png")}/>
+                             <Image style={styles.arrowright} source={dark ? require("../assets/right-arrow-dark.png"):require("../assets/right-arrow.png")}/>
                             </View>
                         </View>
                         </TouchableOpacity>
@@ -72,7 +74,7 @@ export default function genderCategory(props){
 const styles = StyleSheet.create({
     categoriesContainer:{
         width:"100%",
-        height:"70%",
+        height:"72%",
         position:"absolute",
         top:"20%",
     },
@@ -101,14 +103,21 @@ const styles = StyleSheet.create({
         flexDirection:"column",
         height:Dimensions.get("window").height,
         width:Dimensions.get("window").width,
-        backgroundColor:"#292929"
+        backgroundColor: "#121212",
     
     },
     menu:{
         width:"100%",
-        height:"10%",
+        height:"8%",
         backgroundColor:"white",
         flexDirection:"row",
+    },
+    menuDark :{
+        width:"100%",
+        height:"8%",
+        backgroundColor: "#121212",
+        flexDirection:"row",
+
     },
     leftArrowContainer:{
         width:"10%",
@@ -132,6 +141,12 @@ const styles = StyleSheet.create({
     Title:{
         fontWeight:"700",
         fontSize:28
+    },
+    TitleDark:{
+        fontWeight:"700",
+        fontSize:28,
+        color:"white"
+
     },
     searchContainer:{
         width:"10%",
