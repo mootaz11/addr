@@ -58,8 +58,6 @@ input:{
     width:"88%",
     alignSelf:'stretch',
     color:"black"
-
-    
 }
 
 });

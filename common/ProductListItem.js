@@ -5,7 +5,6 @@ import Colors from '../constants/Colors';
 
 const ProductListItem = (props) => {
     const [switchValue, setSwitchValue] = useState(false);
-    
     const toggleSwitch = (value) => {
         setSwitchValue(value);
       };
@@ -19,7 +18,7 @@ const ProductListItem = (props) => {
             <View style={styles.imageContainer}>
                 <Image 
                 style={styles.image} 
-                source={props.image}
+                source={{uri:props.image}}
                 />
             </View>
             <View style={styles.textStyle1}>

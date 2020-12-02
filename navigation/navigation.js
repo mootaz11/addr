@@ -27,6 +27,8 @@ import BusinessDashboardScreen from '../screens/business/BusinessDashboardScreen
 import ListProductsScreen from '../screens/business/ListProductsScreen';
 import DeliveryDashboardScreen from '../screens/business/DeliveryDashboardScreen';
 import AddProductScreen from '../screens/business/AddProductScreen';
+import addLocation from '../screens/business/addLocation'
+import followPackages from '../screens/business/followPackages';
 
 
 
@@ -73,7 +75,7 @@ export default function NavigationScreen(){
 
 
 return(
-<NavigationContainer theme={dark ?DarkTheme :DefaultTheme}>
+<NavigationContainer >
           <drawerStack.Navigator  drawerContent={props => <CustomDrawer {...props}/>}>
             <drawerStack.Screen name="Login" component={Login} />
             <drawerStack.Screen name="orders" component={Orders}/>
@@ -99,6 +101,11 @@ return(
             <drawerStack.Screen name="addProduct" component={AddProductScreen}/>
             <drawerStack.Screen name="listProducts" component={ListProductsScreen}/>
             <drawerStack.Screen name="deliveryDash" component={DeliveryDashboardScreen}/>
+            <drawerStack.Screen name="addLocation" component={addLocation}/>
+            <drawerStack.Screen name="followPackages" component={followPackages}/>
+
+
+
           </drawerStack.Navigator>
       </NavigationContainer>
 

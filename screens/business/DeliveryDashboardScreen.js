@@ -97,7 +97,7 @@ const feedbacks = [
 ];
 
 const DeliveryDashboardScreen = () => {
-/*
+
     const formatData = (data) =>{
         const numberOfFullRows = Math.floor(data.length/2);
 
@@ -260,8 +260,7 @@ const DeliveryDashboardScreen = () => {
                 </View>
             </View>
         </View>
-    );*/
-    return (<View></View>)
+    );
 }; 
 
 const styles = StyleSheet.create({

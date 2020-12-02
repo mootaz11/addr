@@ -94,7 +94,7 @@ export default function Conversation(props) {
 
     const goBack = () => {
         //console.log (Object.keys(props.route.params));
-        props.navigation.navigate((Object.keys(props.route.params)[1].toString()));
+        props.navigation.goBack()
     }
     return (
         <View style={dark ? styles.containerDark : styles.container}>

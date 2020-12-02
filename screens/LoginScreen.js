@@ -54,7 +54,7 @@ export default function Login  (props)  {
     
     useEffect(() => {
         if(!context.isloading && context.user){
-            props.navigation.navigate("addProduct");
+            props.navigation.navigate("businessDash");
         }
     },[context.user,context.isloading])
 

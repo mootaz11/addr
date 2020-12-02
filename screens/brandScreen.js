@@ -3,25 +3,13 @@ import {View,Text,StyleSheet, Dimensions,Image, TouchableOpacity} from 'react-na
 import AuthContext from '../navigation/AuthContext';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { FlatList } from 'react-native-gesture-handler';
-
-
-const partners=[
-   
-    {name:"nike",image:require("../assets/nike.jpg"),_id:"55"},
-    {name:"adidas",image:require("../assets/adidas.jpg"),_id:"56"},
-    {name:"h&m",image:require("../assets/hm.png"),_id:"57"},
-    {name:"exist",image:require("../assets/exist.png"),_id:"58"},
-    {name:"bershka",image:require("../assets/bershkadark.jpg"),_id:"59"},
-    {name:"pull & bear",image:require("../assets/pullandbear.jpg"),_id:"60"},
-    {name:"lacoste",image:require("../assets/lacoste.png"),_id:"61"},
-    {name:"zara",image:require("../assets/zara.png"),_id:"65"}
-
-]
+import {getPartnersByServiceName} from '../rest/partnerApi'
 
 
 export default function Brand(props){
     const context = useContext(AuthContext)
     const [dark,setDark] =  useState(true);
+    const [partners,setPartners]=useState([]);
     const [magictap,setmagicTap]= useState(false)
 
     /*
@@ -31,8 +19,15 @@ export default function Brand(props){
     },[context.darkMode])
     */
 
+    useEffect(()=>{
+        getPartnersByServiceName('wear').then(_partners=>{
+                setPartners(_partners)
+        }).catch(err=>{
+            alert("error while getting data")
+        })
+    },[])
     const goBack = ()=> {
-
+            props.navigation.navigate("Home")
     }
     const checkBrand=(value)=>{
         props.navigation.navigate("singleBrand",{partner:value})
@@ -66,15 +61,16 @@ export default function Brand(props){
             </View>
         
             <View style={styles.partners}>
-                <FlatList
+               
+               {partners   && <FlatList
                     data={partners}
                     numColumns={2}
                     renderItem={({item})=>
                     <TouchableOpacity style={{width:"45%",height:140,margin:8,}} onPress={()=>{checkBrand(item)}} onMagicTap={()=>{setmagicTap(magictap=>!magictap)}}>
 
                     <View style={ magictap ? styles.partnerContainerTapped : (dark ? styles.partnerContainerDark : styles.partnerContainer)} >
-                        <Image style={styles.partnerImage} source={item.image}/>        
-                        <Text style={dark ? styles.partnerNameDark : styles.partnerName}>{item.name}</Text>
+                        <Image style={styles.partnerImage} source={item.profileImage ? {uri:item.profileImage} : require("../assets/imagenotyet.jpg")}/>        
+                        <Text style={dark ? styles.partnerNameDark : styles.partnerName}>{item.partnerName}</Text>
                     </View>
                     </TouchableOpacity>
 
@@ -85,7 +81,7 @@ export default function Brand(props){
                 >
 
                 </FlatList>
-
+                }
             </View>
         
         </View>

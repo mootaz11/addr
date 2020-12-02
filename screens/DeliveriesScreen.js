@@ -1,5 +1,5 @@
  import React, { useState, useEffect } from 'react'
- import { View, Text, StyleSheet, Platform, TouchableOpacity, Image, TextInput, ScrollView } from 'react-native'
+ import { View, Text, StyleSheet, Platform, TouchableOpacity, Image, TextInput, ScrollView, SafeAreaView } from 'react-native'
  import { Icon } from 'react-native-elements';
  import AuthContext from '../navigation/AuthContext';
  import _ from 'lodash';
@@ -131,11 +131,12 @@
  
  
      return (
-         <View style={dark ? styles.containerDark : styles.container}>
+ <SafeAreaView>
+ <View style={dark ? styles.containerDark : styles.container}>
              <View style={dark ? styles.menuDark : styles.menu}>
                  <TouchableOpacity style={styles.leftArrowContainer}>
                      <View >
-                         <Icon color={dark ? "white":"#2474F1"} style={{ flex: 1, padding: 0 }} name="menu" onPress={openDrawer} />
+                         <Icon color={dark ? "white":"#2474F1"} style={{ flex: 1, padding: 0 ,justifyContent:"center"}} name="menu" onPress={openDrawer} />
                      </View>
                  </TouchableOpacity>
                  <View style={styles.titleContainer}>
@@ -207,6 +208,7 @@
              </View>
  
          </View>
+         </SafeAreaView>
      );
  }
  

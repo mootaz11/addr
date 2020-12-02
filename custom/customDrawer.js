@@ -1,117 +1,145 @@
-import React, {useState }from 'react';
-import { View, StyleSheet, Image } from 'react-native';
+import React, { useState } from 'react';
+import { View, StyleSheet, Image, ActivityIndicator } from 'react-native';
 import { DrawerContentScrollView, DrawerItem } from '@react-navigation/drawer';
 import { Avatar, Title, Caption, Text, TouchableRipple, Switch, Drawer, Paragraph } from 'react-native-paper';
 import { Icon } from 'react-native-elements'
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import AuthContext from '../navigation/AuthContext';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
 export default function CustomDrawer(props) {
     const [isEnabled, setIsEnabled] = useState(false);
     const context = React.useContext(AuthContext);
 
+
     const toggleSwitch = () => {
-        
+
         setIsEnabled(previousState => !previousState);
         context.modifyDarkModeHandler();
 
     }
-    return (
+    if (context.user) {
+        return (
 
-        <View style={{ flex: 1 }}>
-            <DrawerContentScrollView {...props}>
-                <View style={styles.drawerContent}>
-                    <TouchableOpacity onPress={() => { props.navigation.navigate("Home") }}>
-                        <View style={styles.logoAppSection}>
-                            <Image style={styles.LogoApp} source={require("../assets/logo.png")} />
-                            <Title style={styles.title}>Addresti</Title>
-                        </View>
-                    </TouchableOpacity>
-                </View>
+            <View style={{ flex: 1, backgroundColor: "#2474F1" }}>
+                <DrawerContentScrollView {...props}>
+                    <View style={styles.drawerContent}>
+                        <TouchableOpacity onPress={() => { props.navigation.navigate("Settings") }}>
+                            <View style={styles.logoAppSection}>
+                                <Image style={styles.LogoApp} source={context.user.photo ? { uri: context.user.photo }: require('../assets/user_image.png')} />
+                                <Title style={styles.title}>{context.user.firstName + " " + context.user.lastName}</Title>
+                            </View>
+                        </TouchableOpacity>
+                    </View>
+                    <Drawer.Section style={styles.drawerSection} >
+                        <DrawerItem icon={({ color, size }) => (
+                            <Icon
+                                name="dashboard"
+                                color={"white"}
+                                size={size}
+                            />
+                        )}
+                            labelStyle={{ color: "white" }}
 
-                <Drawer.Section style={styles.drawerSection} >
+                            label="Dashboard"
+                            onPress={() => { props.navigation.navigate("businessDash") }}
+                        />
+                        <DrawerItem  
+                            labelStyle={{ color: "white" }}
+
+                            label="products"
+                            onPress={() => { props.navigation.navigate("listProducts") }}
+                        />
+
+                    </Drawer.Section>
+                    <Drawer.Section style={styles.drawerSection} >
+                        <DrawerItem icon={({ color, size }) => (
+                            <FontAwesome color={"white"} style={{ padding: 0, fontSize: 30, }} name="home" />
+
+                        )}
+                            labelStyle={{ color: "white" }}
+
+                            label="Home"
+                            onPress={() => { props.navigation.navigate("Home") }}
+                        />
+
+                    </Drawer.Section>
+                    
+                    <Drawer.Section style={styles.drawerSection} >
+                        <DrawerItem icon={({ color, size }) => (
+                            <FontAwesome color={"white"} style={{ padding: 0, fontSize: 30, }} name="comments" />
+
+                        )}
+                            labelStyle={{ color: "white" }}
+                            label="Chat"
+                            onPress={() => { props.navigation.navigate("chat") }}
+                        />
+
+                    </Drawer.Section>
+                    <Drawer.Section style={styles.drawerSection} >
+                        <DrawerItem icon={({ color, size }) => (
+                            <FontAwesome color={"white"} style={{ padding: 0, fontSize: 30, }} name="truck" />
+
+                        )} labelStyle={{ color: "white" }}
+
+                            label="livraisons"
+                            onPress={() => { props.navigation.navigate("deliveries") }}
+                        />
+
+                    </Drawer.Section>
+
+                    <Drawer.Section style={styles.drawerSection} >
+                        <DrawerItem icon={({ color, size }) => (
+                            <FontAwesome color={"white"} style={{ padding: 0, fontSize: 30, }} name="truck" />
+
+                        )} labelStyle={{ color: "white" }}
+
+                            label="Mes Commandes"
+                            onPress={() => { props.navigation.navigate("orders") }} />
+                    </Drawer.Section>
+                    <Drawer.Section style={styles.drawerSection} >
+                        <DrawerItem
+                            label="Dark mode"
+                            labelStyle={{ color: "white" }}
+                            icon={({ color, size }) => (
+                                <Switch
+                                    trackColor={{ false: "black", true: "white" }}
+                                    thumbColor={isEnabled ? "black" : "white"}
+                                    ios_backgroundColor="#3e3e3e"
+                                    onValueChange={toggleSwitch}
+                                    value={isEnabled}
+                                />)}
+
+                        />
+                    </Drawer.Section>
+
+                </DrawerContentScrollView>
+                <Drawer.Section style={styles.bottomDrawerSection} >
                     <DrawerItem icon={({ color, size }) => (
                         <Icon
-                            name="home"
-                            color={color}
+                            name="exit-to-app"
+                            color={"white"}
                             size={size}
                         />
                     )}
-                        label="Parametres"
-                        onPress={() => { props.navigation.navigate("Settings") }}
+
+                        labelStyle={{ color: "white" }}
+
+                        label="Logout"
+                        onPress={() => { context.logoutHandler() }}
                     />
 
                 </Drawer.Section>
-                <Drawer.Section style={styles.drawerSection} >
-                    <DrawerItem icon={({ color, size }) => (
-                        <Icon
-                            name="account-circle"
-                            color={color}
-                            size={size}
-                        />
-                    )}
-                        label="Chat"
-                        onPress={() => { props.navigation.navigate("chat") }}
-                    />
+            </View>
+        );
+    }
+    else {
+        return <View style={{ flex: 1, flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+            <ActivityIndicator size="large" />
 
-                </Drawer.Section>
-                <Drawer.Section style={styles.drawerSection} >
-                    <DrawerItem icon={({ color, size }) => (
-                        <Icon
-                            name="account-circle"
-                            color={color}
-                            size={size}
-                        />
-                    )}
-                        label="livraisons"
-                        onPress={() => { props.navigation.navigate("deliveries") }}
-                    />
-
-                </Drawer.Section>
-
-                <Drawer.Section style={styles.drawerSection} >
-                    <DrawerItem icon={({ color, size }) => (
-                        <Icon
-                            name="settings"
-                            color={color}
-                            size={size}
-                        />
-                    )}
-                        label="Mes Commandes"
-                        onPress={() => { props.navigation.navigate("orders") }} />
-                </Drawer.Section>
-                <Drawer.Section style={styles.drawerSection} >
-                    <DrawerItem
-                     label="Dark mode"
-
-                    icon={({ color, size }) => (
-                        <Switch
-                            trackColor={{ false: "black", true: "white" }}
-                            thumbColor={isEnabled ? "black" : "white"}
-                            ios_backgroundColor="#3e3e3e"
-                            onValueChange={toggleSwitch}
-                            value={isEnabled}
-                        />)}
-
-                    />
-                </Drawer.Section>
-
-            </DrawerContentScrollView>
-            <Drawer.Section style={styles.bottomDrawerSection} >
-                <DrawerItem icon={({ color, size }) => (
-                    <Icon
-                        name="exit-to-app"
-                        color={color}
-                        size={size}
-                    />
-                )}
-                    label="Logout"
-                    onPress={() => { context.logoutHandler() }}
-                />
-
-            </Drawer.Section>
         </View>
-    );
+    }
+
 }
 const styles = StyleSheet.create({
 
@@ -119,22 +147,23 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     logoAppSection: {
-        flex: 1,
         flexDirection: 'row',
-        alignItems: "baseline"
+        alignItems: "center",
+        marginTop: 20
 
     },
     LogoApp: {
         width: 30,
-        height: 40,
+        height: 30,
+        borderRadius: 30,
         marginHorizontal: 10
     },
 
     title: {
-        fontSize: 30,
-        marginTop: 30,
-        fontWeight: 'bold',
-        color: '#24A9E1'
+        fontSize: 16,
+        fontWeight: '400',
+        color: 'white',
+        letterSpacing: 0.2
     },
     caption: {
         fontSize: 14,
@@ -155,12 +184,10 @@ const styles = StyleSheet.create({
         marginRight: 3
     },
     drawerSection: {
-        marginTop: 15,
+        marginTop: 5,
     },
     bottomDrawerSection: {
-        marginBottom: 15,
-        borderTopColor: '#f4f4f4',
-        borderTopWidth: 1
+        marginBottom: 10,
     },
     preference: {
         flexDirection: 'row',

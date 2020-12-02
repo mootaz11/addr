@@ -3,34 +3,51 @@ import { View, Text, StyleSheet, Dimensions, Image, TouchableOpacity, Platform }
 import AuthContext from '../navigation/AuthContext';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { FlatList } from 'react-native-gesture-handler';
+import { getPartnerProducts, getPartnerWithProducts, getPartner } from '../rest/partnerApi'
 const categories = [
     { name: "Men", _id: "55" },
     { name: "Women", _id: "56" },
     { name: "kids", _id: "57" },
-    { name: "kids", _id: "58" },
-    { name: "kids", _id: "59" },
+    { name: "others", _id: "58" },
 
 ];
-const newArrivals = [
-    { name: "BIKER JACKET", price: "129.99 TND", image: require("../assets/bikerjacket.jpg"), _id: "51" },
-    { name: "BIKER JACKET", price: "129.99 TND", image: require("../assets/bikerjacket.jpg"), _id: "52" },
-    { name: "BIKER JACKET", price: "129.99 TND", image: require("../assets/bikerjacket.jpg"), _id: "53" }
-];
+
 export default function SingleBrand(props) {
     const context = useContext(AuthContext)
     const [dark, setDark] = useState(true);
     const [magictap, setmagicTap] = useState(false)
+    const [newArrivals, setNewArrivals] = useState(null);
+    const [topTrends, setTopTrends] = useState(null);
+    const [partner,setPartner]=useState(null);
 
-   /* useEffect(() => {
-        setDarkmode(context.darkMode)
-    }, [context.darkMode])
-*/
+    /* useEffect(() => {
+         setDarkmode(context.darkMode)
+     }, [context.darkMode])
+ */
+    
+    useEffect(() => {
+        getPartnerWithProducts(props.route.params.partner._id).then(partner => {
+            if(partner.lastProducts.length>0){
+                setPartner(partner)
+                console.log(partner)
+                setNewArrivals(partner.lastProducts)
+            }
+            else {
+                setNewArrivals(null);
+            }
+        })
+            .catch(err => { alert("error while getting partner ") })
+
+    }, [props.route.params.partner])
     const goBack = () => {
-        props.navigation.navigate("brand")
+        props.navigation.goBack()
     }
     const showall = () => { }
-    const checkCategory = (item)=>{
-        props.navigation.navigate("gender",{gender:item.name})
+    const checkCategory = (item) => {
+        props.navigation.navigate("gender", { gender: item.name ,categories:partner.categories})
+    }
+    const checkProduct = (item)=>{
+        props.navigation.navigate("singleProduct",{product:item})
     }
     return (
         <View style={!dark ? styles.container : styles.containerDark}>
@@ -60,7 +77,7 @@ export default function SingleBrand(props) {
                     data={categories}
 
                     renderItem={({ item }) =>
-                        <TouchableOpacity onPress={()=>{checkCategory(item)}}>
+                        <TouchableOpacity onPress={() => { checkCategory(item) }}>
                             <View style={styles.category}>
                                 <Text style={styles.categoryTitle}>{item.name}</Text>
 
@@ -79,67 +96,81 @@ export default function SingleBrand(props) {
             <View style={styles.newArrivals}>
                 <View style={styles.newArrivalsHeader}>
                     <View style={{ marginLeft: 5 }}>
-                        <Text style={dark ? { fontSize: 24, color: "white", fontWeight: "500" }:{ fontSize: 24, color: "black", fontWeight: "500" }}>New Arrivals</Text>
+                        <Text style={dark ? { fontSize: 24, color: "white", fontWeight: "500" } : { fontSize: 24, color: "black", fontWeight: "500" }}>New Arrivals</Text>
                     </View>
                     <TouchableOpacity>
                         <View style={{ flexDirection: "row", alignItems: "center", alignContent: "center", justifyContent: "space-between", marginRight: 5 }}>
-                            <Text style={dark ? { fontSize: 15, color: "white" }:{ fontSize: 15, color: "black" }}>show all</Text>
-                            <FontAwesome color={dark ? "white":"black"} style={{ marginHorizontal: 3, fontSize: 15 }} name="caret-right" onPress={showall} />
+                            <Text style={dark ? { fontSize: 15, color: "white" } : { fontSize: 15, color: "black" }}>show all</Text>
+                            <FontAwesome color={dark ? "white" : "black"} style={{ marginHorizontal: 3, fontSize: 15 }} name="caret-right" onPress={showall} />
 
 
                         </View>
                     </TouchableOpacity>
                 </View>
                 <View style={styles.newArrivalsBody}>
-                    <FlatList
+                    {newArrivals ? <FlatList
                         data={newArrivals}
                         horizontal
                         renderItem={
                             ({ item }) =>
-                                <View style={dark ? styles.productDark :styles.product}>
-                                    <Image style={styles.productImage} source={item.image} />
-                                    <Text style={dark ? styles.productTitleDark: styles.productTitle}>{item.name}</Text>
-                                    <Text style={styles.price}>{item.price}</Text>
+                                <TouchableOpacity onPress={()=>{checkProduct(item)}}>
+
+                                <View style={dark ? styles.productDark : styles.product}>
+                                    <Image style={styles.productImage} source={item.mainImage ? { uri: item.mainImage } : require("../assets/imagenotyet.jpg")} />
+                                    <Text style={dark ? styles.productTitleDark : styles.productTitle}>{item.name}</Text>
+                                    <Text style={styles.price}>{item.basePrice} DT</Text>
                                 </View>
+                                </TouchableOpacity>
+
                         }
                         keyExtractor={item => item._id}
                     >
 
                     </FlatList>
+                        :
+                        <View style={{ justifyContent: "center", flex: 1 }}>
+                            <Text style={{ textAlign: "center", color: "white", fontSize: 16 }}>no new Arrivals yet</Text>
 
+                        </View>}
                 </View>
             </View>
             <View style={styles.newArrivals}>
                 <View style={styles.newArrivalsHeader}>
                     <View style={{ marginLeft: 5 }}>
-                        <Text style={dark  ?{ fontSize: 24, color: "white", fontWeight: "500" }:{ fontSize: 24, color: "black", fontWeight: "500" }}>Top Trends</Text>
+                        <Text style={dark ? { fontSize: 24, color: "white", fontWeight: "500" } : { fontSize: 24, color: "black", fontWeight: "500" }}>Top Trends</Text>
                     </View>
                     <TouchableOpacity>
                         <View style={{ flexDirection: "row", alignItems: "center", alignContent: "center", justifyContent: "space-between", marginRight: 5 }}>
-                            <Text style={dark ? { fontSize: 15, color: "white" }:{ fontSize: 15, color: "black" }}>show all</Text>
-                            <FontAwesome color={dark ? "white":"black"} style={{ marginHorizontal: 3, fontSize: 15 }} name="caret-right" onPress={showall} />
+                            <Text style={dark ? { fontSize: 15, color: "white" } : { fontSize: 15, color: "black" }}>show all</Text>
+                            <FontAwesome color={dark ? "white" : "black"} style={{ marginHorizontal: 3, fontSize: 15 }} name="caret-right" onPress={showall} />
 
 
                         </View>
                     </TouchableOpacity>
                 </View>
                 <View style={styles.newArrivalsBody}>
-                    <FlatList
-                        data={newArrivals}
-                        horizontal
-                        renderItem={
-                            ({ item }) =>
-                                <View style={dark ? styles.productDark : styles.product}>
-                                    <Image style={styles.productImage} source={item.image} />
-                                    <Text style={dark ? styles.productTitleDark : styles.productTitle}>{item.name}</Text>
-                                    <Text style={styles.price}>{item.price}</Text>
-                                </View>
-                        }
-                        keyExtractor={item => item._id}
-                    >
+                    {topTrends ?
+                        <FlatList
+                            data={topTrends}
+                            horizontal
+                            renderItem={
+                                ({ item }) =>
+                                    <View style={dark ? styles.productDark : styles.product}>
+                                        <Image style={styles.productImage} source={item.mainImage ? { uri: item.mainImage } : require("../assets/imagenotyet.jpg")} />
+                                        <Text style={dark ? styles.productTitleDark : styles.productTitle}>{item.name}</Text>
+                                        <Text style={styles.price}>{item.basePrice} DT</Text>
+                                    </View>
+                            }
+                            keyExtractor={item => item._id}
+                        >
 
-                    </FlatList>
+                        </FlatList>
+                        :
+                        <View style={{ justifyContent: "center", flex: 1 }}>
+                            <Text style={{ textAlign: "center", color: "white", fontSize: 16 }}>no Top Trends yet</Text>
 
+                        </View>
+                    }
                 </View>
             </View>
 
@@ -164,7 +195,7 @@ const styles = StyleSheet.create({
         flexDirection: "column",
         height: Dimensions.get("window").height,
         width: Dimensions.get("window").width,
-        backgroundColor:"#121212"
+        backgroundColor: "#121212"
     },
 
 
@@ -261,12 +292,12 @@ const styles = StyleSheet.create({
         borderRadius: 8
 
     },
-    productDark:{
+    productDark: {
         height: "100%",
         width: 140,
         marginHorizontal: 8,
         borderRadius: 8,
-        backgroundColor:"#292929",
+        backgroundColor: "#292929",
 
 
     },
@@ -283,7 +314,7 @@ const styles = StyleSheet.create({
         fontWeight: "400",
 
     },
-    productTitleDark:{
+    productTitleDark: {
         fontSize: 16,
         color: "white",
         fontWeight: "400",

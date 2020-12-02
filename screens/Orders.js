@@ -2,7 +2,7 @@
 // Linking.openURL(url);
 
 import React, { useState, useEffect } from 'react'
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, Image, SafeAreaView } from 'react-native'
 import { Icon } from 'react-native-elements';
 import AuthContext from '../navigation/AuthContext';
 import _ from 'lodash';
@@ -114,11 +114,12 @@ export default function Orders(props) {
 
 
     return (
+        <SafeAreaView style={{flex:1}}>
         <View style={ dark ? styles.containerDark : styles.container}>
             <View style={dark ? styles.menuDark :  styles.menu}>
                 <TouchableOpacity style={styles.leftArrowContainer}>
                     <View >
-                        <Icon color={ dark ? "white" : "#2474F1"} style={{ flex: 1, padding: 0 }} name="menu" onPress={openDrawer} />
+                        <Icon color={ dark ? "white" : "#2474F1"} style={{ flex: 1, padding: 0,justifyContent:"center" }} name="menu" onPress={openDrawer} />
                     </View>
                 </TouchableOpacity>
                 <View style={styles.titleContainer}>
@@ -169,7 +170,7 @@ export default function Orders(props) {
                             {
                                 orderDuringDelivery ?
 
-                                    <View style={{ width: "25%", height: "100%", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
+                                    <View style={{ width: "10%", height: "100%", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
 
                                         <TouchableOpacity onPress={() => { orderDone(item) }}>
                                             <FontAwesome color={ "#4BB543" } style={{ padding: 0, fontSize: 30, }} name="check" />
@@ -188,6 +189,7 @@ export default function Orders(props) {
             </View>
 
         </View>
+        </SafeAreaView>
     );
 }
 
@@ -204,11 +206,12 @@ const styles = StyleSheet.create({
         borderRadius: 12
     },
     deliveryInfo: {
-        width: "60%",
+        width: "75%",
         height: "100%",
         flexDirection: "column",
         padding: 4,
-        justifyContent: "center"
+        justifyContent: "center",
+
     },
     info: {
         fontSize: 12,
@@ -316,7 +319,9 @@ const styles = StyleSheet.create({
         height: "8%",
         backgroundColor: "#121212",
         flexDirection: "row",
-        marginBottom: 8
+        marginBottom: 8,
+        
+        
     },
     leftArrowContainer: {
         width: "10%",

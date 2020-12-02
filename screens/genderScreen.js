@@ -1,30 +1,27 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {View,Text, StyleSheet,Dimensions,Image,TouchableOpacity} from 'react-native'
 import { FlatList } from 'react-native-gesture-handler';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
-const categories = [
-    {name:"Offers",_id:"50"},
-    {name:"Trending Now",_id:"51"},
-    {name:"View all",_id:"53"},
-    {name:"T-shirt & Vesta",_id:"54"},
-    {name:"Shirts",_id:"55"},
-    {name:"Hoodies & Sweatshirts",_id:"56"},
-    {name:"Shoes",_id:"57"},
-    {name:"Troussers",_id:"58"},
-    {name:"Jeans",_id:"59"},
 
-]
 
 
 export default function genderCategory(props){
     const [dark,setDark] = useState(true);
+    const [categories,setCategories]=useState(null)
+    const [gender,setGender]=useState("")
+    useEffect(()=>{
+        setGender(props.route.params.gender)
+        if(props.route.params.categories.length>0){
+            setCategories(props.route.params.categories);
 
+        }
+    },[props.route.params])
     const goBack= ()=>{
-        props.navigation.navigate("singleBrand");
+        props.navigation.goBack()
     }
-    const checkCategory=()=>{
-        props.navigation.navigate("products")
+    const checkCategory=(_category)=>{
+        props.navigation.navigate("products",{previous_screen:"gender",category:_category,gender:gender.toLowerCase()})
     }
     return(
         <View style={dark ? styles.containerDark : styles.container}>
@@ -36,7 +33,7 @@ export default function genderCategory(props){
                         </TouchableOpacity>
                     </View>
                  <View style={styles.titleContainer}>
-                 <Text style={dark ? styles.TitleDark : styles.Title}>{/*props.route.params.gender*/}hello</Text>
+                 <Text style={dark ? styles.TitleDark : styles.Title}>{props.route.params.gender}</Text>
                 </View>   
                 <View style={styles.searchContainer}>
                 <FontAwesome color={dark ? "white" : "black"} style={{ padding: 0, fontSize: 24 }} name="search"  />
@@ -44,28 +41,36 @@ export default function genderCategory(props){
                 </View>
             
             </View>
-            <View style={styles.categoriesContainer}>
-                <FlatList
-                    data={categories}
-                    renderItem={
-                        ({item})=>
-                        <TouchableOpacity onPress={()=>{checkCategory(item)}}>
-                        <View style={styles.category}>
-                            <View style={{marginLeft:8}}>
-                                <Text style={dark ? {fontSize:20,fontWeight:"400",color:"white"}:{fontSize:20,fontWeight:"400"}}>{item.name}</Text>
-                            </View>
-                            <View style={{width:30, height:"80%",justifyContent:"center",alignItems:"center" ,marginRight:8}}>
-                             <Image style={styles.arrowright} source={dark ? require("../assets/right-arrow-dark.png"):require("../assets/right-arrow.png")}/>
-                            </View>
-                        </View>
-                        </TouchableOpacity>
-                    }
-                    keyExtractor={item=>item._id}
-                >
+       {
+           categories ? 
+           <View style={styles.categoriesContainer}>
+           <FlatList
+               data={categories}
+               renderItem={
+                   ({item})=>
+                   <TouchableOpacity onPress={()=>{checkCategory(item)}}>
+                   <View style={styles.category}>
+                       <View style={{marginLeft:8}}>
+                           <Text style={dark ? {fontSize:20,fontWeight:"400",color:"white"}:{fontSize:20,fontWeight:"400"}}>{item.name}</Text>
+                       </View>
+                       <View style={{width:30, height:"80%",justifyContent:"center",alignItems:"center" ,marginRight:8}}>
+                        <Image style={styles.arrowright} source={dark ? require("../assets/right-arrow-dark.png"):require("../assets/right-arrow.png")}/>
+                       </View>
+                   </View>
+                   </TouchableOpacity>
+               }
+               keyExtractor={item=>item._id}
+           >
 
-                </FlatList>
-            </View>
-        
+           </FlatList>
+       </View>
+    :
+    <View style={{width:"100%",height:"100%",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
+            <Text style={{fontSize:20,color:"white"}}>no Cagetories Found for this partner</Text>
+    </View>
+           
+       }
+           
 
         </View>
     );

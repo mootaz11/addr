@@ -17,10 +17,15 @@ export default  function AppContext(props){
     const token_init = AsyncStorageService.getAccessToken();
     const [token,setToken]=useState(token_init)
     const [isloading,setIsloading]=useState(true);
+    const [partner,setPartner]=useState(null)
     
     useEffect(() => {
         if (token) {
             getConnectedUser().then(res=>{  
+                if(res.data.connectedUser.isPartner){
+                    console.log(res.data.connectedUser.partners[0])
+                    setPartner(res.data.connectedUser.partners[0])
+                }
                 setDarkMode(false);
                 setUser(res.data.connectedUser);
                 setLocationState(res.data.connectedUser.locationState);
@@ -243,6 +248,7 @@ return(
 <AuthContext.Provider value={{
     darkMode:darkMode,
     user:user,
+    partner:partner,
     socket:socket,
     conversations:conversations,
     location:location,

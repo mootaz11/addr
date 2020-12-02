@@ -1,24 +1,32 @@
 import React, { useContext, useState,useEffect } from 'react'
-import {View,Text,StyleSheet, Dimensions,Image, TouchableOpacity} from 'react-native'
+import {View,Text,StyleSheet, Dimensions,Image, TouchableOpacity, ActivityIndicator} from 'react-native'
 import AuthContext from '../navigation/AuthContext';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { FlatList } from 'react-native-gesture-handler';
+import {getProductsByCategory} from '../rest/partnerApi';
 
-const products=[
-    {name:"BIKER JACKER",price:"123.487 TND",image:require("../assets/product1.webp"),_id:"55"},
-    {name:"BIKER JACKER",price:"123.487 TND",image:require("../assets/product2.webp"),_id:"56"},
-    {name:"BIKER JACKER",price:"123.487 TND",image:require("../assets/product3.webp"),_id:"57"},
-    {name:"BIKER JACKER",price:"123.487 TND",image:require("../assets/product4.webp"),_id:"58"},
-    {name:"BIKER JACKER",price:"123.487 TND",image:require("../assets/product5.webp"),_id:"59"},
-    {name:"BIKER JACKER",price:"123.487 TND",image:require("../assets/product6.webp"),_id:"60"},
-
-]
 
 
 export default function Products(props){
     const context = useContext(AuthContext)
     const [dark,setDark] =  useState(true);
     const [magictap,setmagicTap]= useState(false)
+    const [products,setProducts]=useState(null);
+    useEffect(()=>{
+        if(props.route.params.previous_screen=='gender'){
+            console.log(props.route.params.gender);
+            getProductsByCategory(props.route.params.category._id,props.route.params.gender)
+                .then(_products=>{
+                    if(_products.length>0){
+                        setProducts(_products);
+                    }
+
+                })
+        }
+        
+    },[props.route.params])
+
+    
 
     /*useEffect(()=>{
         setDarkmode(context.darkMode)
@@ -26,7 +34,8 @@ export default function Products(props){
     */
 
     const goBack = ()=> {
-        props.navigation.navigate("gender")
+        setProducts(null)
+        props.navigation.goBack()
     }
     const checkSingleProduct=(value)=>{
         props.navigation.navigate("singleProduct",{product:value})
@@ -51,31 +60,48 @@ export default function Products(props){
                 </View>
             
             </View>
-            <View style={styles.partners}>
-                <FlatList
-                    data={products}
-                    numColumns={2}
-                    renderItem={({item})=>
-                    <TouchableOpacity style={{width:"45%",height:250,margin:8,}} onPress={()=>{checkSingleProduct(item)}} onMagicTap={()=>{setmagicTap(magictap=>!magictap)}}>
-                    <View style={ magictap ? styles.partnerContainerTapped :(dark ? styles.partnerContainerDark :  styles.partnerContainer)} >
-                        <Image style={styles.partnerImage} source={item.image}/>    
-                        <View style={styles.productinfo}>
-                        <Text style={dark ? styles.productTitleDark : styles.productTitle}>{item.name}</Text>
-                        <Text style={styles.price}>{item.price}</Text>
+           
+           {
+               products ? 
 
-                            </View>    
-                    </View>
-                    </TouchableOpacity>
+               <View style={styles.partners}>
+               <FlatList
+                   data={products}
+                   numColumns={2}
+                   renderItem={({item})=>
+                   <TouchableOpacity style={{width:"45%",height:250,margin:8,}} onPress={()=>{checkSingleProduct(item)}} onMagicTap={()=>{setmagicTap(magictap=>!magictap)}}>
+                   <View style={ magictap ? styles.partnerContainerTapped :(dark ? styles.partnerContainerDark :  styles.partnerContainer)} >
+                        
+                       <Image style={styles.partnerImage} source={{uri:item.mainImage}}/>    
+
+                       <View style={styles.productinfo}>
+                       <Text style={dark ? styles.productTitleDark : styles.productTitle}>{item.name}</Text>
+                       <Text style={styles.price}>{item.basePrice} DT</Text>
+
+                           </View>    
+                   </View>
+                   </TouchableOpacity>
 
 
-                }
-                keyExtractor={item => item._id}
-                
-                >
+               }
+               keyExtractor={item => item._id}
+               
+               >
 
-                </FlatList>
+               </FlatList>
 
-            </View>
+           </View>
+           :
+
+           <View style={{height:"90%",width:"100%",justifyContent:"center",alignItems:"center",flexDirection:"column"}}>
+               <Text style={{fontSize:16,color:"white"}}>no products in stock</Text>
+          
+           </View>
+
+
+           }
+           
+           
         
         </View>
     );
@@ -213,7 +239,7 @@ productinfo:{
 },
 partnerName:{
     fontSize:18,
-    color:"back",
+    color:"black",
     fontWeight:"500"
 }
 
