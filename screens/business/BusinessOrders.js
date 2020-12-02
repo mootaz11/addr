@@ -17,13 +17,13 @@ const order_pipeline = [
 export default function  BusinessOrders (props) {
     const context = React.useContext(AuthContext);
     
-    const [orderstoPrepare, setOrderstoPrepare] = useState(orderToPrepare);
-    const [preparedOrders,setPreparedOrders]=useState(orders_prepared);
-    const [deliveredOrders,setDeliveredOrders] = useState(historique_orders);
+    const [orderstoPrepare, setOrderstoPrepare] = useState([]);
+    const [preparedOrders,setPreparedOrders]=useState([]);
+    const [deliveredOrders,setDeliveredOrders] = useState([]);
 
     const [checkedStep, setCheckedStep] = useState(order_pipeline[0])
 
-    const [OrderToPrepare, setOrderToPrepare] = useState(true);
+    const [orderToPrepare, setOrderToPrepare] = useState(true);
     const [preparedOrder, setPreparedOrder] = useState(false);
     const [deliveredOrder, setDeliveredOrder] = useState(false);
 
@@ -139,7 +139,7 @@ export default function  BusinessOrders (props) {
             <View style={styles.ordersContainer}>
 
                 <FlatList
-                    data={orderToPrepare ? orderstoPrepare : preparedOrder ? preparedOrders : deliveredOrder ? deliveredOrders : null}
+                    data={orderToPrepare? orderstoPrepare : preparedOrder ? preparedOrders : deliveredOrder ? deliveredOrders : null}
                     renderItem={({ item }) =>
                     <TouchableOpacity>
                         <View style={styles.delivery} >
@@ -150,7 +150,7 @@ export default function  BusinessOrders (props) {
                                 <Text style={styles.info}>Nom de Livreur: {item.nomLivreur} </Text>
                                 <Text style={styles.info}>Nom de Produit: {item.productname} </Text>
                                 <Text style={styles.info}>Date: {item.Date}</Text>
-                                {   orderToPrepare &&
+                                {   orderToPrepare&&
                                     <TouchableOpacity onPress={()=>{changeOrderState(item)}}>
                                         <Text style={{ fontSize: 12, fontWeight: "600", color: "#2474F1", textDecorationLine: "underline" }}>your opinion about the product</Text>
                                     </TouchableOpacity>

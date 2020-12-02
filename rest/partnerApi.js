@@ -50,6 +50,20 @@ export const deleteManager = (partnerId,user)=>{
     })
 }
 
+export const  addPartnerLocalisation =(partnerId,localisation)=>{
+
+    return new Promise((resolve,reject)=>{
+        axios.post(`/partner/${partnerId}/localisation`,{localisation}).then(res=>{
+            resolve(res.data.localisation);
+        })
+        .catch(err=>{
+            reject(err);
+        })
+    })
+
+}
+
+
 export const addView =(partnerId)=>{   
     return new Promise((resolve,reject)=>{
         axios.post(`/partner/view/${partnerId}`,{}).then(res=>{
@@ -145,9 +159,4 @@ export const getProductsByCategory = (idcategory,gender)=>{
         })
         .catch(err=>{reject(err)})
     })
-}
-
-
-export  const addVariants = ()=>{
-    
 }

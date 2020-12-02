@@ -44,12 +44,33 @@ export default function CustomDrawer(props) {
                             label="Dashboard"
                             onPress={() => { props.navigation.navigate("businessDash") }}
                         />
-                        <DrawerItem  
+                        {   context.user.isPartner ? 
+                                <DrawerItem  
+                                labelStyle={{ color: "white" }}
+    
+                                label="products"
+                                onPress={() => { props.navigation.navigate("listProducts") }}
+                            />
+                            :null
+                        }
+                        
+                          <DrawerItem  
                             labelStyle={{ color: "white" }}
 
-                            label="products"
-                            onPress={() => { props.navigation.navigate("listProducts") }}
+                            label="follow packages"
+                            onPress={() => { props.navigation.navigate("followPackages") }}
                         />
+                        {
+                            context.user.isPartner ? 
+                                  <DrawerItem  
+                                  labelStyle={{ color: "white" }}
+      
+                                  label="add location"
+                                  onPress={() => { props.navigation.navigate("addLocation") }}
+                              />
+                              :null
+                        }
+                        
 
                     </Drawer.Section>
                     <Drawer.Section style={styles.drawerSection} >
@@ -87,15 +108,16 @@ export default function CustomDrawer(props) {
                         />
 
                     </Drawer.Section>
-
                     <Drawer.Section style={styles.drawerSection} >
                         <DrawerItem icon={({ color, size }) => (
                             <FontAwesome color={"white"} style={{ padding: 0, fontSize: 30, }} name="truck" />
 
                         )} labelStyle={{ color: "white" }}
 
-                            label="Mes Commandes"
-                            onPress={() => { props.navigation.navigate("orders") }} />
+                            label={"Orders"}
+                          
+                          onPress={() => { context.user.isPartner ? props.navigation.navigate("businessorders") : props.navigation.navigate("orders") }} />
+                   
                     </Drawer.Section>
                     <Drawer.Section style={styles.drawerSection} >
                         <DrawerItem
@@ -156,7 +178,8 @@ const styles = StyleSheet.create({
         width: 30,
         height: 30,
         borderRadius: 30,
-        marginHorizontal: 10
+        marginHorizontal: 10,
+        backgroundColor:"white"
     },
 
     title: {
