@@ -16,10 +16,7 @@ const MyButton = (props) => {
 
 const styles = StyleSheet.create({
     button: {
-        backgroundColor: "#2474F1",
-
-        paddingVertical: 20,
-
+        backgroundColor: "#2474F1",  
          //shadow
          shadowColor: '#f3f3f3',
          shadowOffset: {width:1, height:2},
@@ -29,7 +26,7 @@ const styles = StyleSheet.create({
     },
     buttonText: {
         color: Colors.accent,
-        fontSize: 20,
+        fontSize: 16,
         fontWeight: '600'
     }
 });

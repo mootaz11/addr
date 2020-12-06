@@ -1,11 +1,6 @@
 import React, { useContext, useState } from 'react'
 import { View, Text, StyleSheet, Dimensions, Image, TouchableOpacity, SafeAreaView, Modal, TextInput } from 'react-native'
-export default function followPackages(props) {
-
-return (<View></View>)
-}
-
-/*import MapView, { Marker } from 'react-native-maps';
+import MapView, { Marker } from 'react-native-maps';
 import { Icon } from 'react-native-elements';
 import AuthContext from '../../navigation/AuthContext';
 import MapViewDirections from 'react-native-maps-directions';
@@ -486,4 +481,3 @@ const darkStyle = [
     }
 ];
 
-*/

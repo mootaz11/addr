@@ -1,30 +1,36 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import { View, Text, StyleSheet, Dimensions, Image, TouchableOpacity, SafeAreaView,Modal,TextInput } from 'react-native'
 import { FlatList } from 'react-native-gesture-handler';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
-export default function addLocation(props){
-    return (<View></View>) 
-}
-/*import MapView, { Marker } from 'react-native-maps';
+
+import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import * as Permissions from 'expo-permissions';
 import { Icon } from 'react-native-elements';
+import { addPartnerLocalisation } from '../../rest/partnerApi';
+import AuthContext from '../../navigation/AuthContext';
 
 
 
 export default function addLocation(props) {
+    const context = useContext(AuthContext);
     const [dark, setDark] = useState(false);
     const [openModal,setOpenModal]=useState(false)
     const [address,setAddress]=useState("")
+    const [partnerLocations,setPartnerLocations]=useState([]);
     const openDrawer = () => {
         props.navigation.openDrawer();
 
     }
-    const saveAdress=()=>{
-        console.log(address);
-        setAddress("")
-        setOpenModal(false)
+    const addNewLocationHandler=()=>{
+     
+    }
+    const addNewLocationByMapHandler=(evt)=>{
+        const localisation = evt.nativeEvent.coordinate;
+        addPartnerLocalisation(context.partner._id,localisation).then(_localisation=>{
+            setPartnerLocations(partnerLocations=>[...partnerLocations,_localisation]);
+        })
     }
     const getPosition=()=>{}
     return (
@@ -51,13 +57,50 @@ export default function addLocation(props) {
 
 
                         }}
-
+                        on
+                        onPress={(evt)=>{addNewLocationByMapHandler(evt)}} 
                         style={{ flex: 1 }}
                         customMapStyle={darkStyle}
                         provider="google"
                     >
+                                            
+                      {
+                      partnerLocations.length>0 
+                      && partnerLocations.map((location)=>(
+                        <Marker
+                        key={location._id}
+                        draggable={true}
+                        onDragEnd={(evt)=>{handleChangeAddress(evt)}}
+  coordinate={
+    Platform.OS=='ios' ?
+    {
+    latitude:Number( location.latitude) 
+
+    ,
+    longitude:Number (location.longitude)
+
+  } :
+  {
+    latitude:  Number(location.latitude) 
+
+    ,
+    longitude:Number(location.longitude) 
+
+  }
+
+
+
+}
+>
+  <Image  source={ context.partner.profileImage ? {uri:context.partner.profileImage}: require('../../assets/logoAddresti.png') } style={{ height: 40, width: 40,borderRadius:40,}} />
+
+</Marker>
+
+                      )) 
+                      }
+        
                     </MapView>
-                    <TouchableOpacity style={styles.addLocation} onPress={()=>{setOpenModal(true)}}>
+                    <TouchableOpacity style={styles.addLocation} onPress={addNewLocationHandler}>
                         <View style={{
                             flexDirection: "row", justifyContent: "space-between", alignItems: "center"
                         }}>
@@ -74,38 +117,7 @@ export default function addLocation(props) {
                         </View>
                     </TouchableOpacity>
                 </View>
-                {
-                openModal &&
-            <Modal
-                animationType={"fade"}
-                transparent={true}
-                visible={true}
-                
-            >
-                <View  style={{ backgroundColor: "#000000aa", flex: 1 }}>
-                    <View style={{ backgroundColor: "#ffffff", margin: 100, flexDirection: "column", borderRadius: 10, height: Dimensions.get("window").height * 0.6, width: Dimensions.get("window").width * 0.8, alignSelf: "center" }}>
-                            <View style={{width:"100%",shadowOffset:{width:1,height:1},shadowOpacity:0.5,height:"20%",flexDirection:"column",justifyContent:"center",alignItems:"center"}}>
-                                <Text style={{fontSize:20}}>set your shop address</Text>
-                            </View >
-                            <View style={{width:"100%",height:"60%",flexDirection:"column",justifyContent:"center",alignItems:"center"}}>
-                                <TextInput
-                                    placeholder={"set your address here .."}
-                                    numberOfLines={2}
-                                    value={address}
-                                    onChangeText={(text)=>{setAddress(text)}}
-                                />
-                            </View>
-                            <View style={{width:"100%",height:"20%",flexDirection:"column",justifyContent:"center",alignItems:"center"}}>
-                            <TouchableOpacity onPress={saveAdress}>
-                            <View style={{width:"80%",height:40,backgroundColor:'#2474f1',justifyContent:"center",position:"absolute",borderRadius:20,alignSelf:"center",bottom:-20}}>
-                                <Text style={{textAlign:"center",textAlignVertical:"center",color:"white",fontSize:16, fontWeight:"500"}}>add your address</Text>
-                            </View>
-
-                            </TouchableOpacity>
-                            </View>
-                        </View>
-                    </View>
-            </Modal>}
+              
 
 
             </View>
@@ -392,4 +404,3 @@ const darkStyle = [
     }
 ];
 
-*/

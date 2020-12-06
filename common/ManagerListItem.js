@@ -3,9 +3,8 @@ import {StyleSheet, View, Text, Image, TouchableOpacity} from 'react-native';
 
 
 const ManagerListItem = (props) => {
-    
     return (
-            <View style={styles.itemContainer}>
+            <View  style={styles.itemContainer}>
                 <View style={styles.imageContainer}>
                 <Image 
                     style={styles.image} 
@@ -20,13 +19,13 @@ const ManagerListItem = (props) => {
                     <TouchableOpacity onPress={()=>{}}> 
                         <Image
                         style={styles.imageButton}
-                        source={require('../assets/images/speech.png')}
+                        source={require("../assets/images/speech.png")}
                         />
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={()=>{}}>
+                    <TouchableOpacity onPress={props.deleteManager.bind(this,props.user)}>
                         <Image 
                         style={styles.imageButton}
-                        source={require('../assets/images/trash.png')}
+                        source={require("../assets/images/trash.png")}
                         />
                     </TouchableOpacity>
                 </View>
@@ -67,7 +66,6 @@ const styles = StyleSheet.create({
     buttonsContainer: {
         flex:1.5,
         flexDirection: 'row',
-        //backgroundColor:'green',
         justifyContent: 'space-around',
         alignItems: 'center'
     },

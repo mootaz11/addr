@@ -3,7 +3,7 @@ import {View,Text,StyleSheet, Dimensions,Image, TouchableOpacity, ActivityIndica
 import AuthContext from '../navigation/AuthContext';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { FlatList } from 'react-native-gesture-handler';
-import {getProductsByCategory} from '../rest/partnerApi';
+import {getProductsByCategory} from '../rest/productApi';
 
 
 

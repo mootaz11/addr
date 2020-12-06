@@ -31,7 +31,7 @@ const DeliveryListItem = (props) => {
                     onValueChange={toggleSwitch}
                     value={switchValue}
                     />
-                    <TouchableOpacity onPress={()=>{}}>
+                    <TouchableOpacity onPress={props.deleteDeliverer.bind(this,props.deliverer)}>
                         <Image 
                         style={styles.imageButton}
                         source={require('../assets/images/trash.png')}

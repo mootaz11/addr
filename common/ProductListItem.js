@@ -112,7 +112,6 @@ const styles = StyleSheet.create({
     textContainerStock: {
         //backgroundColor:'yellow',
         flexDirection:'row',
-        justifyContent:'space-between'
     },
     textStyle2: {
         //backgroundColor: 'grey',

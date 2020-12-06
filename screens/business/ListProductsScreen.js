@@ -3,10 +3,11 @@ import { View, StyleSheet, Image, TextInput, FlatList,Dimensions,TouchableOpacit
 import ProductListItem from '../../common/ProductListItem';
 import MyButton from '../../common/MyButton';
 import Colors from '../../constants/Colors';
-import { getProducts } from '../../rest/partnerApi';
+import {  getPartnerProducts } from '../../rest/productApi';
 import AuthContext from '../../navigation/AuthContext';
 import _ from 'lodash';
 import { Icon } from 'react-native-elements';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 
 const ListProductsScreen = (props) => {
@@ -28,14 +29,15 @@ const ListProductsScreen = (props) => {
 
 
     useEffect(() => {
-        console.log(context.user._id)
-        getProducts(context.partner._id).then(products => {
-            setProducts(products)
-            setSearchResult(products)
+        getPartnerProducts(context.partner._id).then(data => {
+            setProducts(data.products)
+            setSearchResult(data.products)
 
         })
     }, [])
-
+    const addProductHandle =()=>{
+        props.navigation.navigate("addProduct")
+    }
     const openDrawer = ()=>{
         props.navigation.openDrawer();
     }
@@ -53,6 +55,7 @@ const ListProductsScreen = (props) => {
     };
 
     return (
+        <SafeAreaView style={{flex:1}}>
         <View style={styles.mainContainer}>
             <View style={styles.menu}>
                 <View style={styles.leftArrowContainer}>
@@ -86,14 +89,16 @@ const ListProductsScreen = (props) => {
                 <FlatList
                     data={searchResult}
                     renderItem={renderListItem}
+                    keyExtractor={item=>item._id}
                 />
             </View>
             <View style={styles.partThree}>
-                <MyButton style={styles.buttonStyle}>
+                <MyButton onPress={addProductHandle} style={styles.buttonStyle}>
                     Add product
                 </MyButton>
             </View>
         </View>
+        </SafeAreaView>
     );
 };
 
@@ -186,9 +191,10 @@ const styles = StyleSheet.create({
         //backgroundColor: 'green'
     },
     buttonStyle: {
-        paddingHorizontal: 120,
+        paddingHorizontal: 100,
+        paddingVertical:10,
         borderRadius: 10,
-        margin: 8
+        margin:4
     }
 });
 

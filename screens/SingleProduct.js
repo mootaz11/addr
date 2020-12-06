@@ -3,9 +3,11 @@ import { View, Text, StyleSheet, Dimensions, Image, TouchableOpacity, ActivityIn
 import AuthContext from '../navigation/AuthContext';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { Picker } from '@react-native-community/picker'
-import { getProduct } from '../rest/partnerApi'
+import { getProduct } from '../rest/productApi';
 import { FlatList } from 'react-native-gesture-handler';
+
 export default function SingleProduct(props) {
+
     const [selectedColor, setSelectedColor] = useState("");
     const [selectedSize, setSelectedSize] = useState("");
     const [product, setProduct] = useState(null);

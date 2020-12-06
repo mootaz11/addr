@@ -1,4 +1,4 @@
-//import AsyncStorage from '@react-native-community/async-storage'
+import AsyncStorage from '@react-native-community/async-storage'
 
 const getToken = async (item) => {
   let token = '';
@@ -22,34 +22,34 @@ const getToken = async (item) => {
         }
         return _service
     }
-     function _setToken(tokenObj) {
-      // await  AsyncStorage.setItem('access_token', tokenObj.accessToken);
-      // await  AsyncStorage.setItem('refresh_token', tokenObj.refreshToken);
-      localStorage.setItem('access_token',tokenObj.accessToken)
-      localStorage.setItem('refresh_token', tokenObj.refreshToken);
+     async function _setToken(tokenObj) {
+      await  AsyncStorage.setItem('access_token', tokenObj.accessToken);
+      await  AsyncStorage.setItem('refresh_token', tokenObj.refreshToken);
+      // localStorage.setItem('access_token',tokenObj.accessToken)
+      // localStorage.setItem('refresh_token', tokenObj.refreshToken);
       
     }
 
     
       function _getAccessToken() {
-      return    localStorage.getItem('access_token')//getToken('access_token')
+      return   getToken('access_token')
    
     }
      function _getRefreshToken() {
-       console.log( localStorage.getItem('refresh_token'))
-      return    localStorage.getItem('refresh_token')//getToken('refresh_token')
+      
+      return   getToken('refresh_token')
     }
 
-     function _clearToken() {
-       //await AsyncStorage.removeItem('access_token');
-        //await AsyncStorage.removeItem('refresh_token');
-           localStorage.removeItem('access_token');
-           localStorage.removeItem('refresh_token');
+    async function _clearToken() {
+       await AsyncStorage.removeItem('access_token');
+        await AsyncStorage.removeItem('refresh_token');
+          //  localStorage.removeItem('access_token');
+          //  localStorage.removeItem('refresh_token');
       }
 
-        function _setAccessToken(accessToken) {
-         localStorage.setItem('access_token',accessToken)
-        //await AsyncStorage.setItem('access_token', accessToken);
+       async  function _setAccessToken(accessToken) {
+        //  localStorage.setItem('access_token',accessToken)
+        await AsyncStorage.setItem('access_token', accessToken);
     }
 
     return {

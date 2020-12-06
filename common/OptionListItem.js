@@ -1,126 +1,122 @@
-import React, {useState} from 'react';
-import {StyleSheet, View, Text, Image, TouchableOpacity, Dimensions} from 'react-native';
-import { FlatList } from 'react-native-gesture-handler';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import React, {useState,useEffect} from 'react';
+import {StyleSheet, View, Text, TextInput, Switch, Dimensions} from 'react-native';
 
-const VariantListItem = (props) =>{
+import Colors from '../constants/Colors';
 
-    const renderListSousVariantsItem = (itemData) => {
-        return (
-            <View style={styles.sousVariantValueItemContainer}>
-                <View style={styles.sousvariantValue}>
-                    <Text style={{color:'white'}}>{itemData.item.sousvariant}</Text>
+const OptionListItem = (props) => {
+    const [switchValue, setSwitchValue] = useState(false);
+    const [price,setPrice]=useState("");
+    const [stock,setStock]=useState("");
+
+    useEffect(()=>{
+            setPrice(props.price.toString());
+            setStock(props.stock.toString());
+
+    },[props.price,props.stock])
+
+    const toggleSwitch = (value) => {
+        setSwitchValue(value);
+        props.handleisChecked(props.idCombination)
+      };
+const handleText= (text,idCombination)=>{
+    props.handlePriceChange(text,idCombination)
+}
+const handleStockText = (text,idCombination)=>{
+    props.handleStockChange(text,idCombination);
+}
+
+    return(
+            <View style={styles.itemContainer}>
+                <View style={styles.textContainer}>
+                    <Text>{props.name}</Text>
                 </View>
-                <View style={styles.deleteSousVariantImageContainer}>
-                <TouchableOpacity onPress={props.onDeleteSousVariant.bind(this,props.variantId, itemData.item.id)}>
-                    <FontAwesome color={"black"}  name={"close"} />                    
-                </TouchableOpacity>
+                <View style={styles.priceContainer}>
+                    <TextInput
+                    placeholder="price"
+                    keyboardType="decimal-pad"
+                    style={styles.priceInput}
+                    value={price}
+                    onChangeText={(text)=>{
+                       handleText(text,props.idCombination)}}
+                    />
                 </View>
-            </View>
-        );
-    };
-
-
-    return (
-        <View style={styles.itemContainer}>
-            <View style={styles.variantNameContainer}>
-                <Text style={{color:'white'}}>{props.variant}</Text>
-            </View>
-            <View style={styles.sousVariantsContainer}>
-                <View style={styles.sousVariantsValuesContainer}>
-                    <View style={styles.partSousVariants}>
-                        <FlatList
-                        data={props.sousvariants}
-                        renderItem={renderListSousVariantsItem}
-                        numColumns={3}
+                <View style={styles.stockContainer}>
+                    <View style={styles.stockInputContainer}>
+                        <TextInput
+                        placeholder="stock"
+                        keyboardType="decimal-pad"
+                        style={styles.stockInput}
+                        value={stock}
+                        onChangeText={(text)=>{
+                           handleStockText(text,props.idCombination)}}
+                        />
+                    </View>
+                    <View style={styles.switchContainer}>
+                        <Switch 
+                        trackColor={{ false: "#767577", true: Colors.primary }}
+                        thumbColor={switchValue ? "white" : "#f4f3f4"}
+                        onValueChange={toggleSwitch}
+                        value={switchValue}
                         />
                     </View>
                 </View>
-                <View style={styles.deleteButtonContainer}>
-                    <TouchableOpacity onPress={props.onDeleteVariant.bind(this, props.variantId)}>
-                    <Image 
-                    style={styles.imageDeleteButton}
-                    source={require('../assets/images/trash.png')}
-                    />
-                    </TouchableOpacity>
-                </View>
+
             </View>
-        </View>
     );
-};
+
+}
 
 const styles = StyleSheet.create({
     itemContainer:{
-        //backgroundColor:'red',
-        //flex:1,
-        height:Dimensions.get('window').height*0.155, //120
-        marginVertical:5
-    },
-    variantNameContainer:{
-        backgroundColor:'#0862ef',
-        marginBottom:3,
-        borderRadius:5,
-        flex:1,
-        width:'25%',
-        justifyContent:'center',
-        alignItems:'center'
-    },
-    sousVariantsContainer:{
-        backgroundColor:'white',
-        flex:3,
-        flexDirection:'row'
-    },
-    sousVariantsValuesContainer:{
-        //backgroundColor:'#0862ef',
-        //backgroundColor:'pink',
-        flex:6,
-        justifyContent:'center'
-    },
-    partSousVariants:{
-        //backgroundColor:'pink',
-        height:'80%',
-        marginHorizontal:5,
-        borderColor: '#0862ef',
-        borderWidth: 2,
-        borderRadius:8,
-        paddingHorizontal:Dimensions.get('window').width*0.025,
-    },
-    sousVariantValueItemContainer:{
-        backgroundColor:'#0862ef',
+        //backgroundColor:'yellow',
+        marginVertical:5,
         flexDirection:'row',
-        margin:3,
-        width:'30%',
-        height:Dimensions.get('window').height*0.0364,//28
-        borderRadius:5
     },
-    sousvariantValue:{
+    textContainer:{
+        //backgroundColor:'pink',
+        flex:1.17
+    },
+    priceContainer:{
+        //backgroundColor:'brown',
+        flex:1.85,
+        justifyContent:'center',
+        alignItems:'center'
+        
+    },
+    priceInput:{
+        borderColor: Colors.placeholder,
+        borderWidth: 1,
+        borderRadius:6,
+        height:Dimensions.get('window').height*0.055,//42
+        width:'85%',
+        paddingHorizontal:5
+    },
+    stockContainer:{
+        //backgroundColor:'orange',
+        flex:2.15,
+        flexDirection:'row',
+    },
+    stockInputContainer:{
         //backgroundColor:'green',
+        flex:2,
+        justifyContent:'center',
+        alignItems:'center'
+    },
+    stockInput:{
+        borderColor: Colors.placeholder,
+        borderWidth: 1,
+        borderRadius:6,
+        height:Dimensions.get('window').height*0.055,
+        width:'75%',
+        paddingHorizontal:5
+    },
+    switchContainer:{
+        //backgroundColor:'yellow',
         flex:1,
         justifyContent:'center',
         alignItems:'center'
     },
-    deleteSousVariantImageContainer:{
-        //backgroundColor:'purple',
-        justifyContent:'center',
-        alignItems:'center'
-    },
-    imageDeleteSousVariant:{
-        //backgroundColor:'yellow'
-        height:Dimensions.get('window').height*0.04, //15
-        width:Dimensions.get('window').width*0.04,  //18
-        resizeMode:'contain'
-    },
-    deleteButtonContainer:{
-        //backgroundColor:'blue',
-        flex:1,
-        justifyContent:'center',
-        alignItems:'center'
-    },
-    imageDeleteButton:{
-        height:Dimensions.get('window').height*0.045, //35
-        width:Dimensions.get('window').width*0.09,  //35
-        //backgroundColor:'yellow'
-    },
+
 });
 
-export default VariantListItem;
+export default OptionListItem;

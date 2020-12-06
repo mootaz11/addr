@@ -1,9 +1,7 @@
 import React, { useState, useContext, useEffect, useRef } from 'react'
 import { StyleSheet, Dimensions, View, Image, Platform, Text, Clipboard, Modal, SafeAreaView, Alert, Linking, TouchableOpacity,Keyboard  } from 'react-native';
-export default function Home(props){
-  return (<View></View>)
-}
-/*import MapView, { Marker } from 'react-native-maps';
+
+import MapView, { Marker } from 'react-native-maps';
 import { Icon, SearchBar } from 'react-native-elements';
 import { ScrollView } from 'react-native-gesture-handler';
 import { Button, TextInput } from 'react-native-paper';
@@ -1040,4 +1038,3 @@ const darkStyle = [
   }
 ]
 
-*/

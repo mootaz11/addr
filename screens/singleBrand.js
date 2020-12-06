@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Dimensions, Image, TouchableOpacity, Platform }
 import AuthContext from '../navigation/AuthContext';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { FlatList } from 'react-native-gesture-handler';
-import { getPartnerProducts, getPartnerWithProducts, getPartner } from '../rest/partnerApi'
+import {  getPartnerWithProducts } from '../rest/partnerApi'
 const categories = [
     { name: "Men", _id: "55" },
     { name: "Women", _id: "56" },
