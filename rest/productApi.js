@@ -1,16 +1,14 @@
-
 import axios from './customAxios';
 
 
 export const getProductsByCategory = (idcategory,gender)=>{
     return new Promise((resolve,reject)=>{
-        axios.post(`/product/category/${idcategory}`,{gender}).then(res=>{
-            resolve(res.data.filtered_products);
+        axios.post(`/product/categoryMobile/${idcategory}`,{gender}).then(res=>{
+            resolve(res.data.category.products);
         })
         .catch(err=>{reject(err)})
     })
 }
-
 
 export const addProduct=(partnerId,fd)=>{
     return new Promise((resolve,reject)=>{
@@ -43,6 +41,20 @@ export const getProduct = (productId)=>{
 }
 
 
+export const rateProduct = (productId,body)=>{
+    return new Promise((resolve,reject)=>{
+        axios.patch(`/product/rate/${productId}`).then(res=>{
+            if(res.status===200){
+                resolve(res.data.message);
+            }
+            else {
+                resolve("operation not effected");
+            }
+        }).catch(err=>{
+            reject(err)
+        })
+    })
+}
 
 
 

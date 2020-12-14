@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect, useRef } from 'react'
 import { StyleSheet, Dimensions, View, Image, Platform, Text, Clipboard, Modal, SafeAreaView, Alert, Linking, TouchableOpacity,Keyboard  } from 'react-native';
 
-import MapView, { Marker } from 'react-native-maps';
+//import MapView, { Marker } from 'react-native-maps';
 import { Icon, SearchBar } from 'react-native-elements';
 import { ScrollView } from 'react-native-gesture-handler';
 import { Button, TextInput } from 'react-native-paper';
@@ -10,7 +10,7 @@ import _ from 'lodash';
 import AuthContext from '../navigation/AuthContext';
 import * as Location from 'expo-location';
 import * as Permissions from 'expo-permissions';
-import MapViewDirections from 'react-native-maps-directions';
+//import MapViewDirections from 'react-native-maps-directions';
 import { getCities, getRegion,getService } from '../rest/geoLocationApi'
 import {getPartner} from '../rest/partnerApi';
 
@@ -41,7 +41,9 @@ const domains = [
 
 
 export default function Home({ navigation }) {
-  const context = useContext(AuthContext);
+  return(<View></View>)
+}
+ /* const context = useContext(AuthContext);
   const searchInput = useRef()
   const [user, setUser] = useState(context.user);
   const [dark, setDark] = useState(context.darkMode);
@@ -1038,3 +1040,4 @@ const darkStyle = [
   }
 ]
 
+*/

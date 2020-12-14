@@ -3,25 +3,24 @@ import {View,Text, StyleSheet,Dimensions,Image,TouchableOpacity} from 'react-nat
 import { FlatList } from 'react-native-gesture-handler';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
-
-
-
 export default function genderCategory(props){
     const [dark,setDark] = useState(true);
     const [categories,setCategories]=useState(null)
     const [gender,setGender]=useState("")
     useEffect(()=>{
-        setGender(props.route.params.gender)
+        if(props.route.params.gender)
+        {setGender(props.route.params.gender)}
         if(props.route.params.categories.length>0){
             setCategories(props.route.params.categories);
-
         }
-    },[props.route.params])
+
+    },[props.route.params.gender,props.route.params.categories])
     const goBack= ()=>{
         props.navigation.goBack()
     }
     const checkCategory=(_category)=>{
-        props.navigation.navigate("products",{previous_screen:"gender",category:_category,gender:gender.toLowerCase()})
+        
+        props.navigation.navigate("products",{category:_category,gender:gender.toLowerCase(),last_screen:"gender"})    
     }
     return(
         <View style={dark ? styles.containerDark : styles.container}>

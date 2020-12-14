@@ -6,46 +6,59 @@ import { FlatList } from 'react-native-gesture-handler';
 import {getProductsByCategory} from '../rest/productApi';
 
 
-
 export default function Products(props){
     const context = useContext(AuthContext)
-    const [dark,setDark] =  useState(true);
-    const [magictap,setmagicTap]= useState(false)
+    const [dark,setDark] =  useState(context.darkMode);
+    const [magictap,setmagicTap]= useState(false);
     const [products,setProducts]=useState(null);
+
     useEffect(()=>{
-        if(props.route.params.previous_screen=='gender'){
-            console.log(props.route.params.gender);
-            getProductsByCategory(props.route.params.category._id,props.route.params.gender)
-                .then(_products=>{
-                    if(_products.length>0){
-                        setProducts(_products);
-                    }
-
-                })
-        }
+        console.log(props.route.params.category.name);
         
-    },[props.route.params])
+        let isMounted = true ;
+            if(props.route.params.last_screen=="newArrivals"){
+                    setProducts(props.route.params.newArrivals)
+            }
+            else{  
+                getProductsByCategory(props.route.params.category._id,props.route.params.gender)
+                .then(_products=>{
+                    if(isMounted){
+                        if(_products.length>0){
+                            setProducts(_products);
+                        }
+                    }
+                  
+                }).catch(err=>{
+                    if(isMounted){
+                        alert("error occured")
+                    }
+                })      
+            }
+            
+            
+            return () =>{ isMounted=false;setProducts(null);}
+            },[props.route.params])
 
+
+            useEffect(()=>{
+        setDark(context.darkMode)
+                },[context.darkMode])
     
-
-    /*useEffect(()=>{
-        setDarkmode(context.darkMode)
-    },[context.darkMode])
-    */
-
     const goBack = ()=> {
-        setProducts(null)
+        setProducts(null);
         props.navigation.goBack()
     }
     const checkSingleProduct=(value)=>{
+        if(value.type=="food"){
+            props.navigation.navigate("food",{product:value});
+        }
+        else {
         props.navigation.navigate("singleProduct",{product:value})
-    }
-        
+        }
+    }   
     return(
-        <View style={!dark ? styles.container: styles.containerDark}>
-             
-
-                <View style={dark ? styles.menuDark  : styles.menu}>
+           <View style={!dark ? styles.container: styles.containerDark}>
+                        <View style={dark ? styles.menuDark  : styles.menu}>
                 <TouchableOpacity  style={styles.leftArrowContainer} onPress={goBack}>
                     <View >
                     <Image style={styles.leftArrow} source={dark ?require("../assets/left-arrow-dark.png") : require("../assets/left-arrow.png")}/>
@@ -58,12 +71,9 @@ export default function Products(props){
 
                 <FontAwesome color={dark ?"white" :  "black"} style={{ padding: 0, fontSize: 24 }} name="search" />
                 </View>
-            
-            </View>
-           
-           {
+             </View>
+              {
                products ? 
-
                <View style={styles.partners}>
                <FlatList
                    data={products}

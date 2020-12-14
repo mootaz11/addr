@@ -18,10 +18,15 @@ export default  function AppContext(props){
     const [token,setToken]=useState(token_init)
     const [isloading,setIsloading]=useState(true);
     const [partner,setPartner]=useState(null)
-    
+    const [bag,setBag]=useState(bag);
     useEffect(() => {
         if (token) {
             getConnectedUser().then(res=>{  
+                if(!res.data.connectedUser.isPartner)
+                {
+                    console.log(res.data.orders);
+                    setBag(res.data.orders);                    
+                }
                 if(res.data.connectedUser.isPartner){
                     console.log(res.data.connectedUser.partners[0])
                     setPartner(res.data.connectedUser.partners[0])
@@ -69,8 +74,6 @@ useEffect(()=>{
 
    
 //markasread-conversation
-
-
     useEffect(()=>{
         socket.off('send-message');
         socket.off('create-conversation');
@@ -82,13 +85,12 @@ useEffect(()=>{
                     if(conv_index >=0){
                          let _convReal = {..._conversations[conv_index]};
                          let notSeenMessages = [..._convReal.messages];
-                        
+                         
                          notSeenMessages.push(message);
                          let notSeenSum = 0
                          notSeenMessages.map(message=>{
                             if(message.sender._id != user._id && message.seen.length==0){
                                 notSeenSum+=1;}})          
-
                           _convReal.messages=notSeenMessages
                           _conversations.splice(conv_index,1);
                           _convReal.notSeen=notSeenSum;
@@ -133,13 +135,12 @@ useEffect(()=>{
             }).catch(err=>{reject(err)})
         }).catch(err=>{reject(err)})
     }
+
     const openConversationHandler = (id,Users) =>{
         console.log(id);
     if(conversations)
         if(!Users.other.isPartner){
-         
             let conversation_found=null;
-            
             conversations.map(conversation=>{
                 if (conversation.users.findIndex(user=>{ return user._id==Users.other._id}) >=0
                 && conversation.users.findIndex(user=>{return user._id==Users.user._id})>=0)
@@ -213,7 +214,9 @@ useEffect(()=>{
         setToken(null);
         setUser(null);
     }
-
+    const _createOrder =( body ) =>{
+        console.log(body);
+    }
     const updateUserLocation =(_location)=>{
         if(!location){
             addLocation(_location).then(loc=>{
@@ -253,11 +256,12 @@ return(
     conversations:conversations,
     location:location,
     locationState:locationState,
+    bag:bag,
+    isloading:isloading,
     LoginHandler:LoginHandler,
     openConversationHandler:openConversationHandler,
     logoutHandler:logoutHandler,
     modifyDarkModeHandler:modifyDarkModeHandler,
-    isloading:isloading,
     startNewConversation:startNewConversation,
     send_message:send_message,
     handleConversation:handleConversation,
@@ -266,7 +270,8 @@ return(
     updateUserLocation:updateUserLocation,
     updateUserLocationState:updateUserLocationState,
     handleTemporaryLocation:handleTemporaryLocation,
-    deleteTemprorayLocation:deleteTemprorayLocation
+    deleteTemprorayLocation:deleteTemprorayLocation,
+    _createOrder:_createOrder
 }
 }>
 

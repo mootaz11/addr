@@ -15,7 +15,7 @@ const ListProductsScreen = (props) => {
     const context = useContext(AuthContext)
     const [search, setSearch] = useState("");
     const [searchResult, setSearchResult] = useState([]);
-
+    const [dark,setDark]=useState(true);
 
     const filtreList = (text) => {
         setSearch(text)
@@ -50,22 +50,23 @@ const ListProductsScreen = (props) => {
                 stock={itemData.item.stock}
                 price={itemData.item.basePrice}
                 image={itemData.item.mainImage}
+                dark ={dark}
             />
         );
     };
 
     return (
         <SafeAreaView style={{flex:1}}>
-        <View style={styles.mainContainer}>
-            <View style={styles.menu}>
+        <View style={dark ? styles.mainContainerDark: styles.mainContainer}>
+            <View style={dark ? styles.menuDark : styles.menu}>
                 <View style={styles.leftArrowContainer}>
                     <TouchableOpacity style={styles.leftArrow}>
-                        <Icon color={"black"} style={{ padding: 4, alignSelf: "center", justifyContent: "center" }} name="menu" onPress={openDrawer} />
+                        <Icon color={dark ? "white":"black"} style={{ padding: 4, alignSelf: "center", justifyContent: "center" }} name="menu" onPress={openDrawer} />
 
                     </TouchableOpacity>
                 </View>
                 <View style={styles.titleContainer}>
-                    <Text style={styles.Title}>Partner products</Text>
+                    <Text style={dark ? styles.TitleDark : styles.Title}>Partner products</Text>
                 </View>
 
 
@@ -74,7 +75,7 @@ const ListProductsScreen = (props) => {
                 <View style={styles.search}>
                     <Image
                         style={styles.image}
-                        source={require("../../assets/images/searching.png")}
+                        source={dark ?require("../../assets/images/searchingDark.png") :require("../../assets/images/searching.png")}
                     />
                     <TextInput
                         value={search}
@@ -158,6 +159,12 @@ const styles = StyleSheet.create({
         alignContent: 'center',
         justifyContent: 'center',
         backgroundColor: Colors.background
+    },
+    mainContainerDark:{
+        flex: 1,
+        alignContent: 'center',
+        justifyContent: 'center',
+        backgroundColor: "#121212",
     },
     partOne: {
         flex: 1,

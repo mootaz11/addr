@@ -144,8 +144,6 @@ export default function Settings({navigation}){
         formdata.append('profileImage',{type:'image/png',uri:image.uri,name:'upload.png'});
         updateImage(formdata).then(res=>{Alert.prompt(res.data.photo)}).catch(err=>{console.log(err)});
         context.updateUser(user);
-        
-
     }
     const chooseFromLibrary=async ()=>{
        const permResult1 =  await Permissions.askAsync(Permissions.CAMERA);
@@ -209,13 +207,17 @@ export default function Settings({navigation}){
                 <Icon color={ dark ? "white": "#2474F1"} style={{ flex: 1, padding: 0 }} name="menu" onPress={openDrawer} />
                 <Text style={dark ? styles.TitleDark : styles.Title}>My Account</Text>
              </View>
+            
              <View style={styles.addImageContainer}>
                  <View style={styles.addImage} >
-                <Image style={dark ? styles.imageDark :styles.image}   source={ user.photo ? {uri:user.photo}  : require("../assets/add-image.png")}/>
-                 </View>
-                 <TouchableOpacity onPress={changePicture}>
-                     <Text style={dark ? styles.imageTitleDark :styles.imageTitle}>{ user.photo ? "Modifier votre image" : "Ajouter une image"}</Text>
+                 <Image style={dark ? styles.imageDark :styles.image}   source={ user.photo ? {uri:user.photo}  : require("../assets/add-image.png")}/>
+    
+                 <TouchableOpacity style={{position:"absolute",top:"84%",left:"64%"}} onPress={changePicture}>
+                     <Image style={{width:20,height:20,resizeMode:"cover"}} source={require("../assets/edit_image.png")}/>
                  </TouchableOpacity>
+               
+                 </View>
+               
             </View>
             <View style={styles.generalInfo}>
                 <View style={dark ? styles.infoDark :styles.info}>
@@ -232,6 +234,40 @@ export default function Settings({navigation}){
                    
 
                 </View>
+
+                <View style={dark ? styles.infoDark :styles.info}>
+                    <Image style={styles.infoImage} source={require("../assets/loginProfile.png")}/>
+               
+
+
+               { !editUsername &&<Text style={dark ? styles.userInfoDark :styles.userInfo}>{user.username}</Text>}
+                 {editUsername && <TextInput  style={dark ? styles.userInfoInputDark :styles.userInfoInput} value={user.username} onChangeText={(text)=>setUser({...user,username:text})} />} 
+                <TouchableOpacity style={styles.buttonEdit} onPress={changetoTextInputUsername}>
+                   { !editUsername && <Image style={styles.edit}  source={require("../assets/edit.png") }/>}
+                   { editUsername && <Image style={styles.edit}  source={require("../assets/done.png") }/>}
+                </TouchableOpacity> 
+                   
+
+                </View>
+
+                <View style={dark ? styles.infoDark :styles.info}>
+                    <Image style={styles.infoImage} source={require("../assets/loginProfile.png")}/>
+               
+
+
+               { !editUsername &&<Text style={dark ? styles.userInfoDark :styles.userInfo}>{user.username}</Text>}
+                 {editUsername && <TextInput  style={dark ? styles.userInfoInputDark :styles.userInfoInput} value={user.username} onChangeText={(text)=>setUser({...user,username:text})} />} 
+                <TouchableOpacity style={styles.buttonEdit} onPress={changetoTextInputUsername}>
+                   { !editUsername && <Image style={styles.edit}  source={require("../assets/edit.png") }/>}
+                   { editUsername && <Image style={styles.edit}  source={require("../assets/done.png") }/>}
+                </TouchableOpacity> 
+                   
+
+                </View>
+
+
+
+
 
                 <View style={dark ? styles.infoDark :styles.info}>
                 <Image style={styles.infoImage} source={require("../assets/emailProfile.png")}/>
@@ -429,8 +465,6 @@ addImage:{
     justifyContent:"center",
     alignItems:"center",
     width:"32%",
-    height:"46%",
-
 
 
 },

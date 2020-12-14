@@ -1,19 +1,23 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {StyleSheet, View, Text, Image, Switch} from 'react-native';
 
 import Colors from '../constants/Colors';
 
 const ProductListItem = (props) => {
     const [switchValue, setSwitchValue] = useState(false);
+    const [dark,setDark]=useState(true);
+    // useEffect(()=>{
+    //     setDark(props.dark);
+    // },[props.dark])
     const toggleSwitch = (value) => {
         setSwitchValue(value);
       };
     
     return (
-        <View style={styles.container}>
-        <View style={styles.itemContainer} >
+        <View style={ styles.container}>
+        <View style={ dark ? styles.itemContainerDark : styles.itemContainer} >
             <View style={styles.indexContainer}>
-                <Text>{props.index}</Text>
+                <Text style={dark ? {color:"white"}:{color:"black"}}>{props.index}</Text>
             </View>
             <View style={styles.imageContainer}>
                 <Image 
@@ -23,24 +27,24 @@ const ProductListItem = (props) => {
             </View>
             <View style={styles.textStyle1}>
                 <View style={styles.textContainerTitle}>
-                    <Text>{props.title}</Text>
+                <Text style={dark ? {color:"white"}:{color:"black"}}>{props.title}</Text>
                 </View>
                 <View style={styles.textContainerStock}>
-                    <Text>stock:</Text>
-                    <Text>{props.stock}</Text>
+                <Text style={dark ? {color:"white"}:{color:"black"}}>stock:</Text>
+                <Text style={dark ? {color:"white"}:{color:"black"}}>{props.stock}</Text>
                 </View>
             </View>
             <View style={styles.textStyle2}>
                 <View style={styles.priceContainer}>
-                    <Text>
+                <Text style={dark ? {color:"white"}:{color:"black"}}>
                         Price: 
                     </Text>
-                    <Text>
+                    <Text style={dark ? {color:"white"}:{color:"black"}}>
                         {props.price} TND 
                     </Text>
                 </View>
                 <View style={styles.switchContainer}>
-                    <Text style={{marginTop: 7}}>Switch</Text> 
+                    <Text style={dark ? {marginTop: 7,color:"white"}:{marginTop:7,color:"black"}}>Switch</Text> 
                     <Switch 
                     trackColor={{ false: "#767577", true: Colors.primary }}
                     thumbColor={switchValue ? "white" : "#f4f3f4"}
@@ -64,6 +68,7 @@ const styles = StyleSheet.create({
         //backgroundColor: 'yellow',
         paddingVertical: 10,
     },
+ 
     itemContainer: {
         backgroundColor: 'white',
         //backgroundColor:'red',
@@ -78,6 +83,21 @@ const styles = StyleSheet.create({
         marginVertical: 10,
         elevation: 5
     },
+    itemContainerDark:{
+        backgroundColor: '#292929',
+        //backgroundColor:'red',
+        flexDirection: 'row',
+        height: '120%',
+        width: '90%',
+        alignItems: 'center',
+        justifyContent: 'space-around',
+        borderColor: '#292929',
+        borderWidth: 1,
+        borderRadius: 20,
+        marginVertical: 10,
+        elevation: 5
+    },
+   
     indexContainer:{
         flex:0.5,
         //backgroundColor:'orange',

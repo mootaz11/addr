@@ -73,7 +73,12 @@ export default function Login(props) {
 
     useEffect(() => {
         if (!context.isloading && context.user) {
-            props.navigation.navigate("businessDash");
+            if(!context.user.isPartner){
+                props.navigation.navigate("Settings");
+            }
+            else{
+            props.navigation.navigate("listProducts");
+            }
         }
     }, [context.user, context.isloading])
 
@@ -92,7 +97,7 @@ export default function Login(props) {
             }
         );
 
-        return () => {
+        return () => {  
             keyboardDidHideListener.remove();
             keyboardDidShowListener.remove();
         };
@@ -143,6 +148,7 @@ export default function Login(props) {
                             source={require('../assets/images/logoBlue.png')}
                             style={styles.image}
                             resizeMode="contain"
+                            
                         />
                     </View>
                     <View style={styles.partTwo}>
@@ -217,6 +223,7 @@ export default function Login(props) {
          </View>
      );
  }*/
+
 const styles = StyleSheet.create({
     fullContainer: {
         flex: 1,

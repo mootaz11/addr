@@ -107,7 +107,6 @@ const AddProductScreen = (props) => {
     const [allSousVariantsCombinaisons, setSousVariantsCombinaisons] = useState([]);
     const  [categories,setCategories]=useState([]);
     const [foodVariants,setFoodVariants]=useState(variants_food);
-
     const [ModalSousVariantVisible,setModalSousVariantVisible]=useState(false)
 
 
@@ -469,13 +468,18 @@ const addOptionHandler = React.useCallback((idVariant)=>{
     };
 
     const submitHandler = useCallback(() => {
-        if(!formState.formIsValid || selectedImages.length===0|| variantsInputs.length===0){
+        if(productType=="regular"){
+
+       
+        
+        if(!formState.formIsValid || selectedImages.length===0|| variantsInputs.length===0 ){
             setImagesTouched(true);
             setVariantsTouched(true);
             Alert.alert('Wrong input!', 'Please check the errors in the form.', [{text: 'Okay'}
         ]);
         return;
         }
+
         else {
             // where you find title,description, productType, price, weight values
             let  _variants = []
@@ -495,13 +499,13 @@ const addOptionHandler = React.useCallback((idVariant)=>{
                 description:formState.inputValues.description,
                 partner:context.user._id,
                 weight:formState.inputValues.weight,
-                type:formState.inputValues.productType.toLowerCase(),
+                type:productType.toLowerCase(),
                 gender:gender.toLowerCase(),
                 name:formState.inputValues.title,
                 pricing:allSousVariantsCombinaisons}
 
                 const  fd= new FormData();
- 
+                console.log(product);
 
             selectedImages.forEach(image=>{
                 fd.append('productImages', {type:'image/png',uri:image.uri,name:'upload.png'});
@@ -511,10 +515,63 @@ const addOptionHandler = React.useCallback((idVariant)=>{
             fd.append('category',category);
             
             addProduct(context.partner._id,fd).then(message=>{
-                console.log(message);
+                Alert.alert('Operation Done', message, [{text: 'Okay'}]);
+                
             })
-
+        
         }
+    }
+
+   else{
+    if(!formState.formIsValid || selectedImages.length===0|| foodVariants.length===0 ){
+        setImagesTouched(true);
+        setVariantsTouched(true);
+        Alert.alert('Wrong input!', 'Please check the errors in the form.', [{text: 'Okay'}
+    ]);
+    return;
+    }
+
+    else {
+        // where you find title,description, productType, price, weight values
+        let  _variants = []
+        let  pricing =[]
+
+        variantsInputs.map(v=>{
+            let _variant = {
+                name:v.variant,
+                options:v.sousvariants.map(sv=>{return {name:sv.sousvariant}})
+            }
+            _variants.push(_variant);    
+        })
+       
+        const product={
+            basePrice:formState.inputValues.price,
+            discount:valueDiscount,
+            description:formState.inputValues.description,
+            partner:context.user._id,
+            weight:formState.inputValues.weight,
+            type:productType.toLowerCase(),
+            gender:gender.toLowerCase(),
+            name:formState.inputValues.title,
+            pricing:allSousVariantsCombinaisons}
+
+            const  fd= new FormData();
+            console.log(product);
+        selectedImages.forEach(image=>{
+            fd.append('productImages', {type:'image/png',uri:image.uri,name:'upload.png'});
+        })
+        fd.append('product',JSON.stringify({...product}));
+        fd.append('variants',JSON.stringify([..._variants]));
+        fd.append('category',category);
+        
+        // addProduct(context.partner._id,fd).then(message=>{
+        //     console.log(message);
+        // })
+    
+    }
+}
+
+    
 
     },[formState, selectedImages, variantsInputs]);
 

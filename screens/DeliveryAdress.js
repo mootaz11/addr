@@ -32,18 +32,15 @@ export default function deliveryAdress(props) {
     const [deliveryOption,setDeliveryOption]=useState(null);
     const [phoneNumber,setPhoneNumber]=useState("");
     const [dark,setDark]=useState(true)
-    
     const goBack = () => {
-        props.navigation.navigate("bag")
+        props.navigation.navigate("bag",{products:props.route.params.products})
     }
 
     const checkReview =()=>{
         props.navigation.navigate("orderReview")
     }
     
-
-
-
+    
     return (
         <View style={dark ? styles.containerDark : styles.container}>
 

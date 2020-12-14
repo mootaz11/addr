@@ -12,6 +12,20 @@ export const createOrder =(order )=>{
        }
     })
 }
+
+export const getClientPreOrders=()=>{
+    return new Promise((resolve,reject)=>{
+        axios.get("/order/client/pre-orders").then(res=>{
+            if(res.status===200){
+                resolve(res.data.orders)
+            }
+
+        }).catch(err=>{
+            reject(err);
+        })
+    })
+}
+
 export const getClientOrders = ()=>{
     return new Promise((resolve,reject)=>{
         axios.get("/order/client").then(res=>{
@@ -20,6 +34,7 @@ export const getClientOrders = ()=>{
         .catch(err=>{reject(err)})
     })
 }
+
 export const  getPartnerOrders = (partnerId)=>{
     return new Promise((resolve,reject)=>{
         axios.get(`/order/partner/${partnerId}`).then(res=>{
@@ -28,6 +43,9 @@ export const  getPartnerOrders = (partnerId)=>{
         .catch(err=>{reject(err)})
     })
 }
+
+
+//add partner id ; 
 export const   getDelivererOrders = ()=>{
     return new Promise((resolve,reject)=>{
         axios.get(`/order/deliverer`).then(res=>{

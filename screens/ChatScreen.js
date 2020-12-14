@@ -15,7 +15,6 @@ export default function Chat({navigation}){
     useEffect(()=>{
         setDark(context.darkMode)
         setConversations(context.conversations);
-        
 
     },[context.conversations,context.darkMode])
     

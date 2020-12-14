@@ -1,8 +1,14 @@
-import React from 'react';
+import React ,{useState,useEffect} from 'react';
 import {StyleSheet, View, Text, Image, TouchableOpacity} from 'react-native';
 
 
 const ManagerListItem = (props) => {
+    const [dark,setDark]=useState(props.dark);
+    
+    
+      useEffect(()=>{
+          setDark(props.dark);
+      },[props.dark])
     return (
             <View  style={styles.itemContainer}>
                 <View style={styles.imageContainer}>
@@ -12,20 +18,20 @@ const ManagerListItem = (props) => {
                     />
                 </View>
                 <View style={styles.paragraphContainer}>
-                    <Text style={styles.nameStyle}> {props.name} </Text>
-                    <Text>{props.title}</Text>
+                    <Text style={dark ? styles.nameStyleDark :  styles.nameStyle}> {props.name} </Text>
+                    <Text style={dark ? {color:"white"}:{color:"black"}}>{props.title}</Text>
                 </View>
                 <View style={styles.buttonsContainer}>
                     <TouchableOpacity onPress={()=>{}}> 
                         <Image
                         style={styles.imageButton}
-                        source={require("../assets/images/speech.png")}
+                        source={dark ? require("../assets/speech-bubble.png") : require("../assets/images/speech.png")}
                         />
                     </TouchableOpacity>
                     <TouchableOpacity onPress={props.deleteManager.bind(this,props.user)}>
                         <Image 
                         style={styles.imageButton}
-                        source={require("../assets/images/trash.png")}
+                        source={dark ? require("../assets/images/trashDark.png") : require("../assets/images/trash.png")}
                         />
                     </TouchableOpacity>
                 </View>
@@ -62,6 +68,11 @@ const styles = StyleSheet.create({
     nameStyle:{
         fontSize: 18,
         fontWeight: 'bold'
+    },
+    nameStyleDark:{
+        fontSize: 18,
+        fontWeight: 'bold',
+        color:"white"
     },
     buttonsContainer: {
         flex:1.5,

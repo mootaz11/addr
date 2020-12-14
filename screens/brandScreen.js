@@ -11,21 +11,26 @@ export default function Brand(props){
     const [dark,setDark] =  useState(true);
     const [partners,setPartners]=useState([]);
     const [magictap,setmagicTap]= useState(false)
-
+    const [pageName,setPageName]=useState("");
+    
     /*
-
     useEffect(()=>{
         setDarkmode(context.darkMode)
     },[context.darkMode])
     */
 
+
     useEffect(()=>{
-        getPartnersByServiceName('wear').then(_partners=>{
+        setPageName(props.route.params.page);
+        getPartnersByServiceName(props.route.params.serviceName).then(_partners=>{
                 setPartners(_partners)
         }).catch(err=>{
             alert("error while getting data")
         })
-    },[])
+    },[props.route.params])
+    
+    
+    
     const goBack = ()=> {
             props.navigation.navigate("Home")
     }
@@ -35,7 +40,8 @@ export default function Brand(props){
         
     return(
         <View style={!dark ? styles.container: styles.containerDark}>
-                <View style={styles.categories}>
+                {   props.route.params.page=="Brand" &&
+                    <View style={styles.categories}>
                     <View style={styles.brand}>
                         <Text style={{fontSize:20,color:"white",fontWeight:"500"}}>Brand</Text>
                     </View>
@@ -45,13 +51,13 @@ export default function Brand(props){
                     </View>
                     
                 </View>
-
+                }
                 <View style={dark ? styles.menuDark : styles.menu}>
                     <View style={styles.leftArrowContainer}>
                     <Image style={styles.leftArrow} source={dark ? require("../assets/left-arrow-dark.png") : require("../assets/left-arrow.png")}/>
                     </View>
                  <View style={styles.titleContainer}>
-                 <Text style={ dark ? styles.TitleDark : styles.Title}>Brand</Text>
+                 <Text style={ dark ? styles.TitleDark : styles.Title}>{pageName}</Text>
                 </View>     
                 <View style={styles.searchContainer}>
                 <FontAwesome color={dark ? "white" : "black"} style={{ padding: 0, fontSize: 24 }} name="search" onPress={goBack} />

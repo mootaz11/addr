@@ -93,17 +93,13 @@
      const openDrawer = () => {
          props.navigation.openDrawer();
      }
- 
- 
- 
- 
- 
- 
+
      // const startConversation = (order)=>{
      //    const conversation =  context.openConversationHandler({},{user:order.client,other:order.deliverer});
      //    props.navigation.navigate("conversation",{conversation,orders:true})
      // }
  
+
      const orderDone = (item) => {
          setDone(true);
      }

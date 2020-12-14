@@ -1,9 +1,9 @@
 import React, { useReducer, useCallback, useState, useRef } from 'react';
 import { View, StyleSheet, ScrollView, Dimensions, Keyboard, Alert, Platformn, Text, Image, Modal ,TouchableOpacity} from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
+//import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import * as Permissions from 'expo-permissions';
-
+import {signup} from '../rest/userApi'
 import Input from '../common/Input';
 import SubmitButton from '../common/SubmitButton';
 
@@ -45,6 +45,9 @@ const SignUpForm = (props) => {
     const [formState, dispatchFormState] = useReducer(formReducer, {
         inputValues: {
             username: '',
+            firstName: '',
+            lastName:'',
+            username: '',
             email: '',
             password: '',
             repeatPassword: '',
@@ -53,10 +56,13 @@ const SignUpForm = (props) => {
         },
         inputValidities: {
             username: false,
+            lastName:false,
+            firstName:false,
             email: false,
             password: false,
             repeatPassword: false,
             phone: false,
+            
             address: false
         },
         formIsValid: false
@@ -108,13 +114,15 @@ const SignUpForm = (props) => {
     }
 
     const signupHandler = () => {
-        if (!formState.formIsValid) {
+        if (!formState.formIsValid){
             Alert.alert('Wrong input!', 'Please check the errors in the form.', [{ text: 'Okay' }]);
             return;
         }
         Keyboard.dismiss();
-        console.log('hello from signup');
-        console.log(formState.inputValues);
+        signup({...formState.inputValues,location:{longitude:location ? location.longitude :null,latitude:location ?location.latitude:null},locationState:location?true:false}).then(
+            message=>{
+            Alert.alert('Signup',message,[{text: 'Okay'}])
+        }).catch(err=>{});
     };
 
 
@@ -134,6 +142,29 @@ const SignUpForm = (props) => {
                             errorText="please enter a valid username"
                             onInputChange={inputChangeHandler}
                             required
+                        />
+                    </View>
+                    <View style={styles.listItem}>
+                        <Input
+                            inputId="firstName"
+                            style={styles.input}
+                            imageSrc={require("../assets/images/login.png")}
+                            placeholder="first name"
+                            errorText="please enter a valid username"
+                            onInputChange={inputChangeHandler}
+                            required
+                        />
+                    </View>
+                    <View style={styles.listItem}>
+                        <Input
+                            inputId="lastName"
+                            style={styles.input}
+                            imageSrc={require("../assets/images/login.png")}
+                            placeholder="last name"
+                            errorText="please enter a valid username"
+                            onInputChange={inputChangeHandler}
+                            required
+                        
                         />
                     </View>
                     <View style={styles.listItem}>
@@ -235,7 +266,7 @@ const SignUpForm = (props) => {
                 <SubmitButton onPress={signupHandler}>Create account</SubmitButton>
             </View>
          
-            {
+            {/* {
            openModal &&
             <Modal
                 animationType={"fade"}
@@ -297,7 +328,7 @@ const SignUpForm = (props) => {
                     </View>
                         </View>
                     </View>
-    </Modal>}
+    </Modal>} */}
 
         </View>
     );

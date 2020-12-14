@@ -49,29 +49,29 @@ export default function orderReview(props) {
                 <View style={styles.orderInfoContainer}>
                     <View style={styles.clientInfo}>
                         <View style={styles.info}>
-                            <Text style={dark ? {fontSize:15,fontWeight:"500",color:"white"}: {fontSize:15,fontWeight:"500"}}>Ahmed yassine allegue</Text>
+                            <Text style={dark ? {fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500",color:"white"}: {fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500"}}>Ahmed yassine allegue</Text>
                         </View>
                         <View style={styles.info}>
-                            <Text style={dark ? {fontSize:15,fontWeight:"500",color:"white"}:{fontSize:15,fontWeight:"500"}}>Client address: 4785aaaa</Text>
+                            <Text style={dark ? {fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500",color:"white"}:{fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500"}}>Client address: 4785aaaa</Text>
                         </View>
                         <View style={styles.info}>
-                            <Text style={dark ? {fontSize:15,fontWeight:"500",color:"white"}:{fontSize:15,fontWeight:"500"}}>kssar hellel,</Text>
+                            <Text style={dark ? {fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500",color:"white"}:{fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500"}}>kssar hellel,</Text>
                         </View>
                         <View style={styles.info}>
-                            <Text style={dark ? {fontSize:15,fontWeight:"500",color:"white"} : {fontSize:15,fontWeight:"500"}}>Monastir</Text>
+                            <Text style={dark ? {fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500",color:"white"} : {fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500"}}>Monastir</Text>
                         </View>
                        
                     </View>
                     <View style={styles.orderPaymentInfo}>
 
                     <View style={styles.info}>
-                            <Text style={dark ? {fontSize:15,fontWeight:"500",color:"white"} : {fontSize:15,fontWeight:"500"}}>phone number : 28896426</Text>
+                            <Text style={dark ? {fontSize:Dimensions.get("screen").width*0.035,fontWeight:"500",color:"white"} : {fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500"}}>phone number : 28896426</Text>
                         </View>
                         <View style={styles.info}>
-                            <Text style={{fontSize:15,fontWeight:"500",color: "#2474F1"}}>payment method</Text>
+                            <Text style={{fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500",color: "#2474F1"}}>payment method</Text>
                         </View>
                         <View style={styles.info}>
-                            <Text style={dark ? {fontSize:15,fontWeight:"500",color:"white"} : {fontSize:15,fontWeight:"500"}}>cash on delivery</Text>
+                            <Text style={dark ? {fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500",color:"white"} : {fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500"}}>cash on delivery</Text>
                         </View>
 
                     </View>
@@ -109,18 +109,11 @@ export default function orderReview(props) {
                                 <Text style={dark ?{ fontSize: 14,color:"white" }:{ fontSize: 14 }}>{item.size}</Text>
                             </View>
                             <View style={{ width: "92%", height: "18%", marginVertical: 4, alignSelf: "center", flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
-                                <TouchableOpacity>
-                                    <FontAwesome color={dark ? "white":"black"} style={{ padding: 0, fontSize: 26, fontWeight: "700" }} name="plus" />
-
-                                </TouchableOpacity>
+                  
 
                                 <View style={{ width: "30%", height: "100%", marginHorizontal: 6, borderWidth: 3, borderColor: "#bfbfbf", borderRadius: 12, alignItems: "center", justifyContent: "center", flexDirection: "center" }}>
                                     <Text  style={dark ? { fontSize: 20, fontWeight: "400" ,color:"white"}:{ fontSize: 20, fontWeight: "400" }}>{item.quantity}</Text>
                                 </View>
-
-                                <TouchableOpacity>
-                                    <FontAwesome color={dark ? "white":"black"} style={{ padding: 0, fontSize: 26, fontWeight: "700" }} name="minus" />
-                                </TouchableOpacity>
 
                             </View>
                         </View>

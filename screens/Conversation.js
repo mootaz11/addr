@@ -10,8 +10,6 @@ import AuthContext from '../navigation/AuthContext';
 
 
 export default function Conversation(props) {
-   
-   
     const context = useContext(AuthContext);
     const scrollViewRef = useRef();
     const [message, setMessage] = useState("");
@@ -27,9 +25,6 @@ export default function Conversation(props) {
         setDark(context.darkMode)
 
     }, [context.darkMode])
-
-
-
 
     useEffect(() => {
         let _conversations = [...context.conversations];

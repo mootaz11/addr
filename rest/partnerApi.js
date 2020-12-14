@@ -50,6 +50,22 @@ export const  addPartnerLocalisation =(partnerId,localisation)=>{
     })
 
 }
+export const deletePartnerLocation = (partnerId,localisation)=>{
+    return new Promise((resolve,reject)=>{
+        axios.patch(`/partner/${partnerId}/delete-localisation`,localisation).then(res=>{
+            if(res.status===200){
+                resolve(res.data.message);
+            }
+            else {
+                resolve('operation not effected');
+            }
+        }).catch(err=>{reject(err)})
+    })
+}
+
+
+
+
 export const addView =(partnerId)=>{   
     return new Promise((resolve,reject)=>{
         axios.post(`/partner/view/${partnerId}`,{}).then(res=>{

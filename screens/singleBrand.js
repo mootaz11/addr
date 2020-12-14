@@ -4,7 +4,7 @@ import AuthContext from '../navigation/AuthContext';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { FlatList } from 'react-native-gesture-handler';
 import {  getPartnerWithProducts } from '../rest/partnerApi'
-const categories = [
+const _categories = [
     { name: "Men", _id: "55" },
     { name: "Women", _id: "56" },
     { name: "kids", _id: "57" },
@@ -19,42 +19,76 @@ export default function SingleBrand(props) {
     const [newArrivals, setNewArrivals] = useState(null);
     const [topTrends, setTopTrends] = useState(null);
     const [partner,setPartner]=useState(null);
-
+    const [categories,setCategories]=useState(null);
     /* useEffect(() => {
          setDarkmode(context.darkMode)
      }, [context.darkMode])
  */
-    
-    useEffect(() => {
-        getPartnerWithProducts(props.route.params.partner._id).then(partner => {
-            if(partner.lastProducts.length>0){
-                setPartner(partner)
-                console.log(partner)
-                setNewArrivals(partner.lastProducts)
-            }
-            else {
-                setNewArrivals(null);
-            }
-        })
-            .catch(err => { alert("error while getting partner ") })
 
-    }, [props.route.params.partner])
+ useEffect(() => {
+    let isMounted = true;
+        getPartnerWithProducts(props.route.params.partner._id).then(partner => {
+            if(isMounted)
+            {   
+                setPartner(partner);
+                if(partner.services.serviceName.toLowerCase()=='food'){
+                    setCategories(partner.categories);
+                }
+                else {
+                    setCategories(_categories)
+                }
+                if(partner.lastProducts.length>0){
+                    setNewArrivals(partner.lastProducts)       }
+                  }    
+                })
+            .catch(err => { 
+                if(isMounted){
+                    alert("error while getting partner ")     
+                }}
+            )
+            return () =>{ isMounted=false;}
+    },[props.route.params])
+
     const goBack = () => {
-        props.navigation.goBack()
+        setNewArrivals(null);
+        setPartner(null);
+        props.navigation.navigate("brand")
     }
-    const showall = () => { }
+    const showallNewArrivals = () => {
+        props.navigation.navigate("products", { last_screen: "newArrivals" ,newArrivals:newArrivals})
+    }
+
+    const showallTopTrends =()=>{
+    }
     const checkCategory = (item) => {
-        props.navigation.navigate("gender", { gender: item.name ,categories:partner.categories})
+        if(partner.services.serviceName.toLowerCase()!='wear'){
+            props.navigation.navigate("products", {category:item,last_screen:"food",gender:''});
+        }
+        else {
+            props.navigation.navigate("gender", { gender: item.name ,categories:partner.categories})
+        }
+    
     }
     const checkProduct = (item)=>{
+        if(item.type=="food"){
+            props.navigation.navigate("food",{product:item})
+                        }
+        else {
         props.navigation.navigate("singleProduct",{product:item})
+        }
     }
+    const checkBasket =()=>{
+        props.navigation.navigate("basket",{last_screen:"singleBrand"});
+    }
+
+
+
+
+
     return (
+
         <View style={!dark ? styles.container : styles.containerDark}>
-
-
-
-
+            
             <View style={styles.headerImageContainer}>
 
                 <Image style={styles.headerImage} source={require("../assets/zarashop.jpg")} />
@@ -67,7 +101,11 @@ export default function SingleBrand(props) {
                     <Image style={{ width: "100%", height: "100%" }} source={require("../assets/left-arrow-dark.png")} />
 
                 </TouchableOpacity>
+                <TouchableOpacity onPress={checkBasket} style={{ position: "absolute", top: "5%", right: "50%" }}>
                 <FontAwesome color={"white"} style={{ padding: 0, fontSize: 24, position: "absolute", top: "5%", right: "50%" }} name="shopping-bag" />
+
+                </TouchableOpacity>
+
                 <FontAwesome color={"white"} style={{ padding: 0, fontSize: 24, position: "absolute", top: "5%", right: "2%" }} name="search" />
 
             </View>
@@ -101,7 +139,7 @@ export default function SingleBrand(props) {
                     <TouchableOpacity>
                         <View style={{ flexDirection: "row", alignItems: "center", alignContent: "center", justifyContent: "space-between", marginRight: 5 }}>
                             <Text style={dark ? { fontSize: 15, color: "white" } : { fontSize: 15, color: "black" }}>show all</Text>
-                            <FontAwesome color={dark ? "white" : "black"} style={{ marginHorizontal: 3, fontSize: 15 }} name="caret-right" onPress={showall} />
+                            <FontAwesome color={dark ? "white" : "black"} style={{ marginHorizontal: 3, fontSize: 15 }} name="caret-right" onPress={showallNewArrivals} />
 
 
                         </View>
@@ -142,7 +180,7 @@ export default function SingleBrand(props) {
                     <TouchableOpacity>
                         <View style={{ flexDirection: "row", alignItems: "center", alignContent: "center", justifyContent: "space-between", marginRight: 5 }}>
                             <Text style={dark ? { fontSize: 15, color: "white" } : { fontSize: 15, color: "black" }}>show all</Text>
-                            <FontAwesome color={dark ? "white" : "black"} style={{ marginHorizontal: 3, fontSize: 15 }} name="caret-right" onPress={showall} />
+                            <FontAwesome color={dark ? "white" : "black"} style={{ marginHorizontal: 3, fontSize: 15 }} name="caret-right" onPress={showallTopTrends} />
 
 
                         </View>
@@ -178,9 +216,8 @@ export default function SingleBrand(props) {
 
         </View>
     );
+                }
 
-
-}
 
 const styles = StyleSheet.create({
     container: {

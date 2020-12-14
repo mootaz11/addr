@@ -7,6 +7,8 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 import AuthContext from '../navigation/AuthContext';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
+
+
 export default function CustomDrawer(props) {
     const [isEnabled, setIsEnabled] = useState(false);
     const context = React.useContext(AuthContext);
@@ -31,6 +33,7 @@ export default function CustomDrawer(props) {
                             </View>
                         </TouchableOpacity>
                     </View>
+         {context.user.isPartner ?
                     <Drawer.Section style={styles.drawerSection} >
                         <DrawerItem icon={({ color, size }) => (
                             <Icon
@@ -71,8 +74,11 @@ export default function CustomDrawer(props) {
                               :null
                         }
                         
-
-                    </Drawer.Section>
+                    </Drawer.Section>:
+                    null
+    }         
+                   
+                   
                     <Drawer.Section style={styles.drawerSection} >
                         <DrawerItem icon={({ color, size }) => (
                             <FontAwesome color={"white"} style={{ padding: 0, fontSize: 30, }} name="home" />
@@ -83,9 +89,29 @@ export default function CustomDrawer(props) {
                             label="Home"
                             onPress={() => { props.navigation.navigate("Home") }}
                         />
+                        
 
                     </Drawer.Section>
-                    
+                    <Drawer.Section style={styles.drawerSection} >
+                        <DrawerItem icon={({ color, size }) => (
+                            <FontAwesome color={"white"} style={{ padding: 0, fontSize: 30, }} name="shopping-cart" />
+
+                        )}
+                            labelStyle={{ color: "white" }}
+
+                            label="Brand"
+                            onPress={() => { props.navigation.navigate("brand",{serviceName:"wear",page:"Brand"}) }}
+                            />
+                            <DrawerItem icon={({ color, size }) => (
+                            <FontAwesome color={"white"} style={{ padding: 0, fontSize: 30, }} name="shopping-cart" />
+
+                        )}
+                            labelStyle={{ color: "white" }}
+
+                            label="Food"
+                            onPress={() => { props.navigation.navigate("brand",{serviceName:"food",page:"Food"}) }}
+                            />
+                            </Drawer.Section>
                     <Drawer.Section style={styles.drawerSection} >
                         <DrawerItem icon={({ color, size }) => (
                             <FontAwesome color={"white"} style={{ padding: 0, fontSize: 30, }} name="comments" />
@@ -113,9 +139,7 @@ export default function CustomDrawer(props) {
                             <FontAwesome color={"white"} style={{ padding: 0, fontSize: 30, }} name="truck" />
 
                         )} labelStyle={{ color: "white" }}
-
                             label={"Orders"}
-                          
                           onPress={() => { context.user.isPartner ? props.navigation.navigate("businessorders") : props.navigation.navigate("orders") }} />
                    
                     </Drawer.Section>
@@ -148,7 +172,7 @@ export default function CustomDrawer(props) {
                         labelStyle={{ color: "white" }}
 
                         label="Logout"
-                        onPress={() => { context.logoutHandler() }}
+                        onPress={() => { context.logoutHandler();props.navigation.navigate("Login") }}
                     />
 
                 </Drawer.Section>

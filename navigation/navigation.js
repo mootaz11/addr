@@ -29,6 +29,7 @@ import DeliveryDashboardScreen from '../screens/business/DeliveryDashboardScreen
 import AddProductScreen from '../screens/business/AddProductScreen';
 import addLocation from '../screens/business/addLocation'
 import followPackages from '../screens/business/followPackages';
+import Basket from '../screens/BasketScreen';
 
 
 
@@ -63,10 +64,6 @@ const HomeNavStack = createStackNavigator() ;
     </HomeNavStack.Navigator>
 )
 export default function NavigationScreen(){
-
-
-
-
   const context = useContext(AuthContext)
   const [dark,setDark]=useState(context.darkMode);
   useEffect(()=>{
@@ -95,7 +92,7 @@ return(
             <drawerStack.Screen name="deliveryAdress" component={deliveryAdress}/>
             <drawerStack.Screen name="orderReview" component={orderReview}/>
             <drawerStack.Screen name="food" component={foodProduct}/>
-
+            <drawerStack.Screen name="basket" component={Basket}/>
             <drawerStack.Screen name="businessorders" component={BusinessOrders}/>
             <drawerStack.Screen name="businessDash" component={BusinessDashboardScreen}/>
             <drawerStack.Screen name="addProduct" component={AddProductScreen}/>
@@ -103,13 +100,7 @@ return(
             <drawerStack.Screen name="deliveryDash" component={DeliveryDashboardScreen}/>
             <drawerStack.Screen name="addLocation" component={addLocation}/>
             <drawerStack.Screen name="followPackages" component={followPackages}/>
-
-
-
           </drawerStack.Navigator>
       </NavigationContainer>
-
-
-
 )
 }

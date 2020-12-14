@@ -15,18 +15,19 @@ const BusinessDashboardScreen = (props) => {
     const [dashboard, setDashboard] = useState(null)
     const [managers, setManagers] = useState([]);
     const [deliverers, setDeliverers] = useState([]);
+    const [dark,setDark]=useState(context.darkMode);
 
     useEffect(() => {
         getPartnerDashboard(context.partner._id).then(dash => {
             setDashboard(dash)
             setManagers(dash.partner.managers);
             setDeliverers(dash.partner.deliverers);
-
         })
-
     }, [])
 
-
+    useEffect(()=>{
+        setDark(context.darkMode);
+    },[context.darkMode])
     const deleteManagerHandler = (user) => {
 
 
@@ -56,6 +57,7 @@ const BusinessDashboardScreen = (props) => {
                 title={itemData.item.user.phone}
                 user={itemData.item.user._id}
                 deleteManager={deleteManagerHandler}
+                dark ={dark}
             />
         );
     };
@@ -90,6 +92,7 @@ const BusinessDashboardScreen = (props) => {
                 time={itemData.item.phone}
                 deliverer={itemData.item._id}
                 deleteDeliverer={deleteDelivererHandler}
+                dark={dark}
 
             />
         );
@@ -97,24 +100,24 @@ const BusinessDashboardScreen = (props) => {
 
     return (
         <SafeAreaView style={{ flex: 1 }}>
-            <View style={styles.menu}>
+            <View style={dark ?  styles.menuDark: styles.menu}>
                 <View style={styles.leftArrowContainer}>
                     <TouchableOpacity style={styles.leftArrow}>
-                        <Icon color={"black"} style={{ padding: 4, alignSelf: "center", justifyContent: "center" }} name="menu" onPress={openDrawer} />
+                        <Icon color={dark ? "white" :"black"} style={{ padding: 4, alignSelf: "center", justifyContent: "center" }} name="menu" onPress={openDrawer} />
 
                     </TouchableOpacity>
                 </View>
                 <View style={styles.titleContainer}>
-                    <Text style={styles.Title}>Business Dashboard</Text>
+                    <Text style={dark ? styles.TitleDark : styles.Title}>Business Dashboard</Text>
                 </View>
 
 
             </View>
 
             { dashboard ?
-                <View style={styles.mainContainer}>
+                <View style={dark ? styles.mainContainerDark : styles.mainContainer}>
 
-                    <View style={styles.partOne}>
+                    <View style={dark ? styles.partOneDark : styles.partOne}>
                         <LinearGradient
                             colors={['#2071f1', '#f0a8f0']}
                             start={[0, 0]}
@@ -147,7 +150,7 @@ const BusinessDashboardScreen = (props) => {
                         <View style={styles.part2}>
 
                             <View style={styles.cardContainer}>
-                                <Text>
+                            <Text style={dark ? {color:"white"}:{color:"black"}}>
                                     My earnings
                         </Text>
                                 <LinearGradient
@@ -162,7 +165,7 @@ const BusinessDashboardScreen = (props) => {
                                 </LinearGradient>
                             </View>
                             <View style={styles.cardContainer}>
-                                <Text>
+                            <Text style={dark ? {color:"white"}:{color:"black"}}>
                                     Number of Orders
                         </Text>
                                 <LinearGradient
@@ -182,7 +185,7 @@ const BusinessDashboardScreen = (props) => {
 
                         <View style={styles.part2}>
                             <View style={styles.cardContainer}>
-                                <Text>
+                                <Text style={dark ? {color:"white"}:{color:"black"}}>
                                     Addressti fees
       </Text>
                                 <LinearGradient
@@ -197,7 +200,7 @@ const BusinessDashboardScreen = (props) => {
                                 </LinearGradient>
                             </View>
                             <View style={styles.cardContainer}>
-                                <Text>
+                            <Text style={dark ? {color:"white"}:{color:"black"}}>
                                     Number of Views
                                  </Text>
                                 <LinearGradient
@@ -221,23 +224,29 @@ const BusinessDashboardScreen = (props) => {
                     </View>
 
 
+                    {
+                                                context.user.isPartner == true && dashboard.partner.owner != null && dashboard.partner.owner === context.user._id && managers.length > 0 ?
 
-                    <View
-                        style={{
-                            borderBottomColor: '#d8d8d8',
-                            borderBottomWidth: 1,
-                            marginLeft: 5,
-                            marginRight: 5,
-                            marginTop: 5,
-                            marginBottom: 5
-                        }}
-                    />
+ <View
+ style={{
+     borderBottomColor: dark ? "#292929": '#d8d8d8',
+
+     borderBottomWidth: 1,
+     marginLeft: 5,
+     marginRight: 5,
+     marginTop: 5,
+     marginBottom: 5
+ }}
+ 
+/>
+ :null}
+                   
                     {
                         context.user.isPartner == true && dashboard.partner.owner != null && dashboard.partner.owner === context.user._id && managers.length > 0 ?
 
-                            <View style={styles.partTwo}>
+                            <View style={dark ? styles.partTwoDark : styles.partTwo}>
 
-                                <Text style={styles.titlesStyles}>Managers</Text>
+                                <Text style={dark ? styles.titlesStylesDark : styles.titlesStyles}>Managers</Text>
                                 <View style={styles.listManagersContainer}>
 
                                     <FlatList
@@ -251,9 +260,11 @@ const BusinessDashboardScreen = (props) => {
                             :
                             null
                     }
-                    <View
+                    {
+                    
+                    deliverers.length>0 &&        <View
                         style={{
-                            borderBottomColor: '#d8d8d8',
+                            borderBottomColor: dark ? "#292929": '#d8d8d8',                         
                             borderBottomWidth: 1,
                             marginLeft: 5,
                             marginRight: 5,
@@ -261,14 +272,16 @@ const BusinessDashboardScreen = (props) => {
                             marginBottom: 5
                         }}
                     />
+}
 
 
-                   { deliverers.length>0 &&<View style={styles.partThree}>
-                        <Text style={styles.titlesStyles}>Delivery management</Text>
+                   { deliverers.length>0 &&<View style={dark ? styles.partThreeDark : styles.partThree}>
+                        <Text style={dark ? styles.titlesStylesDark : styles.titlesStyles}>Delivery management</Text>
                         <View style={styles.listDeliveryContainer}>
                             <FlatList
                                 data={deliverers}
                                 renderItem={renderListDeliverysItem}
+                                keyExtractor={item=>item._id}
                             />
                         </View>
                     </View>
@@ -293,6 +306,10 @@ const styles = StyleSheet.create({
         //alignItems: 'center',  //crossAxisAlign
         //justifyContent: 'center' //mainAxisAlign
     },
+    mainContainerDark:{
+        backgroundColor: "#121212",
+        flex:1
+    },
     partOne: {
         flex: 2.02,
         // backgroundColor: 'red',
@@ -301,6 +318,14 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: 3,
 
+    },
+    partOneDark:{
+        flex: 2.02,
+        // backgroundColor: 'red',
+        backgroundColor:  "#121212",
+        borderRadius: 20,
+        alignItems: 'center',
+        marginBottom: 3,
     },
     menu: {
         width: "100%",
@@ -328,7 +353,7 @@ const styles = StyleSheet.create({
     },
 
     titleContainer: {
-        width: "80%",
+        width: "90%",
         height: "100%",
         flexDirection: "column",
         alignItems: "center",
@@ -430,13 +455,22 @@ const styles = StyleSheet.create({
     partTwo: {
         flex: 1,
         backgroundColor: 'white',
-        //backgroundColor:'yellow',
         borderRadius: 15,
         marginBottom: 5,
         marginTop: 5,
         paddingHorizontal: 10,
         paddingBottom: 5
-    },
+    },       //backgroundColor:'yellow',
+    partTwoDark: {
+        flex: 1,
+        backgroundColor: '#292929' ,
+        borderRadius: 15,
+        marginBottom: 5,
+        marginTop: 5,
+        paddingHorizontal: 10,
+        paddingBottom: 5
+    },       //backgroundColor:'yellow',
+ 
     listManagersContainer: {
         flex: 1,
         justifyContent: 'center',
@@ -446,12 +480,25 @@ const styles = StyleSheet.create({
         fontSize: 15,
         fontWeight: 'bold'
     },
-
+    titlesStylesDark:{
+        fontSize: 15,
+        fontWeight: 'bold',
+        color:"white"  
+    },
 
 
     partThree: {
         flex: 2,
         backgroundColor: 'white',
+        borderRadius: 15,
+        marginTop: 5,
+        marginBottom: 5,
+        paddingHorizontal: 10,
+        paddingBottom: 5
+    },
+    partThreeDark: {
+        flex: 2,
+        backgroundColor: '#292929',
         borderRadius: 15,
         marginTop: 5,
         marginBottom: 5,

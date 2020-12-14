@@ -1,12 +1,15 @@
 import React, { useContext, useState } from 'react'
 import { View, Text, StyleSheet, Dimensions, Image, TouchableOpacity, SafeAreaView, Modal, TextInput } from 'react-native'
-import MapView, { Marker } from 'react-native-maps';
+//import MapView, { Marker } from 'react-native-maps';
 import { Icon } from 'react-native-elements';
 import AuthContext from '../../navigation/AuthContext';
-import MapViewDirections from 'react-native-maps-directions';
+//import MapViewDirections from 'react-native-maps-directions';
 const api_directions_key = "AIzaSyDcbXzRxlL0q_tM54tnAWHMlGdmPByFAfE";
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-
+export default function followPackages(props) {
+return (<View></View>)
+}
+/*
 const partner ={
     name:'adidas',location:{
         latitude: 35.6778,
@@ -481,3 +484,4 @@ const darkStyle = [
     }
 ];
 
+*/

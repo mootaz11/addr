@@ -2,39 +2,71 @@ import React, { useState, useEffect, useContext } from 'react'
 import { Dimensions, StyleSheet, View, TouchableOpacity, Image, Text } from 'react-native'
 import { FlatList } from 'react-native-gesture-handler';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import AuthContext from '../navigation/AuthContext';
 
 
 const products_data = [
     { name: "BIKER JACKER", price: 123.500, total: 123.500, quantity: 1, color: "white", size: "31/32", image: require("../assets/product1.webp"), _id: "55" },
     { name: "BIKER JACKER", price: 123.500, total: 123.500, quantity: 1, color: "white", size: "31/32", image: require("../assets/product2.webp"), _id: "56" },
     { name: "BIKER JACKER", price: 123.500, total: 123.500, quantity: 1, color: "white", size: "31/32", image: require("../assets/product3.webp"), _id: "57" },
-
 ]
 
+
 export default function bag(props) {
-    const [products, setProducts] = useState(products_data);
+    const [products, setProducts] = useState([]);
     const [dark,setDark]= useState(true)
+    const [preOrder,setPreOrder]=useState(null);
+    const context = useContext(AuthContext);
+    useEffect(()=>{
+        setPreOrder(props.route.params.order);
+        props.route.params.order.items.map(item=>{
+            item.product.total=0
+        })
+        setProducts(props.route.params.order.items);
+    
+    },[props.route.params])
 
     const goBack = () => {
-        props.navigation.navigate("singleProduct",{product:props.route.params.product})
+        props.navigation.navigate('basket');
     }
 
-    const increaseQuantity = () => {
-
+    const increaseQuantity = (item) => {
+            const  _items = [...products];
+            
+            _items.map(_item=>{
+                if(_item._id==item._id){
+                    _item.quantity+=1;
+                    _item.product.total=_item.product.basePrice*_item.quantity
+                    preOrder.price+=_item.product.basePrice
+                }
+            })       
+            setProducts(_items);
     }
-    const decreaseQuantity = () => {
 
-    }
+    const decreaseQuantity = (item) => {
+        const  _items = [...products];           
+        _items.map(_item=>{
+            if(_item._id==item._id){
+                if(_item.quantity>1){
+                    _item.quantity-=1;
+                    _item.product.total=_item.product.total-_item.product.basePrice
+                    preOrder.price-=_item.product.basePrice
+
+                }
+            }
+        })       
+        setProducts(_items);
+}
+
     const removeProduct = () => {
-
     }
+
     const goToDeliveryAdress = ()=>{
-        props.navigation.navigate("deliveryAdress",{product:props.route.params.product})
+        props.navigation.navigate("deliveryAdress",{products:products})
     }
 
     return (
         <View style={dark ? styles.containerDark : styles.container}>
-
             <View style={dark ? styles.menuDark : styles.menu}>
                 <TouchableOpacity style={styles.leftArrowContainer} onPress={goBack}>
                     <View >
@@ -52,12 +84,11 @@ export default function bag(props) {
                         ({ item }) =>
                             <View style={dark ? styles.productContainerDark : styles.productContainer}>
                                 <View style={styles.productImageContainer}>
-                                    <Image style={styles.productImage} source={item.image} />
-
+                                    <Image style={styles.productImage} source={{uri:item.product.mainImage}} />
                                 </View>
                                 <View style={styles.productInfoContainer}>
                                     <View style={{ width: "92%", height: "20%", marginVertical: 4, alignSelf: "center" }}>
-                                        <Text style={dark ? { fontSize: 17, fontWeight: "700" ,color:"white"}:{ fontSize: 17, fontWeight: "700" }}>{item.name} HI HI HIHIHI</Text>
+                                        <Text style={dark ? { fontSize: 17, fontWeight: "700" ,color:"white"}:{ fontSize: 17, fontWeight: "700" }}>{item.product.name}</Text>
                                     </View>
                                     <TouchableOpacity>
                                         <View style={{ width: "92%", height: "8%", marginVertical: 4, alignSelf: "center" }}>
@@ -67,17 +98,17 @@ export default function bag(props) {
 
 
                                     <View style={{ width: "92%", height: "10%", marginVertical: 4, alignSelf: "center" }}>
-                                        <Text style={dark ? { fontSize: 20, fontWeight: "700",color:"white" } :{ fontSize: 20, fontWeight: "700" }}>{item.price} TND</Text>
+                                        <Text style={dark ? { fontSize: 20, fontWeight: "700",color:"white" } :{ fontSize: 20, fontWeight: "700" }}>{item.product.basePrice.toString()} TND</Text>
                                     </View>
                                     <View style={{ width: "92%", height: "10%", marginVertical: 4, alignSelf: "center" }}>
-                                        <Text style={dark ? { fontSize: 20, fontWeight: "700",color:"white" } :{ fontSize: 20, fontWeight: "700" }}>{item.total} TND</Text>
+                                        <Text style={dark ? { fontSize: 20, fontWeight: "700",color:"white" } :{ fontSize: 20, fontWeight: "700" }}>{item.product.total ? item.product.total.toString():item.product.basePrice.toString()} TND</Text>
                                     </View>
                                     <View style={{ width: "92%", height: "15%", marginVertical: 4, alignSelf: "center" }}>
-                                        <Text style={dark ?{ fontSize: 14 ,color:"white"} :{ fontSize: 14 }}>{item.color}</Text>
-                                        <Text style={dark ?{ fontSize: 14,color:"white" }:{ fontSize: 14 }}>{item.size}</Text>
+                                        <Text style={dark ?{ fontSize: 14 ,color:"white"} :{ fontSize: 14 }}>ssss</Text>
+                                        <Text style={dark ?{ fontSize: 14,color:"white" }:{ fontSize: 14 }}>ssss</Text>
                                     </View>
                                     <View style={{ width: "92%", height: "18%", marginVertical: 4, alignSelf: "center", flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
-                                        <TouchableOpacity>
+                                        <TouchableOpacity onPress={()=>increaseQuantity(item)}>
                                             <FontAwesome color={dark ? "white":"black"} style={{ padding: 0, fontSize: 26, fontWeight: "700" }} name="plus" />
 
                                         </TouchableOpacity>
@@ -85,8 +116,7 @@ export default function bag(props) {
                                         <View style={{ width: "30%", height: "100%", marginHorizontal: 6, borderWidth: 3, borderColor: "#bfbfbf", borderRadius: 12, alignItems: "center", justifyContent: "center", flexDirection: "center" }}>
                                             <Text  style={dark ? { fontSize: 20, fontWeight: "400" ,color:"white"}:{ fontSize: 20, fontWeight: "400" }}>{item.quantity}</Text>
                                         </View>
-
-                                        <TouchableOpacity>
+                                        <TouchableOpacity onPress={()=>decreaseQuantity(item)}>
                                             <FontAwesome color={dark ? "white":"black"} style={{ padding: 0, fontSize: 26, fontWeight: "700" }} name="minus" />
                                         </TouchableOpacity>
 
@@ -105,7 +135,7 @@ export default function bag(props) {
                         <Text style={dark ? { fontSize: 20, fontWeight: "600" ,color:"white"}:{ fontSize: 20, fontWeight: "600" }}>Total</Text>
                     </View>
                     <View >
-                        <Text style={dark ? { fontSize: 20, fontWeight: "600" ,color:"white"}:{ fontSize: 20, fontWeight: "600" }}>129,99TND</Text>
+                <Text style={dark ? { fontSize: 20, fontWeight: "600" ,color:"white"}:{ fontSize: 20, fontWeight: "600" }}>{preOrder ? preOrder.price: null} DT</Text>
                     </View>
                 </View>
 
