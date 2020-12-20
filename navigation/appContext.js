@@ -5,7 +5,6 @@ import AsyncStorageService from '../rest/AsyncStorageService'
 import {createConversation, getUserConversations,sendMessage,markAsreadConversation} from '../rest/conversationApi';
 import {getLocation,addLocation,updateLocation,addTemporarlyLocation} from '../rest/locationApi';
 import {getConnectedUser,updateLocationState} from '../rest/userApi';
-import {getUserActifOrders,getUserHistoryOrders,getUserActifDeliveries} from '../rest/ordersApi';
 
 export default  function AppContext(props){
     const [socket, setSocket] = useState(io("http://localhost:3000"));
@@ -22,15 +21,10 @@ export default  function AppContext(props){
     useEffect(() => {
         if (token) {
             getConnectedUser().then(res=>{  
-                if(!res.data.connectedUser.isPartner)
-                {
-                    console.log(res.data.orders);
-                    setBag(res.data.orders);                    
-                }
-                if(res.data.connectedUser.isPartner){
-                    console.log(res.data.connectedUser.partners[0])
-                    setPartner(res.data.connectedUser.partners[0])
-                }
+                if(!res.data.connectedUser.isPartner){setBag(res.data.orders);}
+                if(res.data.connectedUser.isPartner){setPartner(res.data.connectedUser.partners[0])}
+                if(res.data.connectedUser.isVendor){setPartner(res.data.connectedUser.workPlaces[0]);}
+
                 setDarkMode(false);
                 setUser(res.data.connectedUser);
                 setLocationState(res.data.connectedUser.locationState);
@@ -136,22 +130,22 @@ useEffect(()=>{
         }).catch(err=>{reject(err)})
     }
 
-    const openConversationHandler = (id,Users) =>{
-        console.log(id);
-    if(conversations)
-        if(!Users.other.isPartner){
+    const openConversationHandler = (id,Users,type,partner) =>{
+        if(conversations)
+            if(type!=null && type=="personal"){
             let conversation_found=null;
             conversations.map(conversation=>{
-                if (conversation.users.findIndex(user=>{ return user._id==Users.other._id}) >=0
-                && conversation.users.findIndex(user=>{return user._id==Users.user._id})>=0)
+                if (conversation.users.findIndex(user=>{return user==Users.other._id}) >=0
+                && conversation.users.findIndex(user=>{return user==Users.user._id})>=0)
                 {   
                     conversation_found=conversations[conversations.findIndex(conv=>{return conv==conversation})];
                 }
             })
-          if(conversation_found){
+            if(conversation_found){
               conversation_found.other = Users.other.firstName+" "+Users.other.lastName;
             return conversation_found;
           }
+
           else {
               const new_conversation = {
                 image:require("../assets/julia.jpg"),
@@ -162,6 +156,46 @@ useEffect(()=>{
             }
             return new_conversation;
         }
+        }
+        if(type=="group"&&type!=null)
+        {
+            let conversation_found=null;
+            conversations.map(conversation=>{
+                let count =0 ;
+                Users.users_id.map(user=>{
+                    if(conversation.users.findIndex(u=>{return u._id==user})>=0){
+                        count+=1
+                    }    
+                })
+                if(count==Users.users_id.length)
+                {   
+                    conversation_found=conversations[conversations.findIndex(conv=>{return conv._id==conversation._id})];
+
+                }
+            })
+            
+            if(conversation_found){
+               return conversation_found;
+        }
+          
+        
+        else {
+            const new_conversation = {
+                image:partner.profileImage,
+                type:"group",
+                messages:[],
+                partner:partner,
+                title:partner.partnerName,
+                users:Users.users_id,
+            }
+            return new_conversation;
+          }
+
+            
+
+
+
+
         }        
         if(id){
             const convIndex = conversations.findIndex(conversation=>{return conversation._id == id});

@@ -1,24 +1,19 @@
 import React, { useState, useEffect, useContext } from 'react'
+import { SafeAreaView } from 'react-native';
 import { Dimensions, StyleSheet, View, TouchableOpacity, Image, Text } from 'react-native'
 import { FlatList } from 'react-native-gesture-handler';
 import AuthContext from '../navigation/AuthContext';
 import {getClientPreOrders} from '../rest/ordersApi';
-import * as moment from 'moment';
 
 
 
-
-export default function Basket(props) {
+export default function Basket(props){
     const context = useContext(AuthContext);
     const [baskets, setBaskets] = useState([]);
-    const [dark, setDark] = useState(false);
 
-    const checkBag=(item)=>{
-        props.navigation.navigate("bag",{order:item})
-    }
-    const goBack = () => {
-        props.navigation.navigate(props.route.params.last_screen);
-    }
+    const checkBag=(item)=>{props.navigation.navigate("bag",{order:item})}
+    
+    const goBack = () => {props.navigation.navigate(props.route.params.last_screen);}
 
     useEffect(() => {
         let mounted=true;
@@ -35,15 +30,16 @@ export default function Basket(props) {
     }, [props.route])
 
     return (
-        <View style={dark ? styles.containerDark : styles.container}>
-            <View style={dark ? styles.menuDark : styles.menu}>
+        <SafeAreaView>
+        <View style={context.darkMode ? styles.containerDark : styles.container}>
+            <View style={context.darkMode ? styles.menuDark : styles.menu}>
                 <TouchableOpacity style={styles.leftArrowContainer} onPress={goBack}>
                     <View >
-                        <Image style={styles.leftArrow} source={dark ? require("../assets/left-arrow-dark.png") : require("../assets/left-arrow.png")} />
+                        <Image style={styles.leftArrow} source={context.darkMode ? require("../assets/left-arrow-dark.png") : require("../assets/left-arrow.png")} />
                     </View>
                 </TouchableOpacity>
                 <View style={styles.titleContainer}>
-                    <Text style={dark ? styles.TitleDark : styles.Title}>Basket</Text>
+                    <Text style={context.darkMode ? styles.TitleDark : styles.Title}>Basket</Text>
                 </View>
             </View>
             <View style={styles.bagContainer}>
@@ -53,7 +49,7 @@ export default function Basket(props) {
                     renderItem={
                         ({ item }) =>
                         <TouchableOpacity onPress={()=>checkBag(item)}>
-                            <View style={dark ? styles.productContainerDark : styles.productContainer}>
+                            <View style={context.darkMode ? styles.productContainerDark : styles.productContainer}>
                                 <View style={{ width: "30%", height: "100%", flexDirection: "column",justifyContent:"center"  ,borderRadius:12}}>
                                     <View style={{flexWrap:"wrap",margin:5}}>
                                         <Text style={{textAlign:"left" ,fontSize:Dimensions.get("screen").width*0.04,fontWeight:"500"}}>Partner :</Text>
@@ -70,7 +66,7 @@ export default function Basket(props) {
                                         <Text style={{textAlign:"left" ,fontSize:Dimensions.get("screen").width*0.04,fontWeight:"500",color:"#2474F1"}}>{item.partner.partnerName}</Text>
                                     </View>
                                     <View style={{flexWrap:"wrap",margin:5}}>
-                                        <Text style={{textAlign:"left",fontSize:Dimensions.get("screen").width*0.04,fontWeight:"500"}}>{moment(item.date.toString()).fromNow()/*item.date.split("T")[0]*/}</Text>
+                                        <Text style={{textAlign:"left",fontSize:Dimensions.get("screen").width*0.04,fontWeight:"500"}}>{item.date.toString().split('T')[0]}</Text>
                                     </View>
                                     <View style={{flexWrap:"wrap",margin:5}}>
                                         <Text style={{textAlign:"left",fontSize:Dimensions.get("screen").width*0.04,fontWeight:"500"}}>{item.price} DT</Text>
@@ -93,6 +89,7 @@ export default function Basket(props) {
 
 
         </View>
+        </SafeAreaView>
     )
 }
 const styles = StyleSheet.create({
@@ -148,8 +145,13 @@ const styles = StyleSheet.create({
         alignSelf: "center",
         marginVertical: 10,
         flexDirection: "row",
-        backgroundColor: "yellow",
         borderRadius: 12,
+        shadowColor:"black",
+        shadowOpacity:0.3,
+        shadowOffset:{width:1,height:1},
+        borderColor:"white",
+        borderWidth:1,
+        shadowRadius:12
     },
     productContainerDark: {
         width: "100%",

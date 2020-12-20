@@ -5,13 +5,14 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { RadioButton, Checkbox } from 'react-native-paper';
 import { add } from 'react-native-reanimated';
 import {getProduct} from '../rest/productApi';
+import { createOrder } from '../rest/ordersApi';
 
 
 
 export default function foodProduct(props) {
     const [checked, setChecked] = useState("");
     const [product, setProduct] = useState(null);
-    const [choice, setChoice] = useState("");
+    const [choice, setChoice] = useState(null);
     const [supplements, setSupplements] = useState([]);
     const [ingredients, setIngredients] = useState([]);
     const [food_data,setFoodData]=useState(null)
@@ -19,39 +20,37 @@ export default function foodProduct(props) {
         if (props.route.params.product) {
             getProduct(props.route.params.product._id).then(product=>{
                 let _food_data=[];
-                console.log(product)
                  product.variants.map(variant=>{
                     let data = variant.options.map(option=>{
                        let index_pricing = product.pricing.findIndex(pricing=>{
                            return pricing.variantOptions.findIndex(Pricing_option=>{return Pricing_option._id==option._id})>=0
                        });
-                       return {title:variant.name,choix:option.name,price:product.pricing[index_pricing].price,_id:option._id}
+                       return {title:variant.name,choix:option.name,price:product.pricing[index_pricing].price,_id:product.pricing[index_pricing]._id}
                     })
                     _food_data.push({data,title:variant.name})
                  })
                 
                 setFoodData(_food_data)
-                setProduct(product);
-                
+                setProduct(product);  
             })
-            // .catch(err=>{
-            //     alert("error while getting product")
-            // })
+            .catch(err=>{
+                alert("error while getting product")
+            })
         }
     }, [props.route.params])
 
-    const addChoice = (item) => {
-        setChecked(item.choix);
-        setChoice(item.choix);
+    const addChoice = (item) =>{
+        setChecked(item);
+        setChoice(item);
     }
 
     const addIngredients = (item) => {
-        if (ingredients.findIndex(i => { return i == item }) >= 0) {
-            setIngredients(ingredients.filter(i => i.choix != item.choix))
+        
+        if (ingredients.findIndex(i => { return i._id == item._id }) >= 0) {
+            setIngredients(ingredients.filter(i => i._id != item._id))
         }
         else {
             setIngredients(ingredients => [...ingredients, item])
-
         }
 
     }
@@ -62,8 +61,8 @@ export default function foodProduct(props) {
         }
         else {
 
-            if (supplements.findIndex(i => { return i == item }) >= 0) {
-                setSupplements(supplements.filter(i => i.choix != item.choix))
+            if (supplements.findIndex(i => { return i._id == item._id }) >= 0) {
+                setSupplements(supplements.filter(i => i._id != item._id))
             }
             else {
                 setSupplements(supplements => [...supplements, item])
@@ -77,10 +76,31 @@ export default function foodProduct(props) {
 
 
     const addProduct = () => {
-        console.log(supplements);
-        console.log(ingredients);
-        console.log(choice);
-        props.navigation.navigate("bag");
+        let _ingredients = [];
+        
+        supplements.forEach(supp=>{_ingredients.push(supp._id)})
+        ingredients.forEach(ingr=>{_ingredients.push(ingr._id)})
+        if(choice){
+        _ingredients.push(choice._id);
+        }
+        if(_ingredients.length>0){ 
+        createOrder({
+            product:{...product},
+            ingredients:_ingredients,
+            quantity:1
+        }).then(createdOrder=>{
+            if(createdOrder){
+                alert("order created done ! ");
+            }
+        })
+        .catch(err=>{
+            alert("error occured")
+        })
+    
+    }
+        else {
+            alert("please choose at least one option")
+        }
     }
 
     const goBack = () => {
@@ -98,7 +118,7 @@ export default function foodProduct(props) {
                     <FontAwesome color={"white"} style={{ padding: 0, fontSize: 24, position: "absolute", top: "5%", right: "2%" }} name="shopping-bag" />
                 </View>
                 <View style={styles.details}>
-
+                    <Text style={{fontSize:Dimensions.get("window").width*0.1,marginLeft:10,fontWeight:'500',letterSpacing:0.1}}>{product.name[0].toUpperCase()+product.name.slice(1)}</Text>
                     <SectionList
                         sections={food_data}
                         renderItem={({ item, index }) =>
@@ -109,7 +129,7 @@ export default function foodProduct(props) {
                                         item.title == "CHOIX" ?
                                             <TouchableOpacity key={item.choix} onPress={() => addChoice(item)}>
                                                 <View style={styles.RadioButton}>
-                                                    <Image style={{ width: "90%", height: "90%", resizeMode: "cover" }} source={item.choix == checked ? require("../assets/button_checked.png") : require("../assets/button_unchecked.png")} />
+                                                    <Image style={{ width: "90%", height: "90%", resizeMode: "cover" }} source={item == checked ? require("../assets/button_checked.png") : require("../assets/button_unchecked.png")} />
                                                 </View>
                                             </TouchableOpacity>
 

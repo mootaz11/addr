@@ -3,45 +3,51 @@ import { Dimensions, StyleSheet, View, TouchableOpacity, Image, Text } from 'rea
 import { FlatList } from 'react-native-gesture-handler';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import AuthContext from '../navigation/AuthContext';
-
-
-const products_data = [
-    { name: "BIKER JACKER", price: 123.500, total: 123.500, quantity: 1, color: "white", size: "31/32", image: require("../assets/product1.webp"), _id: "55" },
-    { name: "BIKER JACKER", price: 123.500, total: 123.500, quantity: 1, color: "white", size: "31/32", image: require("../assets/product2.webp"), _id: "56" },
-    { name: "BIKER JACKER", price: 123.500, total: 123.500, quantity: 1, color: "white", size: "31/32", image: require("../assets/product3.webp"), _id: "57" },
-]
+import { updateOrder } from '../rest/ordersApi';
 
 
 export default function bag(props) {
     const [products, setProducts] = useState([]);
-    const [dark,setDark]= useState(true)
     const [preOrder,setPreOrder]=useState(null);
     const context = useContext(AuthContext);
     useEffect(()=>{
         setPreOrder(props.route.params.order);
-        props.route.params.order.items.map(item=>{
-            item.product.total=0
-        })
-        setProducts(props.route.params.order.items);
+        if(props.route.params.order.type!='food'){
+            props.route.params.order.items.map(item=>{
+                item.product.total=item.product.basePrice*item.quantity
+            })
+            setProducts(props.route.params.order.items);
+
+        }
+            else {
+                props.route.params.order.foodItems.map(item=>{
+                    item.product.total=item.product.basePrice*item.quantity
+                })
+                setProducts(props.route.params.order.foodItems);
+
+            }
+        
     
     },[props.route.params])
 
     const goBack = () => {
-        props.navigation.navigate('basket');
+        props.navigation.navigate('basket',{price:preOrder.price});
     }
 
     const increaseQuantity = (item) => {
             const  _items = [...products];
-            
             _items.map(_item=>{
                 if(_item._id==item._id){
                     _item.quantity+=1;
                     _item.product.total=_item.product.basePrice*_item.quantity
-                    preOrder.price+=_item.product.basePrice
+                     preOrder.price+=_item.product.basePrice
+                }
+                if(_item.quantity>_item.product.stock){
+                    alert("no stock valid for this product")
                 }
             })       
-            setProducts(_items);
-    }
+            setProducts(_items);}
+
 
     const decreaseQuantity = (item) => {
         const  _items = [...products];           
@@ -50,31 +56,41 @@ export default function bag(props) {
                 if(_item.quantity>1){
                     _item.quantity-=1;
                     _item.product.total=_item.product.total-_item.product.basePrice
-                    preOrder.price-=_item.product.basePrice
+                     preOrder.price-=_item.product.basePrice
 
+                }
+                if(_item.quantity>_item.product.stock){
+                    alert("no stock valid for this product")
                 }
             }
         })       
         setProducts(_items);
 }
 
-    const removeProduct = () => {
+    const removeProduct = (_product) => {
+        console.log(_product);
+        setProducts(products.filter(_prod=>_prod._id!=_product._id));
     }
 
     const goToDeliveryAdress = ()=>{
-        props.navigation.navigate("deliveryAdress",{products:products})
+        updateOrder(props.route.params.order._id,{newItems:products,isFood:props.route.params.order.type=='food'?true:false}).then(message=>{
+            console.log(message);
+            props.navigation.navigate("deliveryAdress",{products:products,order:preOrder._id})
+        }).catch(err=>{
+            alert("error occured during update")
+        })
     }
 
     return (
-        <View style={dark ? styles.containerDark : styles.container}>
-            <View style={dark ? styles.menuDark : styles.menu}>
+        <View style={context.darkMode ? styles.containerDark : styles.container}>
+            <View style={context.darkMode ? styles.menuDark : styles.menu}>
                 <TouchableOpacity style={styles.leftArrowContainer} onPress={goBack}>
                     <View >
-                        <Image style={styles.leftArrow} source={dark ? require("../assets/left-arrow-dark.png"):require("../assets/left-arrow.png")} />
+                        <Image style={styles.leftArrow} source={context.darkMode ? require("../assets/left-arrow-dark.png"):require("../assets/left-arrow.png")} />
                     </View>
                 </TouchableOpacity>
                 <View style={styles.titleContainer}>
-                    <Text style={dark ? styles.TitleDark : styles.Title}>Bag</Text>
+                    <Text style={context.darkMode ? styles.TitleDark : styles.Title}>Bag</Text>
                 </View>
             </View>
             <View style={styles.bagContainer}>
@@ -82,42 +98,41 @@ export default function bag(props) {
                     data={products}
                     renderItem={
                         ({ item }) =>
-                            <View style={dark ? styles.productContainerDark : styles.productContainer}>
+                            <View style={context.darkMode ? styles.productContainerDark : styles.productContainer}>
                                 <View style={styles.productImageContainer}>
                                     <Image style={styles.productImage} source={{uri:item.product.mainImage}} />
                                 </View>
                                 <View style={styles.productInfoContainer}>
                                     <View style={{ width: "92%", height: "20%", marginVertical: 4, alignSelf: "center" }}>
-                                        <Text style={dark ? { fontSize: 17, fontWeight: "700" ,color:"white"}:{ fontSize: 17, fontWeight: "700" }}>{item.product.name}</Text>
+                                        <Text style={context.darkMode ? { fontSize: 17, fontWeight: "700" ,color:"white"}:{ fontSize: 17, fontWeight: "700" }}>{item.product.name}</Text>
                                     </View>
-                                    <TouchableOpacity>
+                                    <TouchableOpacity onPress={()=>{removeProduct(item)}}>
                                         <View style={{ width: "92%", height: "8%", marginVertical: 4, alignSelf: "center" }}>
                                             <Text style={{ fontSize: 16, fontWeight: "500", color: "grey" }}>Remove</Text>
                                         </View>
                                     </TouchableOpacity>
 
-
                                     <View style={{ width: "92%", height: "10%", marginVertical: 4, alignSelf: "center" }}>
-                                        <Text style={dark ? { fontSize: 20, fontWeight: "700",color:"white" } :{ fontSize: 20, fontWeight: "700" }}>{item.product.basePrice.toString()} TND</Text>
+                                        <Text style={context.darkMode ? { fontSize: 20, fontWeight: "700",color:"white" } :{ fontSize: 20, fontWeight: "700" }}>{item.product.basePrice.toString()} TND</Text>
                                     </View>
                                     <View style={{ width: "92%", height: "10%", marginVertical: 4, alignSelf: "center" }}>
-                                        <Text style={dark ? { fontSize: 20, fontWeight: "700",color:"white" } :{ fontSize: 20, fontWeight: "700" }}>{item.product.total ? item.product.total.toString():item.product.basePrice.toString()} TND</Text>
+                                        <Text style={context.darkMode ? { fontSize: 20, fontWeight: "700",color:"white" } :{ fontSize: 20, fontWeight: "700" }}>{item.product.total ? item.product.total.toString():item.product.basePrice.toString()} TND</Text>
                                     </View>
                                     <View style={{ width: "92%", height: "15%", marginVertical: 4, alignSelf: "center" }}>
-                                        <Text style={dark ?{ fontSize: 14 ,color:"white"} :{ fontSize: 14 }}>ssss</Text>
-                                        <Text style={dark ?{ fontSize: 14,color:"white" }:{ fontSize: 14 }}>ssss</Text>
+                                        <Text style={context.darkMode ?{ fontSize: 14 ,color:"white"} :{ fontSize: 14 }}>ssss</Text>
+                                        <Text style={context.darkMode ?{ fontSize: 14,color:"white" }:{ fontSize: 14 }}>ssss</Text>
                                     </View>
                                     <View style={{ width: "92%", height: "18%", marginVertical: 4, alignSelf: "center", flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
                                         <TouchableOpacity onPress={()=>increaseQuantity(item)}>
-                                            <FontAwesome color={dark ? "white":"black"} style={{ padding: 0, fontSize: 26, fontWeight: "700" }} name="plus" />
+                                            <FontAwesome color={context.darkMode ? "white":"black"} style={{ padding: 0, fontSize: 26, fontWeight: "700" }} name="plus" />
 
                                         </TouchableOpacity>
 
                                         <View style={{ width: "30%", height: "100%", marginHorizontal: 6, borderWidth: 3, borderColor: "#bfbfbf", borderRadius: 12, alignItems: "center", justifyContent: "center", flexDirection: "center" }}>
-                                            <Text  style={dark ? { fontSize: 20, fontWeight: "400" ,color:"white"}:{ fontSize: 20, fontWeight: "400" }}>{item.quantity}</Text>
+                                            <Text  style={context.darkMode ? { fontSize: 20, fontWeight: "400" ,color:"white"}:{ fontSize: 20, fontWeight: "400" }}>{item.quantity}</Text>
                                         </View>
                                         <TouchableOpacity onPress={()=>decreaseQuantity(item)}>
-                                            <FontAwesome color={dark ? "white":"black"} style={{ padding: 0, fontSize: 26, fontWeight: "700" }} name="minus" />
+                                            <FontAwesome color={context.darkMode ? "white":"black"} style={{ padding: 0, fontSize: 26, fontWeight: "700" }} name="minus" />
                                         </TouchableOpacity>
 
                                     </View>
@@ -132,10 +147,10 @@ export default function bag(props) {
             <View style={styles.finalSteps}>
                 <View style={styles.orderOverview}>
                     <View >
-                        <Text style={dark ? { fontSize: 20, fontWeight: "600" ,color:"white"}:{ fontSize: 20, fontWeight: "600" }}>Total</Text>
+                        <Text style={context.darkMode ? { fontSize: 20, fontWeight: "600" ,color:"white"}:{ fontSize: 20, fontWeight: "600" }}>Total</Text>
                     </View>
                     <View >
-                <Text style={dark ? { fontSize: 20, fontWeight: "600" ,color:"white"}:{ fontSize: 20, fontWeight: "600" }}>{preOrder ? preOrder.price: null} DT</Text>
+                <Text style={context.darkMode ? { fontSize: 20, fontWeight: "600" ,color:"white"}:{ fontSize: 20, fontWeight: "600" }}>{preOrder ? preOrder.price: null} DT</Text>
                     </View>
                 </View>
 

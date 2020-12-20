@@ -1,78 +1,39 @@
-import React, { useState, useContext, useEffect, useRef } from 'react'
-import { StyleSheet, Dimensions, View, Image, Platform, Text, Clipboard, Modal, SafeAreaView, Alert, Linking, TouchableOpacity,Keyboard  } from 'react-native';
+import React, { useState, useContext, useEffect } from 'react'
+import { StyleSheet, Dimensions, View, Image, Platform, Text, Clipboard, Modal, Alert,Share, Linking, TouchableOpacity,Keyboard  } from 'react-native';
 
-//import MapView, { Marker } from 'react-native-maps';
+import MapView, { Marker } from 'react-native-maps';
 import { Icon, SearchBar } from 'react-native-elements';
-import { ScrollView } from 'react-native-gesture-handler';
-import { Button, TextInput } from 'react-native-paper';
 import { FlatList } from 'react-native-gesture-handler';
 import _ from 'lodash';
 import AuthContext from '../navigation/AuthContext';
 import * as Location from 'expo-location';
 import * as Permissions from 'expo-permissions';
-//import MapViewDirections from 'react-native-maps-directions';
-import { getCities, getRegion,getService } from '../rest/geoLocationApi'
+import MapViewDirections from 'react-native-maps-directions';
+import { getCities,getService } from '../rest/geoLocationApi'
 import {getPartner} from '../rest/partnerApi';
 
 const api_directions_key = "AIzaSyDcbXzRxlL0q_tM54tnAWHMlGdmPByFAfE";
-const partnersData = [
-  {
-    name: "papadom",
-    image: require("../assets/papadom.png")
-  },
-  {
-    name: "Bershka",
-    image: require("../assets/bershka.jpg")
-  }, {
-    name: "papadom",
-    image: require("../assets/mootaz.jpg")
-  }
-]
 
+export default function Home(props) {
 
-//Services : every service contains the service title and two images one for the dark mode  and the other for the regular mode
-const domains = [
-  { title: "Livreur", imageDark: require("../assets/delivery-bike-dark.png"), image: require("../assets/delivery-bike.png") },
-  { title: "Food", imageDark: require("../assets/fast-food-dark.png"), image: require("../assets/fast-food.png") },
-  { title: "Traveaux ", imageDark: require("../assets/builder-dark.png"), image: require("../assets/builder.png") },
-  { title: "Taxi", imageDark: require("../assets/taxi-dark.png"), image: require("../assets/taxi.png") },
-  { title: "Urgence", imageDark: require("../assets/ambulance-dark.png"), image: require("../assets/ambulance.png") }
-];
-
-
-export default function Home({ navigation }) {
-  return(<View></View>)
-}
- /* const context = useContext(AuthContext);
-  const searchInput = useRef()
-  const [user, setUser] = useState(context.user);
-  const [dark, setDark] = useState(context.darkMode);
+  const context = useContext(AuthContext);
   const [dropDown, setdropDown] = useState(false);
-  const [Markers, setMarkers] = useState([]);
   const [location, setLocation] = useState(context.location);
   const [temporaryLocation, setTemporaryLocation] = useState(false);
-  const [partners, setPartners] = useState([]);
+  const [partners, setPartners] = useState(null);
   const [seviceChosen, setServiceChosen] = useState(false);
-  const [smartCode, setSmartCode] = useState(context.user.locationCode);
   const [domain, setDomain] = useState("");
   const [search, setSearch] = useState("");
   const [searchResult, setSearchResult] = useState([]);
-  const [city, setCity] = useState("");
   const [showModal, setShowmodal] = useState(false);
   const [cities, setCities] = useState([]);
   const [services,setServices]=useState([]);
   const [regions, setRegions] = useState([]);
   const [locationState, setLocationState] = useState(context.locationState)
+
   useEffect(() => {
-
-
-    getCities().then(cities => {
-      setCities(cities),
-        setSearchResult(cities)
-    }).catch(
-      err => { alert("getting cities error") }
-    )
-
+    getCities().then(cities =>{setCities(cities),
+    setSearchResult(cities)}).catch(err=>{alert("getting cities error")},[props.route])
 
     // if(!locationState){
     //   Alert.alert(
@@ -116,50 +77,40 @@ export default function Home({ navigation }) {
     //   );
 
     // }
-  }, [context.location, context.locationState, context.temporaryLocation])
+  }, [])
 
 
+  // useEffect(() => {    
+  //   if (!context.location) {
+  //     (async () => {
+  //       let { status } = await Permissions.askAsync(Permissions.LOCATION);
+  //       if (status !== 'granted') {
+  //         Alert.alert('Permission to access location was denied');
+  //       }
+  //       else {
+  //         let location = await Location.getCurrentPositionAsync({});
+  //         setLocation({ latitude: location.coords.latitude, longitude: location.coords.longitude });
+  //       }
+  //     })();
+  //   }
+  //   else {
+  //     if (context.location.temperarlyLocation) {
+  //       setLocation({
+  //         latitude: context.location.temperarlyLocation.latitude
+  //         , longitude: context.location.temperarlyLocation.longitude
+  //       });
+  //       setTemporaryLocation(true);
+  //     }
+  //     else {
+  //       setLocation({
+  //         latitude: context.location.location.latitude
+  //         , longitude: context.location.location.longitude
+  //       });
+  //     }
+  //   }
 
-
-
-
-
-  useEffect(() => {
-    if (!context.location) {
-      (async () => {
-        let { status } = await Permissions.askAsync(Permissions.LOCATION);
-
-
-        if (status !== 'granted') {
-          Alert.alert('Permission to access location was denied');
-        }
-        else {
-          let location = await Location.getCurrentPositionAsync({});
-          setLocation({ latitude: location.coords.latitude, longitude: location.coords.longitude });
-        }
-      })();
-    }
-
-    else {
-      if (context.location.temperarlyLocation) {
-        setLocation({
-          latitude: context.location.temperarlyLocation.latitude
-          , longitude: context.location.temperarlyLocation.longitude
-        });
-        setTemporaryLocation(true);
-      }
-      else {
-        setLocation({
-          latitude: context.location.location.latitude
-          , longitude: context.location.location.longitude
-        });
-      }
-    }
-
-
-
-    setDark(context.darkMode);
-  }, [context.darkMode])
+  //   setDark(context.darkMode);
+  // }, [context.darkMode])
 
 
 
@@ -192,66 +143,97 @@ export default function Home({ navigation }) {
   }
 
   const checkProfile = () => {
-    navigation.navigate("Settings")
-
+    props.navigation.navigate("Settings")
   }
 
 const handleServicePartners= (service)=>{
   var partners_ids = []
-  service.partnersRegions.map(partnerRegion=>{
+  var  _partners=[];
+  
+   service.partnersRegions.map(partnerRegion=>{
     partnerRegion.partners.map(_partner=>{
       if(partners_ids.indexOf(_partner)>=0){}
       else {partners_ids.push(_partner)}
-
     })
-
   })
   partners_ids.map(_id=>{
       getPartner(_id).then(data=>{
-         let index = partners.findIndex(partner=>{return partner._id == data.partner._id})
+         let index = _partners.findIndex(partner=>{return partner._id == data.partner._id})
          if(index==-1){
-            setPartners([...partners,data.partner])
-       }
-      
-      
+          _partners.push(data.partner);
+          setPartners(_partners);
+
+        }          
         }).catch(err=>alert("no partners found"))
   })
-
   setDomain(service.serviceName); 
   setServiceChosen(true);
-
 }
-  const _pressCall = () => {
-    let phoneNumber = "28896426";
 
-    if (Platform.OS !== 'android') {
+const startPartnerConversation =(partner)=>{
+  let users_id=[]
+  partner.managers.forEach(manager=>{
+    users_id.push(manager.user);
+  })
+  users_id.push(context.user._id);
+  users_id.push(partner.owner._id);
+  const conversation =  context.openConversationHandler({},{users_id},"group",partner);
+  console.log(conversation);
+  props.navigation.navigate("conversation",{conversation,home:true})
+}
+
+
+
+
+
+
+
+const shareCode=async()=>{
+  try {
+      const shareResponse =await Share.share({message:context.user.locationCode.toString()});
+
+  } catch (error) {
+    console.log(error)
+  }
+}
+    const _pressCall = () => {
+    let phoneNumber = "28896426";
+if (Platform.OS !== 'android') {
       phoneNumber = `telprompt:${"28896426"}`;
     }
     else {
       phoneNumber = `tel:${"28896426"}`;
     } Linking.openURL(phoneNumber)
-
   }
-
-
 
   const openDrawer = () => {
-    navigation.openDrawer();
+    props.navigation.openDrawer();
   }
+
   const handleItemCheck = (item) => {
     if(!regions){
       setRegions(item.regions);
+      setPartners(null);
+      setServices(null);
     }
     else {
-      setShowmodal(false);
-      item.services.forEach(service_id=>{
-        getService(service_id).then(_service=>{setServices(services=>[...services,_service])}).catch(err=>{alert("getting service error")})
-      })
-
       setRegions(null);
-
+      setShowmodal(false);
+      let _services=[];
+      item.services.forEach(service_id=>{
+        getService(service_id).then(_service=>{
+            if(_services.findIndex(s=>{return s._id ==_service._id})==-1)
+          { 
+            _services.push(_service);
+          }
+          setServices(_services);
+        }).catch(err=>{console.log(err)})
+      })
     }
   }
+const checkPartner=(value)=>{
+  props.navigation.navigate("singleBrand",{partner:value,lastScreen:"Home"})
+}
   return (
     <View style={styles.container}>
       <MapView
@@ -263,7 +245,7 @@ const handleServicePartners= (service)=>{
         }}
 
         style={styles.container}
-        customMapStyle={dark ? darkStyle : defaultStyle}
+        customMapStyle={context.darkMode ?darkStyle : defaultStyle}
         provider="google"
       >
         <Marker
@@ -312,7 +294,7 @@ const handleServicePartners= (service)=>{
 
           }}
           strokeWidth={3}
-          strokeColor={dark ? "#24A9E1" : "#3d3d3d"}
+          strokeColor={context.darkMode ? "#24A9E1" : "#3d3d3d"}
         />
 
       </MapView>
@@ -325,7 +307,7 @@ const handleServicePartners= (service)=>{
           </TouchableOpacity>
         </View>
 
-        <Text style={styles.smartCode}>Smart Code:{smartCode}</Text>
+        <Text style={styles.smartCode}>Smart Code:{context.user.locationCode}</Text>
       </View>
 
       <View style={styles.menu}>
@@ -334,7 +316,7 @@ const handleServicePartners= (service)=>{
 
       <View style={styles.imageContainer}>
         <TouchableOpacity onPress={checkProfile}>
-          <Image style={styles.imageUser} source={user.photo ? { uri: user.photo } : require('../assets/user_image.png')} />
+          <Image style={styles.imageUser} source={context.user.photo ? { uri: context.user.photo } : require('../assets/user_image.png')} />
         </TouchableOpacity>
 
       </View>
@@ -343,18 +325,23 @@ const handleServicePartners= (service)=>{
         <View style={styles.geoInfo}>
           <View style={styles.coordinatesSettings}>
             <Image style={styles.coordSettingsIcon} source={require("../assets/copy-dark.png")} />
-            <TouchableOpacity onPress={() => { Clipboard.setString(user.locationCode) }}>
+            <TouchableOpacity onPress={() => { Clipboard.setString(context.user.locationCode) }}>
               <Text style={styles.codeManup}>copier mon code</Text>
             </TouchableOpacity>
 
           </View>
           <View style={styles.coordinatesSettings}>
+
             <Image style={styles.coordSettingsIcon} source={require("../assets/share-dark.png")} />
+            <TouchableOpacity onPress={(shareCode)}>
+
             <Text style={styles.codeManup}>partager mon code</Text>
+            </TouchableOpacity>
+
           </View>
           <View style={styles.coordinatesSettings}>
             <Image style={styles.coordSettingsIcon} source={require("../assets/temporary-dark.png")} />
-            <TouchableOpacity onPress={turnTemporaryLocation}>
+            <TouchableOpacity onPress={()=>{turnTemporaryLocation}}>
               <Text style={styles.codeManup}>postion temporaire({temporaryLocation ? "activé" : "desactivé"})</Text>
             </TouchableOpacity>
           </View>
@@ -364,119 +351,96 @@ const handleServicePartners= (service)=>{
       }
       <View style={styles.searchBar}>
         <Icon name="search" color={"#24A9E1"} />
-        <TextInput value={city} ref={searchInput} onChangeText={(text) => { setCity(text) }} onFocus={() => { setShowmodal(true) }} style={styles.searchInput} placeholder="Rechercher votre ville " placeholderTextColor="white" />
+        <TouchableOpacity onPress={() => { setShowmodal(true) }}>
+          
+        <Text   style={styles.searchInput} >Rechercher votre ville</Text>
+        </TouchableOpacity>
+
       </View>
 
 
 
-      <ScrollView horizontal
-        style={seviceChosen ? styles.domainswithPartners : styles.domainswithoutPartners}
-        showsHorizontalScrollIndicator={false}
-
-
-        //ios
-        contentInset={{
-          top: 0,
-          left: 0,
-          bottom: 0,
-          right: "50%"
-        }}
-        //android
-        contentContainerStyle={{
-          paddingRight: Platform.OS == 'android' ? 20 : 0
-
-        }}
-      >
-        {
-          services && services.map((service) => {
-            return (
-              <View style={styles.domainsContainer} key={service._id}>
-                <TouchableOpacity onPress={() => { handleServicePartners(service) }}>
-                  <View style={domain == service.serviceName ? styles.serviceChosen : styles.service} >
-                    <Image style={styles.imageService} source={{uri:service.icon}} />
-                  </View>
-
-                </TouchableOpacity>
-                <Text style={styles.servicetitle}>{service.serviceName}</Text>
+<View        style={seviceChosen ? styles.domainswithPartners : styles.domainswithoutPartners}>
+        
+        <FlatList
+        horizontal
+          data={services}
+          renderItem={({item})=>(
+            <View style={styles.domainsContainer}>
+            <TouchableOpacity onPress={() => { handleServicePartners(item) }}>
+              <View style={domain == item.serviceName ? styles.serviceChosen : styles.service} >
+                <Image style={styles.imageService} source={{uri:item.icon}} />
               </View>
 
-            )
-          }
-          )
-        }
-      </ScrollView>
+            </TouchableOpacity>
+            <Text style={styles.servicetitle}>{item.serviceName}</Text>
+          </View>
+
+          )}
+ 
+            keyExtractor={item=>item._id}
+ >
 
 
 
-      <ScrollView horizontal
-        style={styles.partners}
-        showsHorizontalScrollIndicator={false}
+        </FlatList>
+ 
+      </View>
 
 
-        //ios
-        contentInset={{
-          top: 0,
-          left: 0,
-          bottom: 0,
-          right: "50%"
-        }}
-        //android
-        contentContainerStyle={{
-          paddingRight: Platform.OS == 'android' ? 20 : 0
 
-        }}
-      >
-        {
-          seviceChosen && partners.map(partner => {
-            return (
-              <View style={styles.partnersContainer} key={partner._id}>
-                <View style={styles.SinglePartner} >
-                  <View style={styles.PartnerImageContainer}>
-                    <Image style={styles.partnerImage} source={require("../assets/adidas.jpg")} />
-                    <Text style={styles.partnerTitle}>{partner.partnerName}</Text>
+    { partners && seviceChosen&&   <View style={styles.partners}>
+        <FlatList
+          data={partners}
+          horizontal
+          renderItem={({item})=>(
+            <View style={styles.partnersContainer}>
+            <View style={styles.SinglePartner} >
+              <TouchableOpacity onPress={()=>{checkPartner(item)}} style={{width: "70%",height: "100%",}}>
+              <View style={styles.PartnerImageContainer}>
+                
+                <Image style={styles.partnerImage} source={{uri:item.profileImage}} />
+                <Text style={styles.partnerTitle}>{item.partnerName}</Text>
 
-                  </View>
-                  <View style={styles.operations}>
+              </View>
+              </TouchableOpacity>
+              <View style={styles.operations}>
 
-                    <View style={styles.call}>
-                      <TouchableOpacity style={{ width: "100%", height: "100%" }} onPress={_pressCall}>
+                <View style={styles.call}>
+                  <TouchableOpacity style={{ width: "100%", height: "100%" }} onPress={_pressCall}>
 
-                        <Image style={styles.messagingImage} source={require("../assets/phone-call.png")} />
-                      </TouchableOpacity>
-
-                    </View>
-
-
-                    <View style={styles.messaging}>
-                      <TouchableOpacity style={{ width: "100%", height: "100%" }} >
-                        <Image style={styles.messagingImage} source={require("../assets/speech-bubble.png")} />
-
-                      </TouchableOpacity>
-                    </View>
-                  </View>
+                    <Image style={styles.messagingImage} source={require("../assets/phone-call.png")} />
+                  </TouchableOpacity>
 
                 </View>
 
+
+                <View style={styles.messaging}>
+                  <TouchableOpacity onPress={()=>{startPartnerConversation(item)}} style={{ width: "100%", height: "100%" }} >
+                    <Image style={styles.messagingImage} source={require("../assets/speech-bubble.png")} />
+
+                  </TouchableOpacity>
+                </View>
               </View>
 
-            )
-          }
-          )
-        }
+            </View>
+
+          </View>
+
+          )}
+          keyExtractor={item=>{item._id}}
+        >
+        </FlatList>
+</View>
+}
 
 
 
-
-      </ScrollView>
-
-
-
-
-
-      { showModal &&
+     
         <Modal
           transparent={true}
           animationType={'slide'}
+          visible={showModal}
 
 
         >
@@ -489,7 +453,6 @@ const handleServicePartners= (service)=>{
                   placeholder="Type Here..."
                   value={search}
                   onChangeText={filtreList}
-
                 />
               </View>
 
@@ -516,9 +479,7 @@ const handleServicePartners= (service)=>{
                 {
                   setRegions(null);
                   setShowmodal(false);
-
                 }
-                  
               } style={{ width: "50%", height: "70%", borderRadius: 18, backgroundColor: "#2474f1",}}>
                   <View style={{ width: "100%", height: "100%",flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
                     <Text style={{ fontSize: Dimensions.get("window").width * 0.06, color: "white" }}>close</Text>
@@ -532,7 +493,7 @@ const handleServicePartners= (service)=>{
 
         </Modal>
 
-      }
+      
     </View>
 
   );
@@ -563,7 +524,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     flexDirection: "column",
     width: 70,
-    height: "94%",
+    height: "100%",
     overflow: "hidden"
 
   },
@@ -589,11 +550,12 @@ const styles = StyleSheet.create({
     resizeMode: "contain"
   },
   searchInput: {
-    backgroundColor: 'rgba(0,0,0,0)',
     width: "100%",
     height: 20,
-    color: "white"
+    color: "white",
+    textDecorationLine:'underline'
   },
+
   container: {
     flex: 1
   },
@@ -709,12 +671,14 @@ const styles = StyleSheet.create({
     top: "74%",
     left: "14%",
     height: "18%",
+    width:"86%",
     marginTop: Platform.OS == 'ios' ? 30 : 20,
     elevation: 10,
   },
   domainswithPartners: {
     position: "absolute",
     top: "55%",
+    width:"86%",
     left: "14%",
     height: "18%",
     marginTop: Platform.OS == 'ios' ? 30 : 20,
@@ -724,6 +688,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: "74%",
     left: "14%",
+    width:"86%",
     height: "18%",
     marginTop: Platform.OS == 'ios' ? 30 : 20,
     elevation: 10,
@@ -747,7 +712,7 @@ const styles = StyleSheet.create({
   },
   PartnerImageContainer: {
     backgroundColor: "#24A9E1",
-    width: "70%",
+    width: "100%",
     height: "100%",
     shadowColor: "white",
     shadowOffset: { width: 3, height: 3 },
@@ -1040,4 +1005,3 @@ const darkStyle = [
   }
 ]
 
-*/

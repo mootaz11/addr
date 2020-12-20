@@ -56,7 +56,6 @@ export default function Login(props) {
             useNativeDriver: true  // To make use of native driver for performance
         }
     ).start()
-
     // Next, interpolate beginning and end values (in this case 0 and 1)
     const spin = spinValue.interpolate({
         inputRange: [0, 1],
@@ -74,7 +73,7 @@ export default function Login(props) {
     useEffect(() => {
         if (!context.isloading && context.user) {
             if(!context.user.isPartner){
-                props.navigation.navigate("Settings");
+                props.navigation.navigate("Home");
             }
             else{
             props.navigation.navigate("listProducts");
@@ -132,14 +131,20 @@ export default function Login(props) {
         }
 
     };
-
     const checkForgotPassword = () => {
         navigation.navigate("forgotPassword")
     }
-
-
-
-
+    
+    if(context.isloading && context.user){
+        return(
+            <View style={{ flex: 1, flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
+            <Animated.Image
+                style={{ width:90,height:90, transform: [{ rotate: spin }] }}
+                source={require("../assets/images/logoBlue.png")} />
+        </View>
+        )
+    }
+    else{
         return (
             <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
                 <View style={styles.fullContainer}>
@@ -210,19 +215,10 @@ export default function Login(props) {
                 </View>
             </TouchableWithoutFeedback>
         );
+    }
   
-};
+}
 
-/* else {
-     return (
-  
-         <View style={{ flex: 1, flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
-             <Animated.Image
-                 style={{ width:90,height:60, transform: [{ rotate: spin }] }}
-                 source={require("../assets/images/logoBlue.png")} />
-         </View>
-     );
- }*/
 
 const styles = StyleSheet.create({
     fullContainer: {

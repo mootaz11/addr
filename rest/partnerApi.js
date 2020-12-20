@@ -15,6 +15,24 @@ export const getPartner =(partnerId)=>{
     })
 }
 
+export const getDelivererDashboard = (partnerId)=>{
+    return new Promise((resolve,reject)=>{
+        axios.get(`/partner/deliverer/dashboard/${partnerId}`).then(res=>{
+            if(res.status===200){
+                resolve(res.data);
+            }
+            
+        }).catch(err=>{
+            reject(err);
+        })
+    })
+}
+
+
+
+
+
+
 export const getPartnerWithProducts = (partnerId)=> {
     return new Promise ((resolve,reject)=>{
         axios.get(`/partner/addproduct/${partnerId}`).then(res=>{

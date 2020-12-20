@@ -1,22 +1,15 @@
 import React,{useContext, useEffect, useState} from 'react';
 import { View, Text, StyleSheet,Platform,Image,TouchableOpacity} from 'react-native';
 import { Icon } from 'react-native-elements';
-import { ScrollView ,FlatList } from 'react-native-gesture-handler';
+import {FlatList} from 'react-native-gesture-handler';
 import AuthContext from '../navigation/AuthContext';
 
 
 
 export default function Chat({navigation}){
     const context = useContext(AuthContext);
-    const [conversations,setConversations]=useState(context.conversations);
     const [user,setUser]=useState(context.user)
-    const [dark,setDark]=useState(true);
 
-    useEffect(()=>{
-        setDark(context.darkMode)
-        setConversations(context.conversations);
-
-    },[context.conversations,context.darkMode])
     
         
     
@@ -29,7 +22,7 @@ const  openDrawer =()=>{
 
 
 return(
-    <View style={dark ? styles.containerDark :styles.container}>
+    <View style={context.darkMode ? styles.containerDark :styles.container}>
     <View style={styles.menu}>
         <Icon color={"white"} style={{ flex: 1, padding: 0 }} name="menu" onPress={openDrawer} />
         <Text style={styles.Title}>Chat</Text>
@@ -37,17 +30,38 @@ return(
        
         <View style={styles.friends}>
 
-       {conversations &&
+       {context.conversations &&
             <FlatList
-                data={conversations}
+                horizontal
+                data={context.conversations}
                 renderItem={({item})=>
                     <View style={styles.friendContainer}>
                         <TouchableOpacity onPress={()=>{checkConversation(item)}}>
                             <View  style={styles.headUserImageContainer}>
-                             <Image style={styles.headUserImage} source = {item.users[item.users.findIndex(u=>{return u._id != user._id})].photo ? {uri:item.users[item.users.findIndex(u=>{return u._id != user._id})].photo} : require('../assets/user_image.png')}/>
-                             <Text numberOfLines={1} style={styles.friendHeadName}>{item.type=="personal" ? item.users[item.users.findIndex(u=>{return u._id != user._id})].firstName: item.lastName }</Text>
-                             <Text numberOfLines={1} style={styles.friendHeadName}>{item.type=="personal" ?  item.users[item.users.findIndex(u=>{return u._id != user._id})].lastName.length>8 ? item.users[item.users.findIndex(u=>{return u._id != user._id})].lastName.substring(0,8)+".." :item.users[item.users.findIndex(u=>{return u._id != user._id})].lastName : item.lastName }</Text>
-                            
+                             <Image style={styles.headUserImage} source = {
+                                    item.type=="personal"?item.users[item.users.findIndex(u=>{return u._id != context.context.user._id})].photo ? {uri:item.users[item.users.findIndex(u=>{return u._id != context.context.user._id})].photo} :require('../assets/user_image.png'):
+                                        item.users[item.users.findIndex(u=>{return u._id != context.user._id})]&&item.users[item.users.findIndex(u=>{return u._id != context.user._id})].isPartner ?{uri:item.image}:
+                                         item.users[item.users.findIndex(u=>{return u._id != context.user._id})].photo ? {uri:item.image} :require('../assets/user_image.png')                  
+                                        }
+                            />
+                             
+                             
+                             <Text numberOfLines={1} style={styles.friendHeadName}>{
+                                item.type=="personal"? 
+                                item.users[item.users.findIndex(u=>{return u._id != context.user._id})].firstName:
+                                item.users[item.users.findIndex(u=>{return u._id!= context.user._id})]&&item.users[item.users.findIndex(u=>{return u._id!= context.user._id})].isPartner 
+                                ? item.title :   item.users[item.users.findIndex(u=>{return u._id!= context.user._id})].firstName}</Text>
+    
+                             <Text numberOfLines={1} style={styles.friendHeadName}>{
+                             item.type=="personal" ? 
+                              item.users[item.users.findIndex(u=>{return u._id != context.user._id})].lastName.length>8 
+                                ? item.users[item.users.findIndex(u=>{return u._id != context.user._id})].lastName.substring(0,8)+".." :
+                                    item.users[item.users.findIndex(u=>{return u._id != context.user._id})].lastName : 
+                                        ""
+                                        
+                                        }</Text>
+
+
                             </View>
                         </TouchableOpacity>
                     </View>
@@ -62,19 +76,29 @@ return(
 
             
 
-     <View style={dark ? styles.conversationsDark :styles.conversations}>
+     <View style={context.darkMode ? styles.conversationsDark :styles.conversations}>
          <View style={styles.convContainer} >
-                 {conversations ? 
+                 {context.conversations ? 
                  <FlatList
-                    data={conversations}
+                    data={context.conversations}
                     renderItem={({ item }) =>
                 <TouchableOpacity   onPress={() => {checkConversation(item)}}>
                   <View style={styles.conversationContainer} >
                         <View style={styles.ConvimageContainer}>
-                            <Image source = {item.users[item.users.findIndex(u=>{return u._id != user._id})].photo ? {uri:item.users[item.users.findIndex(u=>{return u._id != user._id})].photo} : require('../assets/user_image.png')} style={styles.convImage}/>
+                        <Image style={styles.headUserImage} source = {
+                                    item.type=="personal"?item.users[item.users.findIndex(u=>{return u._id != context.user._id})].photo ? {uri:item.users[item.users.findIndex(u=>{return u._id != context.user._id})].photo} :require('../assets/user_image.png'):
+                                        item.users[item.users.findIndex(u=>{return u._id != context.user._id})]&&item.users[item.users.findIndex(u=>{return u._id != context.user._id})].isPartner ?{uri:item.image}:
+                                         item.users[item.users.findIndex(u=>{return u._id != context.user._id})].photo ? {uri:item.image} :require('../assets/user_image.png')                  
+                                        }
+                            />
                         </View>
                         <View style={styles.messageBody}>
-                            <Text style={dark ? styles.senderDark : styles.sender}>{item.type=="personal" ? item.users[item.users.findIndex(u=>{return u._id != user._id})].firstName+" "+item.users[item.users.findIndex(u=>{return u._id != user._id})].lastName: item.title }</Text>
+                            <Text style={context.darkMode ? styles.senderDark : styles.sender}>{
+                                item.type=="personal"? 
+                                item.users[item.users.findIndex(u=>{return u._id != context.user._id})].firstName+" "+item.users[item.users.findIndex(u=>{return u._id != context.user._id})].lastName:
+                                item.users[item.users.findIndex(u=>{return u._id!= context.user._id})]&&item.users[item.users.findIndex(u=>{return u._id!= context.user._id})].isPartner 
+                                ? item.title :   item.users[item.users.findIndex(u=>{return u._id!= context.user._id})].firstName+" "+item.users[item.users.findIndex(u=>{return u._id!= context.user._id})].lastName
+                            }</Text>
                             <Text numberOfLines={1}  style={styles.message}>{item.messages[item.messages.length-1].content.length>20 ? item.messages[item.messages.length-1].content.substr(0,20)+"...":item.messages[item.messages.length-1].content}</Text>
                         </View>
                         <View style ={styles.messageMeta}>
@@ -187,7 +211,7 @@ seenNumber:{
             justifyContent: "center",
             alignContent:"center",
             flexDirection: "column",
-            width:100,
+            width:90,
             height:120,
             overflow: "hidden",
             margin:8,
@@ -223,7 +247,7 @@ seenNumber:{
                 
             },
             conversationContainer:{
-                height:100,
+                height:60,
                 width:"100%",
                 flexDirection:"row",
                 margin:10

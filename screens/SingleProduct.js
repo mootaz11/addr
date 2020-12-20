@@ -30,19 +30,20 @@ export default function SingleProduct(props) {
 
     const _createOrder = () => {
         const body = {
-            product: { ...product },
+            product: { ...product},
             quantity: 1,
             productPricing: product.pricing[0]._id,
         }
         createOrder(body).then(created => {
+            if(created){
+                alert("order created");
+            }
         }).catch(err => {
             alert("error occured");
         })
-        // props.navigation.navigate("bag", { product: props.route.params.product });
     }
     const handleOption = (optionValue) => {
         console.log(optionValue);
-
     }
     const checkBag=()=>{
         props.navigation.navigate("bag")

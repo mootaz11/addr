@@ -33,7 +33,7 @@ export default function CustomDrawer(props) {
                             </View>
                         </TouchableOpacity>
                     </View>
-         {context.user.isPartner ?
+         {context.user.isPartner || context.user.isVendor ?
                     <Drawer.Section style={styles.drawerSection} >
                         <DrawerItem icon={({ color, size }) => (
                             <Icon
@@ -45,7 +45,7 @@ export default function CustomDrawer(props) {
                             labelStyle={{ color: "white" }}
 
                             label="Dashboard"
-                            onPress={() => { props.navigation.navigate("businessDash") }}
+                            onPress={() => { context.user.isVendor ?  props.navigation.navigate("deliveryDash"):props.navigation.navigate("businessDash") }}
                         />
                         {   context.user.isPartner ? 
                                 <DrawerItem  
@@ -158,7 +158,12 @@ export default function CustomDrawer(props) {
 
                         />
                     </Drawer.Section>
-
+                    <Drawer.Section style={styles.drawerSection} >
+                        <DrawerItem  labelStyle={{ color: "white" }}
+                            label={"Contact us"}
+                          onPress={() => {  props.navigation.navigate("contact")  }} />
+                   
+                    </Drawer.Section>
                 </DrawerContentScrollView>
                 <Drawer.Section style={styles.bottomDrawerSection} >
                     <DrawerItem icon={({ color, size }) => (

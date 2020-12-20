@@ -1,11 +1,12 @@
- import React, { useState, useEffect } from 'react'
- import { View, Text, StyleSheet, Platform, TouchableOpacity, Image, TextInput, ScrollView, SafeAreaView } from 'react-native'
+ import React,{useState} from 'react'
+ import { View, Text, StyleSheet, TouchableOpacity, Image, SafeAreaView } from 'react-native'
  import { Icon } from 'react-native-elements';
  import AuthContext from '../navigation/AuthContext';
  import _ from 'lodash';
  import { FlatList } from 'react-native-gesture-handler';
  import FontAwesome from 'react-native-vector-icons/FontAwesome';
  
+
  const order_pipeline = [
      { step: "Order placed", _id: "1" },
      { step: "waiting order", _id: "2" },
@@ -36,11 +37,9 @@
          productname: "zgougou",
          Date: "11.08.2020", _id: "4"
      }
- ]
- 
+   ]
  
  const order_during_deliv = [
- 
      {
          nomLivreur: "sara sara ",
          productname: "zgougou",
@@ -52,20 +51,17 @@
          Date: "11.08.2020",
          _id: "3"
      },
- 
- ]
+    ]
+
  const historique = [
- 
-     {
+    {
          nomLivreur: "sara sara ",
          productname: "zgougou",
          Date: "11.08.2020", _id: "2"
      },
+    ]
  
- 
- 
- ]
- 
+
  export default function  Deliveries (props) {
      const context = React.useContext(AuthContext);
      const [placedOrdersData, setPlacedOrdersData] = useState(context.actifOrders);
@@ -80,7 +76,6 @@
      const [Done, setDone] = useState(false);
  
  
-     const [dark, setDark] = useState(true);
      const [search, setSearch] = useState("");
      const [searchResult, setSearchResult] = useState(context.historyOrders);
  
@@ -94,10 +89,7 @@
          props.navigation.openDrawer();
      }
 
-     // const startConversation = (order)=>{
-     //    const conversation =  context.openConversationHandler({},{user:order.client,other:order.deliverer});
-     //    props.navigation.navigate("conversation",{conversation,orders:true})
-     // }
+    
  
 
      const orderDone = (item) => {
@@ -122,21 +114,17 @@
              setOrderDuringDelivery(false);
          }
      }
- 
- 
- 
- 
      return (
  <SafeAreaView>
- <View style={dark ? styles.containerDark : styles.container}>
-             <View style={dark ? styles.menuDark : styles.menu}>
+ <View style={context.darkMode ? styles.containerDark : styles.container}>
+             <View style={context.darkMode ? styles.menuDark : styles.menu}>
                  <TouchableOpacity style={styles.leftArrowContainer}>
                      <View >
-                         <Icon color={dark ? "white":"#2474F1"} style={{ flex: 1, padding: 0 ,justifyContent:"center"}} name="menu" onPress={openDrawer} />
+                         <Icon color={context.darkMode ? "white":"#2474F1"} style={{ flex: 1, padding: 0 ,justifyContent:"center"}} name="menu" onPress={openDrawer} />
                      </View>
                  </TouchableOpacity>
                  <View style={styles.titleContainer}>
-                     <Text style={dark ? styles.TitleDark : styles.Title}>Commande</Text>
+                     <Text style={context.darkMode ? styles.TitleDark : styles.Title}>Deliveries</Text>
                  </View>
  
              </View>
@@ -145,9 +133,9 @@
                      data={order_pipeline}
                      numColumns={2}
                      renderItem={({ item }) =>
-                         <TouchableOpacity style={checkedStep && item._id == checkedStep._id ? styles.stepChecked :(dark ? styles.stepDark: styles.step)} onPress={() => checkStep(item)}>
+                         <TouchableOpacity style={checkedStep && item._id == checkedStep._id ? styles.stepChecked :(context.darkMode ? styles.stepDark: styles.step)} onPress={() => checkStep(item)}>
                              <View style={{ width: "100%", height: "100%", flexDirection: "column", justifyContent: "center", alignItems: "center", }}>
-                                 <Text style={checkedStep && item._id == checkedStep._id ? { color: "white", fontSize: 15, textAlign: "center" } : (dark ? { color: "white", fontSize: 15, textAlign: "center" }:{ color: "black", fontSize: 15, textAlign: "center" } )}>{item.step}</Text>
+                                 <Text style={checkedStep && item._id == checkedStep._id ? { color: "white", fontSize: 15, textAlign: "center" } : (context.darkMode ? { color: "white", fontSize: 15, textAlign: "center" }:{ color: "black", fontSize: 15, textAlign: "center" } )}>{item.step}</Text>
                              </View>
                          </TouchableOpacity>
  
@@ -165,14 +153,14 @@
                      data={orderPlaced ? placedorder_data : orderDuringDelivery ? order_during_deliv : history ? historique : null}
                      renderItem={({ item }) =>
                      <TouchableOpacity>
-                         <View style={dark ? styles.deliveryDark :  styles.delivery} >
+                         <View style={context.darkMode ? styles.deliveryDark :  styles.delivery} >
                              <View style={styles.clientImageContainer}>
                                  <Image style={{ width: "80%", height: "80%", resizeMode: "contain" }} source={require("../assets/mootaz.jpg")} />
                              </View>
                              <View style={styles.deliveryInfo}>
-                                 <Text style={dark ? styles.infoDark : styles.info}>Nom de Livreur: {item.nomLivreur} </Text>
-                                 <Text style={dark ? styles.infoDark : styles.info}>Nom de Produit: {item.productname} </Text>
-                                 <Text style={dark ? styles.infoDark : styles.info}>Date: {item.Date}</Text>
+                                 <Text style={context.darkMode ? styles.infoDark : styles.info}>Nom de Livreur: {item.nomLivreur} </Text>
+                                 <Text style={context.darkMode ? styles.infoDark : styles.info}>Nom de Produit: {item.productname} </Text>
+                                 <Text style={context.darkMode ? styles.infoDark : styles.info}>Date: {item.Date}</Text>
                                  {   history &&
                                      <TouchableOpacity>
                                          <Text style={{ fontSize: 12, fontWeight: "600", color: "#2474F1", textDecorationLine: "underline" }}>your opinion about the product</Text>
@@ -213,7 +201,6 @@
 
 
 const styles = StyleSheet.create({
-
     actions: {
         width: "25%",
         height: "100%",
@@ -221,11 +208,12 @@ const styles = StyleSheet.create({
         borderRadius: 12
     },
     deliveryInfo: {
-        width: "60%",
+        width: "75%",
         height: "100%",
         flexDirection: "column",
         padding: 4,
-        justifyContent: "center"
+        justifyContent: "center",
+
     },
     info: {
         fontSize: 12,
@@ -333,7 +321,9 @@ const styles = StyleSheet.create({
         height: "8%",
         backgroundColor: "#121212",
         flexDirection: "row",
-        marginBottom: 8
+        marginBottom: 8,
+        
+        
     },
     leftArrowContainer: {
         width: "10%",

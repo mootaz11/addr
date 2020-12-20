@@ -22,7 +22,6 @@ import deliveryAdress from '../screens/DeliveryAdress';
 import orderReview from '../screens/orderReview';
 import foodProduct from '../screens/FoodProduct';
 import BusinessOrders from '../screens/business/BusinessOrders';
-
 import BusinessDashboardScreen from '../screens/business/BusinessDashboardScreen';
 import ListProductsScreen from '../screens/business/ListProductsScreen';
 import DeliveryDashboardScreen from '../screens/business/DeliveryDashboardScreen';
@@ -30,6 +29,7 @@ import AddProductScreen from '../screens/business/AddProductScreen';
 import addLocation from '../screens/business/addLocation'
 import followPackages from '../screens/business/followPackages';
 import Basket from '../screens/BasketScreen';
+import Contact from '../screens/contactScreen'
 
 
 
@@ -100,6 +100,8 @@ return(
             <drawerStack.Screen name="deliveryDash" component={DeliveryDashboardScreen}/>
             <drawerStack.Screen name="addLocation" component={addLocation}/>
             <drawerStack.Screen name="followPackages" component={followPackages}/>
+            <drawerStack.Screen name="contact" component={Contact}/>
+
           </drawerStack.Navigator>
       </NavigationContainer>
 )

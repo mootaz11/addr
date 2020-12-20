@@ -8,17 +8,10 @@ import {getPartnersByServiceName} from '../rest/partnerApi'
 
 export default function Brand(props){
     const context = useContext(AuthContext)
-    const [dark,setDark] =  useState(true);
     const [partners,setPartners]=useState([]);
     const [magictap,setmagicTap]= useState(false)
     const [pageName,setPageName]=useState("");
     
-    /*
-    useEffect(()=>{
-        setDarkmode(context.darkMode)
-    },[context.darkMode])
-    */
-
 
     useEffect(()=>{
         setPageName(props.route.params.page);
@@ -32,35 +25,40 @@ export default function Brand(props){
     
     
     const goBack = ()=> {
-            props.navigation.navigate("Home")
+            props.navigation.navigate("Home");
     }
     const checkBrand=(value)=>{
         props.navigation.navigate("singleBrand",{partner:value})
     }
         
     return(
-        <View style={!dark ? styles.container: styles.containerDark}>
+        <View style={!context.darkMode ? styles.container: styles.containerDark}>
                 {   props.route.params.page=="Brand" &&
                     <View style={styles.categories}>
                     <View style={styles.brand}>
                         <Text style={{fontSize:20,color:"white",fontWeight:"500"}}>Brand</Text>
                     </View>
-                    <View style={dark ? styles.otherDark : styles.other}>
-                    <Text style={dark ? {fontSize:20,color:"white",fontWeight:"500"} :{fontSize:20,color:"black",fontWeight:"500"}}>Others</Text>
+                    <View style={context.darkMode ? styles.otherDark : styles.other}>
+                    <Text style={context.darkMode ? {fontSize:20,color:"white",fontWeight:"500"} :{fontSize:20,color:"black",fontWeight:"500"}}>Others</Text>
                     
                     </View>
                     
                 </View>
                 }
-                <View style={dark ? styles.menuDark : styles.menu}>
+                <View style={context.darkMode ? styles.menuDark : styles.menu}>
                     <View style={styles.leftArrowContainer}>
-                    <Image style={styles.leftArrow} source={dark ? require("../assets/left-arrow-dark.png") : require("../assets/left-arrow.png")}/>
+                    <TouchableOpacity onPress={goBack}>
+
+                    <Image style={styles.leftArrow} source={context.darkMode ? require("../assets/left-arrow-dark.png") : require("../assets/left-arrow.png")}/>
+                    </TouchableOpacity>    
+
                     </View>
+                
                  <View style={styles.titleContainer}>
-                 <Text style={ dark ? styles.TitleDark : styles.Title}>{pageName}</Text>
+                 <Text style={ context.darkMode ? styles.TitleDark : styles.Title}>{pageName}</Text>
                 </View>     
                 <View style={styles.searchContainer}>
-                <FontAwesome color={dark ? "white" : "black"} style={{ padding: 0, fontSize: 24 }} name="search" onPress={goBack} />
+                <FontAwesome color={context.darkMode ? "white" : "black"} style={{ padding: 0, fontSize: 24 }} name="search" onPress={goBack} />
 
                 </View>
             
@@ -74,9 +72,9 @@ export default function Brand(props){
                     renderItem={({item})=>
                     <TouchableOpacity style={{width:"45%",height:140,margin:8,}} onPress={()=>{checkBrand(item)}} onMagicTap={()=>{setmagicTap(magictap=>!magictap)}}>
 
-                    <View style={ magictap ? styles.partnerContainerTapped : (dark ? styles.partnerContainerDark : styles.partnerContainer)} >
+                    <View style={ magictap ? styles.partnerContainerTapped : (context.darkMode ? styles.partnerContainerDark : styles.partnerContainer)} >
                         <Image style={styles.partnerImage} source={item.profileImage ? {uri:item.profileImage} : require("../assets/imagenotyet.jpg")}/>        
-                        <Text style={dark ? styles.partnerNameDark : styles.partnerName}>{item.partnerName}</Text>
+                        <Text style={context.darkMode ? styles.partnerNameDark : styles.partnerName}>{item.partnerName}</Text>
                     </View>
                     </TouchableOpacity>
 

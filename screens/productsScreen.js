@@ -13,7 +13,6 @@ export default function Products(props){
     const [products,setProducts]=useState(null);
 
     useEffect(()=>{
-        console.log(props.route.params.category.name);
         
         let isMounted = true ;
             if(props.route.params.last_screen=="newArrivals"){

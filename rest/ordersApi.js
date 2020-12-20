@@ -1,6 +1,7 @@
 import axios from "../rest/customAxios";
 
 
+
 export const createOrder =(order )=>{
     return new Promise(async (resolve,reject)=>{
        try{
@@ -12,6 +13,33 @@ export const createOrder =(order )=>{
        }
     })
 }
+
+export const updateOrder =(orderId,body)=>{
+    return new Promise((resolve,reject)=>{
+        axios.patch(`/order/${orderId}`,body).then(res=>{
+            if(res.status===200){
+                resolve(res.data.message)                
+            }
+        }).catch(err=>{
+            reject(err);
+        })
+    
+    })
+}
+
+export const getOrder =(orderId)=> {
+    return new Promise((resolve,reject)=>{
+        axios.get(`/order/${orderId}`).then(res=>{
+            if(res.status===200){
+                resolve(res.data.order);
+            }
+        }).catch(err=>{
+            reject(err);
+        })
+    })
+}
+
+
 
 export const getClientPreOrders=()=>{
     return new Promise((resolve,reject)=>{
@@ -45,10 +73,11 @@ export const  getPartnerOrders = (partnerId)=>{
 }
 
 
+
 //add partner id ; 
-export const   getDelivererOrders = ()=>{
+export const   getDelivererOrders = (partnerId)=>{
     return new Promise((resolve,reject)=>{
-        axios.get(`/order/deliverer`).then(res=>{
+        axios.get(`/order/deliverer/${partnerId}`).then(res=>{
             resolve(res.data.orders);
         })
         .catch(err=>{reject(err)})

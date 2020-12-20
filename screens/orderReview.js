@@ -1,36 +1,27 @@
 import React, { useState, useEffect, useContext } from 'react'
-import { Dimensions, StyleSheet, View, TouchableOpacity, Image, Text } from 'react-native'
+import { Dimensions, StyleSheet, View, TouchableOpacity, Image, Text,ActivityIndicator } from 'react-native'
 import { FlatList } from 'react-native-gesture-handler';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import {getOrder} from '../rest/ordersApi';
 
-
-const products_data = [
-    { name: "BIKER JACKER", price: 123.500, total: 123.500, quantity: 1, color: "white", size: "31/32", image: require("../assets/product1.webp"), _id: "55" },
-    { name: "BIKER JACKER", price: 123.500, total: 123.500, quantity: 1, color: "white", size: "31/32", image: require("../assets/product2.webp"), _id: "56" },
-    { name: "BIKER JACKER", price: 123.500, total: 123.500, quantity: 1, color: "white", size: "31/32", image: require("../assets/product3.webp"), _id: "57" },
-
-]
 
 export default function orderReview(props) {
-    const [products, setProducts] = useState(products_data);
     const [dark,setDark]=useState(true);
-
-
+    const [orderReview,setOrderReview]=useState(null);
+    useEffect(()=>{
+            getOrder(props.route.params.order).then(order=>{
+                console.log(order);
+                setOrderReview(order);
+            })
+            .catch(err=>{
+                alert("error occured");
+            })
+    },[props.route.params])
     
 
-    const increaseQuantity = () => {
-
-    }
-    const decreaseQuantity = () => {
-
-    }
-    const removeProduct = () => {
-
-    }
     const goToDeliveryAdress = ()=>{
         props.navigation.navigate("deliveryAdress")
     }
-
+    if(orderReview){
     return (
         <View style={dark ? styles.containerDark : styles.container}>
 
@@ -49,10 +40,10 @@ export default function orderReview(props) {
                 <View style={styles.orderInfoContainer}>
                     <View style={styles.clientInfo}>
                         <View style={styles.info}>
-                            <Text style={dark ? {fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500",color:"white"}: {fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500"}}>Ahmed yassine allegue</Text>
+                            <Text style={dark ? {fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500",color:"white"}: {fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500"}}>{orderReview.client.firstName+" "+orderReview.client.lastName}</Text>
                         </View>
                         <View style={styles.info}>
-                            <Text style={dark ? {fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500",color:"white"}:{fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500"}}>Client address: 4785aaaa</Text>
+                            <Text style={dark ? {fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500",color:"white"}:{fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500"}}>Client code: {orderReview.client.locationCode}</Text>
                         </View>
                         <View style={styles.info}>
                             <Text style={dark ? {fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500",color:"white"}:{fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500"}}>kssar hellel,</Text>
@@ -79,34 +70,27 @@ export default function orderReview(props) {
             </View>
             <View style={styles.bagContainer}>
                 <FlatList
-                    data={products}
+                    data={orderReview.type=="food" ? orderReview.foodItems : orderReview.items}
                     renderItem={
                         ({ item }) =>
                         <View style={dark ? styles.productContainerDark : styles.productContainer}>
                         <View style={styles.productImageContainer}>
-                            <Image style={styles.productImage} source={item.image} />
+                            <Image style={styles.productImage} source={item.product.mainImage} />
 
                         </View>
                         <View style={styles.productInfoContainer}>
                             <View style={{ width: "92%", height: "20%", marginVertical: 4, alignSelf: "center" }}>
-                                <Text style={dark ? { fontSize: 17, fontWeight: "700" ,color:"white"}:{ fontSize: 17, fontWeight: "700" }}>{item.name} HI HI HIHIHI</Text>
-                            </View>
-                            <TouchableOpacity>
-                                <View style={{ width: "92%", height: "8%", marginVertical: 4, alignSelf: "center" }}>
-                                    <Text style={{ fontSize: 16, fontWeight: "500", color: "grey" }}>Remove</Text>
-                                </View>
-                            </TouchableOpacity>
-
-
-                            <View style={{ width: "92%", height: "10%", marginVertical: 4, alignSelf: "center" }}>
-                                <Text style={dark ? { fontSize: 20, fontWeight: "700",color:"white" } :{ fontSize: 20, fontWeight: "700" }}>{item.price} TND</Text>
+                                <Text style={dark ? { fontSize: 17, fontWeight: "700" ,color:"white"}:{ fontSize: 17, fontWeight: "700" }}>{item.product.name}</Text>
                             </View>
                             <View style={{ width: "92%", height: "10%", marginVertical: 4, alignSelf: "center" }}>
-                                <Text style={dark ? { fontSize: 20, fontWeight: "700",color:"white" } :{ fontSize: 20, fontWeight: "700" }}>{item.total} TND</Text>
+                                <Text style={dark ? { fontSize: 20, fontWeight: "700",color:"white" } :{ fontSize: 20, fontWeight: "700" }}>{item.product.basePrice} TND</Text>
+                            </View>
+                            <View style={{ width: "92%", height: "10%", marginVertical: 4, alignSelf: "center" }}>
+                                <Text style={dark ? { fontSize: 20, fontWeight: "700",color:"white" } :{ fontSize: 20, fontWeight: "700" }}>{item.product.basePrice} TND</Text>
                             </View>
                             <View style={{ width: "92%", height: "15%", marginVertical: 4, alignSelf: "center" }}>
-                                <Text style={dark ?{ fontSize: 14 ,color:"white"} :{ fontSize: 14 }}>{item.color}</Text>
-                                <Text style={dark ?{ fontSize: 14,color:"white" }:{ fontSize: 14 }}>{item.size}</Text>
+                                {/* <Text style={dark ?{ fontSize: 14 ,color:"white"} :{ fontSize: 14 }}>{item.color}</Text>
+                                <Text style={dark ?{ fontSize: 14,color:"white" }:{ fontSize: 14 }}>{item.size}</Text> */}
                             </View>
                             <View style={{ width: "92%", height: "18%", marginVertical: 4, alignSelf: "center", flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
                   
@@ -137,7 +121,7 @@ export default function orderReview(props) {
                         <Text style={dark ?{ fontSize: 20,color:"white"}:{ fontSize: 20}}>Items Total</Text>
                     </View>
                     <View >
-                        <Text style={dark ? { fontSize: 20 ,color:"white"}: { fontSize: 20 }}>129,99TND</Text>
+                        <Text style={dark ? { fontSize: 20 ,color:"white"}: { fontSize: 20 }}>{orderReview.price} TND</Text>
                     </View>
                 </View>
                 <View style={styles.orderOverview}>
@@ -168,7 +152,12 @@ export default function orderReview(props) {
          </View>
 
         </View>
-    )
+    )}
+    else {
+        return (<View style={{ flex: 1, justifyContent: "center", flexDirection: "column", alignItems: "center" }}>
+            <ActivityIndicator size="large" />
+        </View>)
+    }
 }
 
 

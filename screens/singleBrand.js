@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react'
-import { View, Text, StyleSheet, Dimensions, Image, TouchableOpacity, Platform } from 'react-native'
+import { View, Text, StyleSheet, Dimensions, Image, TouchableOpacity, Platform ,SafeAreaView} from 'react-native'
 import AuthContext from '../navigation/AuthContext';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { FlatList } from 'react-native-gesture-handler';
@@ -52,7 +52,12 @@ export default function SingleBrand(props) {
     const goBack = () => {
         setNewArrivals(null);
         setPartner(null);
+        if(props.route.params.lastScreen && props.route.params.lastScreen=="Home"){
+            props.navigation.navigate("Home")
+        }
+        else {       
         props.navigation.navigate("brand")
+        }
     }
     const showallNewArrivals = () => {
         props.navigation.navigate("products", { last_screen: "newArrivals" ,newArrivals:newArrivals})
@@ -86,9 +91,8 @@ export default function SingleBrand(props) {
 
 
     return (
-
-        <View style={!dark ? styles.container : styles.containerDark}>
-            
+        <View style={!context.darkMode ?styles.container : styles.containerDark}>
+            <SafeAreaView>
             <View style={styles.headerImageContainer}>
 
                 <Image style={styles.headerImage} source={require("../assets/zarashop.jpg")} />
@@ -134,12 +138,12 @@ export default function SingleBrand(props) {
             <View style={styles.newArrivals}>
                 <View style={styles.newArrivalsHeader}>
                     <View style={{ marginLeft: 5 }}>
-                        <Text style={dark ? { fontSize: 24, color: "white", fontWeight: "500" } : { fontSize: 24, color: "black", fontWeight: "500" }}>New Arrivals</Text>
+                        <Text style={context.darkMode ?{ fontSize: 24, color: "white", fontWeight: "500" } : { fontSize: 24, color: "black", fontWeight: "500" }}>New Arrivals</Text>
                     </View>
                     <TouchableOpacity>
                         <View style={{ flexDirection: "row", alignItems: "center", alignContent: "center", justifyContent: "space-between", marginRight: 5 }}>
-                            <Text style={dark ? { fontSize: 15, color: "white" } : { fontSize: 15, color: "black" }}>show all</Text>
-                            <FontAwesome color={dark ? "white" : "black"} style={{ marginHorizontal: 3, fontSize: 15 }} name="caret-right" onPress={showallNewArrivals} />
+                            <Text style={context.darkMode ?{ fontSize: 15, color: "white" } : { fontSize: 15, color: "black" }}>show all</Text>
+                            <FontAwesome color={context.darkMode ?"white" : "black"} style={{ marginHorizontal: 3, fontSize: 15 }} name="caret-right" onPress={showallNewArrivals} />
 
 
                         </View>
@@ -153,9 +157,9 @@ export default function SingleBrand(props) {
                             ({ item }) =>
                                 <TouchableOpacity onPress={()=>{checkProduct(item)}}>
 
-                                <View style={dark ? styles.productDark : styles.product}>
+                                <View style={context.darkMode ?styles.productDark : styles.product}>
                                     <Image style={styles.productImage} source={item.mainImage ? { uri: item.mainImage } : require("../assets/imagenotyet.jpg")} />
-                                    <Text style={dark ? styles.productTitleDark : styles.productTitle}>{item.name}</Text>
+                                    <Text style={context.darkMode ?styles.productTitleDark : styles.productTitle}>{item.name}</Text>
                                     <Text style={styles.price}>{item.basePrice} DT</Text>
                                 </View>
                                 </TouchableOpacity>
@@ -175,12 +179,12 @@ export default function SingleBrand(props) {
             <View style={styles.newArrivals}>
                 <View style={styles.newArrivalsHeader}>
                     <View style={{ marginLeft: 5 }}>
-                        <Text style={dark ? { fontSize: 24, color: "white", fontWeight: "500" } : { fontSize: 24, color: "black", fontWeight: "500" }}>Top Trends</Text>
+                        <Text style={context.darkMode ?{ fontSize: 24, color: "white", fontWeight: "500" } : { fontSize: 24, color: "black", fontWeight: "500" }}>Top Trends</Text>
                     </View>
                     <TouchableOpacity>
                         <View style={{ flexDirection: "row", alignItems: "center", alignContent: "center", justifyContent: "space-between", marginRight: 5 }}>
-                            <Text style={dark ? { fontSize: 15, color: "white" } : { fontSize: 15, color: "black" }}>show all</Text>
-                            <FontAwesome color={dark ? "white" : "black"} style={{ marginHorizontal: 3, fontSize: 15 }} name="caret-right" onPress={showallTopTrends} />
+                            <Text style={context.darkMode ?{ fontSize: 15, color: "white" } : { fontSize: 15, color: "black" }}>show all</Text>
+                            <FontAwesome color={context.darkMode ?"white" : "black"} style={{ marginHorizontal: 3, fontSize: 15 }} name="caret-right" onPress={showallTopTrends} />
 
 
                         </View>
@@ -193,9 +197,9 @@ export default function SingleBrand(props) {
                             horizontal
                             renderItem={
                                 ({ item }) =>
-                                    <View style={dark ? styles.productDark : styles.product}>
+                                    <View style={context.darkMode ?styles.productDark : styles.product}>
                                         <Image style={styles.productImage} source={item.mainImage ? { uri: item.mainImage } : require("../assets/imagenotyet.jpg")} />
-                                        <Text style={dark ? styles.productTitleDark : styles.productTitle}>{item.name}</Text>
+                                        <Text style={context.darkMode ?styles.productTitleDark : styles.productTitle}>{item.name}</Text>
                                         <Text style={styles.price}>{item.basePrice} DT</Text>
                                     </View>
                             }
@@ -212,7 +216,7 @@ export default function SingleBrand(props) {
                 </View>
             </View>
 
-
+            </SafeAreaView>
 
         </View>
     );
@@ -267,16 +271,16 @@ const styles = StyleSheet.create({
     },
     title: {
         color: "white",
-        fontSize: 34,
+        fontSize: Dimensions.get("window").width*0.09,
         fontWeight: "600",
 
     },
     description: {
         color: "white",
-        fontSize: 20,
+        fontSize: Dimensions.get("window").width*0.05,
         fontWeight: "300",
         position: "absolute",
-        top: "75%",
+        top: "80%",
         zIndex: 50,
         elevation: 10
 

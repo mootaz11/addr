@@ -9,6 +9,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { getPartnerDashboard, deleteDeliverer, deleteManager } from '../../rest/partnerApi'
 import AuthContext from '../../navigation/AuthContext';
 
+ // const startConversation = (order)=>{
+     //    const conversation =  context.openConversationHandler({},{user:order.client,other:order.deliverer});
+     //    props.navigation.navigate("conversation",{conversation,orders:true})
+     // }
 
 const BusinessDashboardScreen = (props) => {
     const context = useContext(AuthContext);

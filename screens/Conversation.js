@@ -1,10 +1,13 @@
-import React, { useContext, useEffect, useState,useRef } from 'react'
-import { View, Text, StyleSheet, Platform, Image, ScrollView, TouchableOpacity, Button } from 'react-native'
-import { TextInput, Paragraph } from 'react-native-paper';
+import React, { useContext, useEffect, useState, useRef } from 'react'
+import { View, Text, StyleSheet, Platform, Image, ScrollView, TouchableOpacity,ActivityIndicator } from 'react-native'
+import { TextInput } from 'react-native-paper';
 import _ from 'lodash';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import QRCode from 'react-native-qrcode-svg';
 import AuthContext from '../navigation/AuthContext';
+import { LogBox } from 'react-native';
+LogBox.ignoreLogs(['Warning: ...']); // Ignore log notification by message
+LogBox.ignoreAllLogs();//Ignore all log notifications
 
 
 
@@ -13,28 +16,37 @@ export default function Conversation(props) {
     const context = useContext(AuthContext);
     const scrollViewRef = useRef();
     const [message, setMessage] = useState("");
-    const [messages, setMessages] = useState(props.route.params.conversation.messages);
-    const [conversation, setConversation] = useState(props.route.params.conversation);
+    const [messages, setMessages] = useState([]);
+    const [conversation, setConversation] = useState(null);
     const [dark, setDark] = useState(context.darkMode);
-    
-    
-    
-    
+    const [conversationId,setConversationId]=useState("");
+
+
 
     useEffect(() => {
-        setDark(context.darkMode)
-
-    }, [context.darkMode])
-
-    useEffect(() => {
+        let mounted=true;
+        if(mounted){
+        setConversation(props.route.params.conversation);    
         let _conversations = [...context.conversations];
-        const index = _conversations.findIndex(conv => { return conv._id == conversation._id });
-        if (index >= 0) {
+        
+        const index = _conversations.findIndex(conv => { return conv._id == props.route.params.conversation._id });
+        const index_first=  _conversations.findIndex(conv => { return conv._id == conversationId });
+        if (index >= 0 ) {
+            console.log(index);
             let _conversation = _conversations[index];
             setMessages(_conversation.messages);
             setConversation(_conversation);
         }
-    }, [context.conversations])
+        if(index_first>=0){
+            let _conversation = _conversations[index_first];
+            setMessages(_conversation.messages);
+            setConversation(_conversation);
+            setConversationId("");
+        }
+    }
+        return () =>{ mounted=false;setMessages([]);setConversation(null)}
+    }, [context.conversations,props.route.params])
+
     const sendQrCode = () => {
         if (messages.length == 0) {
             const data = {
@@ -45,8 +57,7 @@ export default function Conversation(props) {
                 content: "mon code est   :" + context.user.locationCode,
             }
             context.startNewConversation(data).then(conversation => {
-                setConversation(conversation);
-
+                setConversationId(conversation._id)
             }).catch(err => { alert(err) })
         }
         else {
@@ -60,8 +71,10 @@ export default function Conversation(props) {
     }
 
     const sendMessage = () => {
-        if (messages.length == 0) {
+        if (messages.length == 0)
+        {
             const data = {
+                partner:conversation.partner?conversation.partner._id:null,
                 users: conversation.users,
                 title: conversation.title,
                 image: conversation.image,
@@ -69,10 +82,9 @@ export default function Conversation(props) {
                 content: message,
             }
             context.startNewConversation(data).then(conversation => {
-                setConversation(conversation);
+                setConversationId(conversation._id)
                 context.handleConversation(conversation);
             }).catch(err => { console.log(err) })
-
         }
         else {
             const data = {
@@ -85,8 +97,6 @@ export default function Conversation(props) {
         setMessage("");
     }
 
-
-
     const goBack = () => {
         //console.log (Object.keys(props.route.params));
         props.navigation.goBack()
@@ -95,8 +105,14 @@ export default function Conversation(props) {
         <View style={dark ? styles.containerDark : styles.container}>
             <View style={styles.menu}>
                 <FontAwesome color={"white"} style={{ padding: 0, fontSize: 20 }} name="arrow-left" onPress={goBack} />
-                <Image style={styles.friendImage} source={props.route.params.conversation.image} />
-                <Text style={styles.Title}>{props.route.params.conversation.other ? props.route.params.conversation.other : props.route.params.conversation.users.filter(user => user._id != context.user._id)[0].firstName + " " + props.route.params.conversation.users.filter(user => user._id != context.user._id)[0].lastName}</Text>
+                <Image style={styles.friendImage} source={{uri:props.route.params.conversation.image}} />
+                <Text style={styles.Title}>{
+                props.route.params.conversation.type == "personal" ?
+                    props.route.params.conversation.other ? 
+                            props.route.params.conversation.other : 
+                                props.route.params.conversation.users.filter(user => user._id != context.user._id)[0].firstName + " " + props.route.params.conversation.users.filter(user => user._id != context.user._id)[0].lastName : 
+                                    !context.user.isPartner ? props.route.params.conversation.title:
+                                       props.route.params.conversation.users.filter(user => user != context.user._id)[0].firstName+" "+props.route.params.conversation.users.filter(user => user != context.user._id)[0].lastName}</Text>
             </View>
             <ScrollView ref={scrollViewRef}
                 onContentSizeChange={() => scrollViewRef.current.scrollToEnd({ animated: true })}
@@ -116,32 +132,28 @@ export default function Conversation(props) {
                                                     (<QRCode
                                                         value={message.content.substr(16)}
                                                     />)
-
                                                     : null
                                                 }
                                             </View>
                                             <Text style={styles.userTime}>{message.date.split('T')[1].split(':')[0] + ":" + message.date.split('T')[1].split(':')[1]}</Text>
-                                            <Image style={styles.seenImage} source={require("../assets/julia.jpg")} />
+                                          
+                
                                         </View>
                                         ) :
                                         (
                                             <View style={styles.FriendmessageSentContainer} key={index}>
                                                 <Text style={styles.FriendTime}>{message.date.split('T')[1].split(':')[0] + ":" + message.date.split('T')[1].split(':')[1]}</Text>
-
                                                 <View style={dark ? styles.FriendmessageSentDark : styles.FriendmessageSent}>
-                                                    <Text style={dark ? styles.textMessageDark :styles.textMessage}>{message.content}</Text>
+                                                    <Text style={dark ? styles.textMessageDark : styles.textMessage}>{message.content}</Text>
                                                     {message.content.includes("mon code est   :") ?
                                                         (<QRCode
-
                                                             value={message.content.substr(16)}
-
                                                         />)
-
                                                         : null
                                                     }
 
                                                 </View>
-                                                <Image style={styles.FriendImage} source={props.route.params.conversation.image} />
+                                                <Image style={styles.FriendImage} source={{uri:conversation.users[conversation.users.findIndex(user=>{return user._id==message.sender})].photo}}/>
 
                                             </View>
                                         )
@@ -159,9 +171,11 @@ export default function Conversation(props) {
                         placeholder={"Type a message.."}
                         underlineColor={dark ? "#292929" : "white"}
                         underlineColorAndroid={dark ? "#292929" : "white"}
-                        onFocus={()=>{ if (conversation) {
-                            context.markAsReadConversation(conversation._id);
-                        }}}
+                        onFocus={() => {
+                            if (conversation) {
+                                context.markAsReadConversation(conversation._id);
+                            }
+                        }}
                         //placeholderTextColor={"##919191"}
                         value={message}
                         onChangeText={(text) => { setMessage(text); }}
@@ -185,9 +199,8 @@ export default function Conversation(props) {
                 </View>
             </View>
         </View>
-    );
-
-}
+    )}
+  
 const styles = StyleSheet.create({
     sentCodeContainer:
     {
@@ -340,7 +353,7 @@ const styles = StyleSheet.create({
     },
     message: {
         width: "80%",
-        height: "100%",
+        height:"100%",
         margin: 5,
         borderColor: "#e6e6e6",
         color: "#e6e6e6",
@@ -422,7 +435,7 @@ const styles = StyleSheet.create({
     FriendmessageSent: {
         width: "70%",
         flexDirection: "row",
-        backgroundColor:  '#E6E6E6',
+        backgroundColor: '#E6E6E6',
         alignItems: "flex-start",
         margin: 10,
         padding: 5,
@@ -433,7 +446,7 @@ const styles = StyleSheet.create({
     FriendmessageSentDark: {
         width: "70%",
         flexDirection: "row",
-        backgroundColor:"#292929",
+        backgroundColor: "#292929",
         alignItems: "flex-start",
         margin: 10,
         padding: 5,

@@ -4,7 +4,7 @@ import { FlatList } from 'react-native-gesture-handler';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
 
-//import MapView, { Marker } from 'react-native-maps';
+import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import * as Permissions from 'expo-permissions';
 import { Icon } from 'react-native-elements';
@@ -14,8 +14,7 @@ import AuthContext from '../../navigation/AuthContext';
 
 
 export default function addLocation(props) {
-    return (<View></View>)}
-/*    const context = useContext(AuthContext);
+    const context = useContext(AuthContext);
     const [dark, setDark] = useState(false);
     const [openModal,setOpenModal]=useState(false)
     const [address,setAddress]=useState("")
@@ -404,4 +403,3 @@ const darkStyle = [
         ]
     }
 ];
-*/

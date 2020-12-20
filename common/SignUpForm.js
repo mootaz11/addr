@@ -1,6 +1,6 @@
 import React, { useReducer, useCallback, useState, useRef } from 'react';
 import { View, StyleSheet, ScrollView, Dimensions, Keyboard, Alert, Platformn, Text, Image, Modal ,TouchableOpacity} from 'react-native';
-//import MapView, { Marker } from 'react-native-maps';
+import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import * as Permissions from 'expo-permissions';
 import {signup} from '../rest/userApi'
@@ -266,7 +266,7 @@ const SignUpForm = (props) => {
                 <SubmitButton onPress={signupHandler}>Create account</SubmitButton>
             </View>
          
-            {/* {
+            {
            openModal &&
             <Modal
                 animationType={"fade"}
@@ -328,7 +328,7 @@ const SignUpForm = (props) => {
                     </View>
                         </View>
                     </View>
-    </Modal>} */}
+    </Modal>}
 
         </View>
     );

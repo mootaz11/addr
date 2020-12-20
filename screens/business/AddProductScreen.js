@@ -255,7 +255,7 @@ const AddProductScreen = (props) => {
         
             const index = variantsInputs.findIndex(vari => vari.id === variantId);
         const updatedVariant = variantsInputs.find((vari)=> vari.id === variantId);
-
+        
         const updatedSousVariants = updatedVariant.sousvariants.filter(sousvari=> sousvari.id !== sousVariantId);
 
         updatedVariant.sousvariants = [...updatedSousVariants];
