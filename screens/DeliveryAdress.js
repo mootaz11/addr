@@ -2,11 +2,11 @@ import React, { useState, useEffect, useContext } from 'react'
 import { SafeAreaView } from 'react-native';
 import { Dimensions, StyleSheet, View, TouchableOpacity, Image, Text, TextInput,Modal } from 'react-native'
 import { FlatList } from 'react-native-gesture-handler';
-import { set } from 'react-native-reanimated';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import * as Permissions from 'expo-permissions';
+import AuthContext from '../navigation/AuthContext';
 
 const deliveryOptions = [
     { name: "Sara", price: 20, ratings: 5, workdays: "4-7 jours ouvrés", _id: "55", image: require("../assets/mootaz.jpg") },
@@ -461,11 +461,11 @@ const styles = StyleSheet.create({
     },
     Title: {
         fontWeight: "700",
-        fontSize: 28
+        fontSize: Dimensions.get("window").width * 0.07,
     },
     TitleDark: {
         fontWeight: "700",
-        fontSize: 28,
+        fontSize: Dimensions.get("window").width * 0.07,
         color: "white"
 
     }

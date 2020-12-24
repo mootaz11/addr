@@ -83,7 +83,7 @@ export default function SingleBrand(props) {
         }
     }
     const checkBasket =()=>{
-        props.navigation.navigate("basket",{last_screen:"singleBrand"});
+         props.navigation.navigate("basket",{last_screen:"singleBrand"});
     }
 
 
@@ -105,12 +105,13 @@ export default function SingleBrand(props) {
                     <Image style={{ width: "100%", height: "100%" }} source={require("../assets/left-arrow-dark.png")} />
 
                 </TouchableOpacity>
-                <TouchableOpacity onPress={checkBasket} style={{ position: "absolute", top: "5%", right: "50%" }}>
-                <FontAwesome color={"white"} style={{ padding: 0, fontSize: 24, position: "absolute", top: "5%", right: "50%" }} name="shopping-bag" />
+
+                <TouchableOpacity onPress={checkBasket}  style={{ position: "absolute",width:30,height:30 ,top: "8%", right: "2%" ,elevation:10,zIndex:50}}>
+                <FontAwesome color={"white"} style={{ padding: 0, fontSize: 24, position: "absolute", top: "8%", right: "2%" }} name="shopping-bag" />
+
 
                 </TouchableOpacity>
 
-                <FontAwesome color={"white"} style={{ padding: 0, fontSize: 24, position: "absolute", top: "5%", right: "2%" }} name="search" />
 
             </View>
             <View style={styles.categories}>
@@ -244,7 +245,7 @@ const styles = StyleSheet.create({
         width: 30,
         height: 30,
         position: "absolute",
-        top: "5%",
+        top: "8%",
         left: "2%",
         zIndex: 50,
         elevation: 10,

@@ -90,7 +90,18 @@ export default function foodProduct(props) {
             quantity:1
         }).then(createdOrder=>{
             if(createdOrder){
-                alert("order created done ! ");
+                Alert.alert(
+                    "",
+                    "order created done !",
+                    [
+                      
+                      { text: "OK" }
+                    ],
+                    { cancelable: false }
+
+
+                  );
+
             }
         })
         .catch(err=>{

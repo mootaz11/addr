@@ -1,5 +1,5 @@
 import React, { useContext, useState,useEffect } from 'react'
-import {View,Text,StyleSheet, Dimensions,Image, TouchableOpacity} from 'react-native'
+import {View,Text,StyleSheet, Dimensions,Image, TouchableOpacity,SafeAreaView} from 'react-native'
 import AuthContext from '../navigation/AuthContext';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { FlatList } from 'react-native-gesture-handler';
@@ -14,7 +14,7 @@ export default function Brand(props){
     
 
     useEffect(()=>{
-        setPageName(props.route.params.page);
+        setPageName(props.route.params.serviceName);
         getPartnersByServiceName(props.route.params.serviceName).then(_partners=>{
                 setPartners(_partners)
         }).catch(err=>{
@@ -32,6 +32,8 @@ export default function Brand(props){
     }
         
     return(
+        <SafeAreaView style={{flex:1}}>
+
         <View style={!context.darkMode ? styles.container: styles.containerDark}>
                 {   props.route.params.page=="Brand" &&
                     <View style={styles.categories}>
@@ -57,10 +59,7 @@ export default function Brand(props){
                  <View style={styles.titleContainer}>
                  <Text style={ context.darkMode ? styles.TitleDark : styles.Title}>{pageName}</Text>
                 </View>     
-                <View style={styles.searchContainer}>
-                <FontAwesome color={context.darkMode ? "white" : "black"} style={{ padding: 0, fontSize: 24 }} name="search" onPress={goBack} />
-
-                </View>
+               
             
             </View>
         
@@ -89,6 +88,8 @@ export default function Brand(props){
             </View>
         
         </View>
+        </SafeAreaView>
+
     );
 
 }
@@ -177,6 +178,7 @@ leftArrowContainer:{
 },
 leftArrow:{
     width:30,
+    marginTop:8,
     height:30
 },
 
@@ -189,11 +191,12 @@ titleContainer:{
 },
 Title:{
     fontWeight:"700",
-    fontSize:28
+    color:"black",
+    fontSize: Dimensions.get("window").width * 0.07,
 },
 TitleDark:{
     fontWeight:"700",
-    fontSize:28,
+    fontSize: Dimensions.get("window").width * 0.07,
     color:"white"
 },
 searchContainer:{

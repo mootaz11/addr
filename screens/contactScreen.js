@@ -116,7 +116,7 @@ const Contact = (props) => {
     },[formState]);
 
     return (
-        <SafeAreaView style={{flex:1}}>
+        <SafeAreaView style={{flex:1,marginTop:10}}>
         <KeyboardAvoidingView
         behavior={Platform.OS == "android" ?  "height":"height"}
         style={{flex:1}}>    

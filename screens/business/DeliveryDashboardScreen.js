@@ -11,97 +11,6 @@ import {getDelivererDashboard} from '../../rest/partnerApi';
 import { SafeAreaView } from 'react-native';
 
 
-const markers = [
-    {
-        id: '1',
-        image: '../../assets/images/adidas.jpg',
-        name: 'Amir',
-        price: 109.99,
-    },
-    {
-        id: '2',
-        image: '../../assets/images/adidas.jpg',
-        name: 'Amira',
-        price: 109.99,
-    },
-    {
-        id: '3',
-        image: '../../assets/images/adidas.jpg',
-        name: 'Salah',
-        price: 109.99,
-    },
-    {
-        id: '4',
-        image: '../../assets/images/adidas.jpg',
-        name: 'Mohamed Ali',
-        price: 109.99,
-    },
-    {
-        id: '5',
-        image: '../../assets/images/adidas.jpg',
-        name: 'Salah',
-        price: 109.99,
-    },
-    {
-        id: '6',
-        image: '../../assets/images/adidas.jpg',
-        name: 'Mohamed Ali',
-        price: 109.99,
-    },
-    {
-        id: '7',
-        image: '../../assets/images/adidas.jpg',
-        name: 'Mohamed Ali',
-        price: 109.99,
-    },
-];
-
-const feedbacks = [
-    {
-        id: '1',
-        image: '../../assets/images/adidas.jpg',
-        message: 'cest un beau produit , je lui recommende',
-        rate: 4.5,
-    },
-    {
-        id: '2',
-        image: '../../assets/images/adidas.jpg',
-        message: 'attention cest une alert, vous devez faire attentiton à cette produit si vous lait ne acheter pas ce produit .',
-        rate: 5,
-    },
-    {
-        id: '3',
-        image: '../../assets/images/adidas.jpg',
-        message: 'Amir',
-        rate: 3.7,
-    },
-    {
-        id: '4',
-        image: '../../assets/images/adidas.jpg',
-        message: 'Amir',
-        rate: 4,
-    },
-    {
-        id: '5',
-        image: '../../assets/images/adidas.jpg',
-        message: 'Amir',
-        rate: 2.5,
-    },
-    {
-        id: '6',
-        image: '../../assets/images/adidas.jpg',
-        message: 'Amir',
-        rate: 3,
-    },
-    {
-        id: '7',
-        image: '../../assets/images/adidas.jpg',
-        message: 'Amir',
-        rate: 4.8,
-    },
-];
-
-
 const DeliveryDashboardScreen = (props) => {
     const [dark, setDark] = useState(false);
     const context = useContext(AuthContext);
@@ -109,8 +18,8 @@ const DeliveryDashboardScreen = (props) => {
 
     useEffect(() => {
         getDelivererDashboard(context.partner._id).then(_dashboard=>{
-            console.log(_dashboard)
             setDashboard(_dashboard)
+
         }).catch(err=>{
             alert("error has been occured")
         })      
@@ -135,24 +44,29 @@ const DeliveryDashboardScreen = (props) => {
 
     const openDrawer = () => { props.navigation.openDrawer() }
     const renderListMarkersItem = (itemData) => {
+        if(itemData.item.partner){
         return (
             <MarkListItem
                 index={itemData.index + 1}
-                image={require("../../assets/images/adidas.jpg")}
-                name={itemData.item.name}
-                price={itemData.item.price}
+                image={{uri:itemData.item.partner.profileImage}}
+                name={itemData.item.partner.partnerName}
+                price={itemData.item.price+"DT"}
                 empty={!!itemData.item.empty}
             />
-        );
+        );}
+        else {
+            return <View></View>
+        }
 
     };
 
     const renderListFeedbacksItem = (itemData) => {
+        console.log(itemData.item);
         return (
             <FeedbackListItem
-                image={require("../../assets/images/avatar.jpg")}
-                message={itemData.item.message}
-                rate={itemData.item.rate}
+                image={{uri:itemData.item.user.photo}}
+                message={itemData.item.comment}
+                rate={itemData.item.score}
             />
         );
     };
@@ -162,7 +76,7 @@ const DeliveryDashboardScreen = (props) => {
 
     
     return (
-        <SafeAreaView style={{flex:1}}>
+        <SafeAreaView style={{flex:1,marginTop:10}}>
 
 <View style={styles.mainContainer}>
 
@@ -268,19 +182,28 @@ const DeliveryDashboardScreen = (props) => {
                     marginBottom: 5
                 }}
             />
+       
+            {
+               dashboard && dashboard.unCompletedOrders  &&
             <View style={styles.partTwo}>
+            
+               
                 <View style={styles.titreContainer}>
                     <Text style={styles.titreStyle}>Money for return </Text>
                 </View>
                 <View style={styles.listContainer}>
                     <FlatList
-                        data={formatData(markers)}
+                        data={formatData(dashboard.unCompletedOrders)}
                         renderItem={renderListMarkersItem}
                         numColumns={2}
                     />
+                    
                 </View>
-            </View>
-            <View
+    
+    </View>
+    
+            }
+    <View
                 style={{
                     borderBottomColor: '#d8d8d8',
                     borderBottomWidth: 1,
@@ -290,19 +213,22 @@ const DeliveryDashboardScreen = (props) => {
                     marginBottom: 5
                 }}
             />
-            <View style={styles.partThree}>
+    {
+     dashboard.feedbacks&& dashboard.feedbacks.length>0 &&
+     <View style={styles.partThree}>
                 <View style={styles.feedbacksTitreContainer}>
                     <Text style={styles.titreStyle}>Feedbacks</Text>
                 </View>
                 <View style={styles.listFeedbacksContainer}>
                     <FlatList
-                        data={feedbacks}
+                        data={dashboard.feedbacks}
                         renderItem={renderListFeedbacksItem}
                     />
                 </View>
             </View>
-
+    }
         </View>
+    
         </SafeAreaView>
 
     )
@@ -362,7 +288,7 @@ const styles = StyleSheet.create({
         right: '5%',
         height: '140%',
         width: '100%',
-        resizeMode: 'cover',
+        resizeMode: 'contain',
     },
 
     part2: {
@@ -400,11 +326,12 @@ const styles = StyleSheet.create({
     },
     leftArrow: {
         width: 30,
-        height: 30
+        height: 30,
+        marginTop:10
     },
 
     titleContainer: {
-        width: "90%",
+        width: "80%",
         height: "100%",
         flexDirection: "column",
         alignItems: "center",
@@ -412,7 +339,7 @@ const styles = StyleSheet.create({
     },
     Title: {
         fontWeight: "700",
-        fontSize: Dimensions.get("window").width * 0.08
+        fontSize: Dimensions.get("window").width * 0.07,
     },
     searchContainer: {
         width: "10%",
@@ -424,7 +351,7 @@ const styles = StyleSheet.create({
 
     TitleDark: {
         fontWeight: "700",
-        fontSize: 28,
+        fontSize: Dimensions.get("window").width * 0.07,
         color: "white"
 
     },

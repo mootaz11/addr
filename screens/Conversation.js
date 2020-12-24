@@ -92,7 +92,6 @@ export default function Conversation(props) {
                 content: message
             }
             context.send_message(data)
-
         }
         setMessage("");
     }

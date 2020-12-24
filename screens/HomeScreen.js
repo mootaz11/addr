@@ -14,6 +14,15 @@ import {getPartner} from '../rest/partnerApi';
 
 const api_directions_key = "AIzaSyDcbXzRxlL0q_tM54tnAWHMlGdmPByFAfE";
 
+const services_init = [
+  {_id:1,serviceName:"taxi",icon:require("../assets/taxi-dark.png")},
+  {_id:2,serviceName:"delivery",icon:require("../assets/delivery-bike-dark.png")},
+  {_id:3,serviceName:"building",icon:require("../assets/builder-dark.png")},
+  {_id:4,serviceName:"food",icon:require("../assets/fast-food-dark.png")},
+  {_id:5,serviceName:"emergency",icon:require("../assets/ambulance-dark.png")}
+]
+
+
 export default function Home(props) {
 
   const context = useContext(AuthContext);
@@ -29,91 +38,91 @@ export default function Home(props) {
   const [cities, setCities] = useState([]);
   const [services,setServices]=useState([]);
   const [regions, setRegions] = useState([]);
-  const [locationState, setLocationState] = useState(context.locationState)
+  const [initServices,setInitServices]=useState();
 
   useEffect(() => {
-    getCities().then(cities =>{setCities(cities),
-    setSearchResult(cities)}).catch(err=>{alert("getting cities error")},[props.route])
-
-    // if(!locationState){
-    //   Alert.alert(
-    //     "Are you at Home",
-    //     "press yes if you are",
-    //     [
-    //       {
-    //         text: "yes",
-    //         onPress: () => {
-    //             context.updateUserLocationState(user._id)
-    //         },
-    //         style: "ok"
-    //       },
-    //       { text: "no", onPress: async () => {
+    setServices(services_init);
+    setPartners(null);
+    setServiceChosen(false)
+    setCities([]);
+    setInitServices(true)
+    setSearchResult([]);
+    getCities().then(cities =>{
+    setCities(cities)
+    setSearchResult(cities)
+  }).catch(err=>{alert("getting cities error")})
+  return ()=>{setCities([]);setServices([]);setPartners([]);setDomain(null)}  
+},[props.route.params])
 
 
-    //         let { status } =  await Permissions.askAsync(Permissions.LOCATION);
+  useEffect(() => {    
+    if(!context.user.locationState){
+      Alert.alert(
+        "Are you at Home",
+        "press yes if you are",
+        [
+          {
+            text: "yes",
+            onPress: async () => {
+              let { status } =  await Permissions.askAsync(Permissions.LOCATION);
 
-    //          if (status !== 'granted') {
-    //           Alert.alert('Permission to access location was denied');
-    //                        }
-    //           else {
-    //           const _location =await Location.getCurrentPositionAsync({});
+              if (status !== 'granted') {
+               Alert.alert('Permission to access location was denied');
+                            }
+               else {
+               const _location =await Location.getCurrentPositionAsync({});
 
+               const location= {
+                       latitude:_location.coords.latitude,
+                        longitude:_location.coords.longitude  
+               }
+               
+                  context.updateUserLocation(location,true);
+              }
+                },
+            style: "ok"
+          },
+          { text: "no", onPress: async () => {
 
-    //           const body ={locationCode: user.locationCode,
-    //           location: {
-    //                   latitude:_location.coords.latitude,
-    //                    longitude:_location.coords.longitude  
-    //           },
-    //           userId: user._id
-    //           }
-    //         context.updateUserLocation(body);
-    //       }
+             let { status } =  await Permissions.askAsync(Permissions.LOCATION);
 
-    //     }
+              if (status !== 'granted') {
+               Alert.alert('Permission to access location was denied');}
 
-    //     }
-    //     ],
-    //     { cancelable: false }
-    //   );
+               else {
+               const _location =await Location.getCurrentPositionAsync({});
 
-    // }
-  }, [])
+               const location= {
+                       latitude:_location.coords.latitude,
+                        longitude:_location.coords.longitude  
+               }
+               
+             context.updateUserLocation(location,false);
+           }
 
+        }
 
-  // useEffect(() => {    
-  //   if (!context.location) {
-  //     (async () => {
-  //       let { status } = await Permissions.askAsync(Permissions.LOCATION);
-  //       if (status !== 'granted') {
-  //         Alert.alert('Permission to access location was denied');
-  //       }
-  //       else {
-  //         let location = await Location.getCurrentPositionAsync({});
-  //         setLocation({ latitude: location.coords.latitude, longitude: location.coords.longitude });
-  //       }
-  //     })();
-  //   }
-  //   else {
-  //     if (context.location.temperarlyLocation) {
-  //       setLocation({
-  //         latitude: context.location.temperarlyLocation.latitude
-  //         , longitude: context.location.temperarlyLocation.longitude
-  //       });
-  //       setTemporaryLocation(true);
-  //     }
-  //     else {
-  //       setLocation({
-  //         latitude: context.location.location.latitude
-  //         , longitude: context.location.location.longitude
-  //       });
-  //     }
-  //   }
+        }
+        ],
+        { cancelable: false }
+      );
 
-  //   setDark(context.darkMode);
-  // }, [context.darkMode])
+    }
+   }, [context.user])
 
 
+useEffect(()=>{
+  if(context.location){
+  if (context.location.temperarlyLocation.latitude!=null&&context.location.temperarlyLocation.longitude!=null) 
+  {
+    setTemporaryLocation(true);
+  }
+  else {
+    setTemporaryLocation(false);
 
+  }
+}
+},[context.location])
 
   const filtreList = (text) => {
     setSearch(text)
@@ -125,7 +134,7 @@ export default function Home(props) {
   }
 
   const turnTemporaryLocation = async () => {
-    if (temporaryLocation) {
+    if (context.location.temperarlyLocation.latitude!=null&&context.location.temperarlyLocation.longitude!=null) {     
       setTemporaryLocation(false);
       context.deleteTemprorayLocation();
     }
@@ -138,7 +147,7 @@ export default function Home(props) {
           longitude: _location.coords.longitude
         }
       }
-        , user._id)
+        , context.user._id)
     }
   }
 
@@ -147,6 +156,7 @@ export default function Home(props) {
   }
 
 const handleServicePartners= (service)=>{
+  if(!initServices){
   var partners_ids = []
   var  _partners=[];
   
@@ -160,14 +170,27 @@ const handleServicePartners= (service)=>{
       getPartner(_id).then(data=>{
          let index = _partners.findIndex(partner=>{return partner._id == data.partner._id})
          if(index==-1){
+           if(_partners.length<4)
+           {
           _partners.push(data.partner);
+          if(_partners.length==3 || partners_ids.length<3){
+            _partners.push({partnerName:"see Others",_id:55,serviceName:service.serviceName})
+          }
           setPartners(_partners);
+        }
 
         }          
         }).catch(err=>alert("no partners found"))
   })
-  setDomain(service.serviceName); 
-  setServiceChosen(true);
+  }
+
+
+
+
+setDomain(service.serviceName); 
+setServiceChosen(true);
+
+
 }
 
 const startPartnerConversation =(partner)=>{
@@ -186,7 +209,9 @@ const startPartnerConversation =(partner)=>{
 
 
 
-
+const checkService =(item)=>{
+  props.navigation.navigate("brand",{serviceName:item.serviceName})
+}
 
 const shareCode=async()=>{
   try {
@@ -219,6 +244,7 @@ if (Platform.OS !== 'android') {
     else {
       setRegions(null);
       setShowmodal(false);
+    
       let _services=[];
       item.services.forEach(service_id=>{
         getService(service_id).then(_service=>{
@@ -226,6 +252,7 @@ if (Platform.OS !== 'android') {
           { 
             _services.push(_service);
           }
+          setInitServices(false);
           setServices(_services);
         }).catch(err=>{console.log(err)})
       })
@@ -237,40 +264,35 @@ const checkPartner=(value)=>{
   return (
     <View style={styles.container}>
       <MapView
-        initialRegion={{
-          latitude: 35.7643,
-          longitude: 10.8113,
-          latitudeDelta: 0.05,
-          longitudeDelta: 0.05
-        }}
+         initialRegion={{
+          latitude: context.location ?context.location.location ? Number(context.location.location.latitude) : 0:0,
+          longitude: context.location ? context.location.location?Number(context.location.location.longitude) : 0:0
+      }}
 
         style={styles.container}
         customMapStyle={context.darkMode ?darkStyle : defaultStyle}
         provider="google"
+        
       >
         <Marker
           coordinate={
             Platform.OS == 'ios' ?
               {
-                latitude: location ? location.latitude : 0
-
-                ,
-                longitude: location ? location.longitude : 0
-
+                latitude: context.location ?context.location.location ? Number(context.location.location.latitude) : 0:0,
+                longitude: context.location ? context.location.location?Number(context.location.location.longitude) : 0:0
+      
               } :
               {
-                latitude: location ? Number(location.latitude) : 0
-
-                ,
-                longitude: location ? Number(location.longitude) : 0
-
+                latitude: context.location ?context.location.location ? Number(context.location.location.latitude) : 0:0,
+                longitude: context.location ? context.location.location?Number(context.location.location.longitude) : 0:0
+      
               }
 
 
 
           }
         >
-          <Image source={require('../assets/mootaz.jpg')} style={{ height: 30, width: 30, borderRadius: 30, borderColor: "white", borderWidth: 2 }} />
+          <Image source={context.user.photo ? {uri:context.user.photo} : require('../assets/mootaz.jpg')} style={context.darkMode ? { height: 30, width: 30, borderRadius: 30, borderColor: "white", borderWidth: 2 }: { height: 30, width: 30, borderRadius: 30, borderColor: "#2474F1", borderWidth: 2 }} />
 
         </Marker>
 
@@ -282,28 +304,27 @@ const checkPartner=(value)=>{
           }}
 
         >
-          <Image source={require('../assets/mootaz.jpg')} style={{ height: 30, width: 30, borderRadius: 30, borderColor: "white", borderWidth: 2 }} />
+          <Image source={require('../assets/mootaz.jpg')} style={context.darkMode ? { height: 30, width: 30, borderRadius: 30, borderColor: "white", borderWidth: 2 }: { height: 30, width: 30, borderRadius: 30, borderColor: "#2474F1", borderWidth: 2 }} />
 
         </Marker>
         <MapViewDirections
           apikey={api_directions_key}
-          origin={location}
+          origin={context.location ? context.location.location ? context.location.location : context.location.temperarlyLocation:null}
           destination={{
             latitude: 35.7773,
             longitude: 10.8313
 
           }}
           strokeWidth={3}
-          strokeColor={context.darkMode ? "#24A9E1" : "#3d3d3d"}
+          strokeColor={context.darkMode ? "#2474F1" : "#3d3d3d"}
         />
 
       </MapView>
 
       <View style={styles.Mycode}>
         <View style={styles.dropDownContainer}>
-          <TouchableOpacity onPress={() => { if (dropDown) { setdropDown(false) } else { setdropDown(true) } }}>
-
-            <Image style={styles.dropDown} source={dropDown ? require("../assets/up.png") : require("../assets/down.png")} />
+          <TouchableOpacity style={{width:"100%",height:"100%"}} onPress={() => { setdropDown(!dropDown)}}>
+              <Image style={styles.dropDown} source={dropDown ? require("../assets/up.png") : require("../assets/down.png")} />
           </TouchableOpacity>
         </View>
 
@@ -311,7 +332,9 @@ const checkPartner=(value)=>{
       </View>
 
       <View style={styles.menu}>
-        <Icon color={"white"} style={{ flex: 1, padding: 0 }} name="menu" onPress={openDrawer} />
+        <TouchableOpacity onPress={()=>{openDrawer()}}>
+          <Image source={context.darkMode ?  require("../assets/menu_dark.png"):require("../assets/menu.png")} style={{height:30,width:30,resizeMode:"cover"}}/>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.imageContainer}>
@@ -341,7 +364,7 @@ const checkPartner=(value)=>{
           </View>
           <View style={styles.coordinatesSettings}>
             <Image style={styles.coordSettingsIcon} source={require("../assets/temporary-dark.png")} />
-            <TouchableOpacity onPress={()=>{turnTemporaryLocation}}>
+            <TouchableOpacity onPress={()=>{turnTemporaryLocation()}}>
               <Text style={styles.codeManup}>postion temporaire({temporaryLocation ? "activé" : "desactivé"})</Text>
             </TouchableOpacity>
           </View>
@@ -349,27 +372,28 @@ const checkPartner=(value)=>{
         </View>
         : null
       }
-      <View style={styles.searchBar}>
-        <Icon name="search" color={"#24A9E1"} />
+      <View style={seviceChosen && partners ?  styles.searchBarAfterSetService:styles.searchBar}>
+        <Icon name="search" size={Dimensions.get("window").width*0.08} color={"#2474F1"} />
         <TouchableOpacity onPress={() => { setShowmodal(true) }}>
           
-        <Text   style={styles.searchInput} >Rechercher votre ville</Text>
+        <Text   style={context.darkMode ? styles.searchInputDark : styles.searchInput} >Rechercher votre ville</Text>
         </TouchableOpacity>
 
       </View>
 
 
 
-<View        style={seviceChosen ? styles.domainswithPartners : styles.domainswithoutPartners}>
+<View        style={seviceChosen&&partners&&partners.length>0 ?styles.domainswithPartners : styles.domainswithoutPartners}>
         
         <FlatList
         horizontal
+        showsHorizontalScrollIndicator={false}
           data={services}
           renderItem={({item})=>(
             <View style={styles.domainsContainer}>
             <TouchableOpacity onPress={() => { handleServicePartners(item) }}>
               <View style={domain == item.serviceName ? styles.serviceChosen : styles.service} >
-                <Image style={styles.imageService} source={{uri:item.icon}} />
+                <Image style={styles.imageService} source={initServices ? item.icon : {uri:item.icon}} />
               </View>
 
             </TouchableOpacity>
@@ -389,26 +413,25 @@ const checkPartner=(value)=>{
 
 
 
-    { partners && seviceChosen&&   <View style={styles.partners}>
+    { partners && seviceChosen&&partners.length>0 &&   <View style={styles.partners}>
         <FlatList
           data={partners}
           horizontal
           renderItem={({item})=>(
             <View style={styles.partnersContainer}>
             <View style={styles.SinglePartner} >
-              <TouchableOpacity onPress={()=>{checkPartner(item)}} style={{width: "70%",height: "100%",}}>
+              <TouchableOpacity onPress={()=>{item.partnerName=="see Others" ? checkService(item) : checkPartner(item)}} style={item.partnerName!="see Others" ?{width: "70%",height: "100%",}:{width: "100%",height: "100%"}}>
               <View style={styles.PartnerImageContainer}>
                 
-                <Image style={styles.partnerImage} source={{uri:item.profileImage}} />
-                <Text style={styles.partnerTitle}>{item.partnerName}</Text>
+                {item.partnerName!="see Others" &&<Image style={styles.partnerImage} source={{uri:item.profileImage}} />}
+                <Text style={item.partnerName!="see Others" ? styles.partnerTitle:styles.showmore}>{item.partnerName}</Text>
 
               </View>
               </TouchableOpacity>
-              <View style={styles.operations}>
+             { item.partnerName!="see Others" && <View style={styles.operations}>
 
                 <View style={styles.call}>
                   <TouchableOpacity style={{ width: "100%", height: "100%" }} onPress={_pressCall}>
-
                     <Image style={styles.messagingImage} source={require("../assets/phone-call.png")} />
                   </TouchableOpacity>
 
@@ -423,8 +446,9 @@ const checkPartner=(value)=>{
                 </View>
               </View>
 
-            </View>
-
+            }
+              </View>
+          
           </View>
 
           )}
@@ -523,7 +547,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     flexDirection: "column",
-    width: 70,
+    width: Dimensions.get("window").width*0.25,
     height: "100%",
     overflow: "hidden"
 
@@ -535,7 +559,6 @@ const styles = StyleSheet.create({
     width: 180,
     marginRight: 8,
     height: "94%",
-    overflow: "hidden",
 
   },
 
@@ -550,11 +573,17 @@ const styles = StyleSheet.create({
     resizeMode: "contain"
   },
   searchInput: {
-    width: "100%",
-    height: 20,
-    color: "white",
-    textDecorationLine:'underline'
+    color: "black",
+    textDecorationLine:'underline',
+    fontSize:Dimensions.get("window").width*0.045
+
   },
+  searchInputDark:{
+    color: "white",
+    textDecorationLine:'underline',
+    fontSize:Dimensions.get("window").width*0.045
+  }
+  ,
 
   container: {
     flex: 1
@@ -563,9 +592,9 @@ const styles = StyleSheet.create({
 
   imageUser: {
     flex: 1,
-    width: 25,
-    height: 25,
-    borderRadius: 50,
+    width: 32,
+    height: 32,
+    borderRadius: 32,
   },
   imageContainer: {
     position: "absolute",
@@ -590,7 +619,7 @@ const styles = StyleSheet.create({
     width: "96%",
     height: "9%",
     borderRadius: 10,
-    backgroundColor: "#24A9E1",
+    backgroundColor: "#2474F1",
     justifyContent: "flex-start",
     alignContent: "space-between",
     alignItems: "flex-start"
@@ -602,8 +631,6 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     alignSelf: "center",
     padding: 10,
-    shadowOpacity: 0.5,
-    elevation: 10,
     width: "96%",
     height: "22%",
     borderRadius: 10,
@@ -638,10 +665,11 @@ const styles = StyleSheet.create({
 
   },
   smartCode: {
-    fontSize: 20,
+    fontSize: Dimensions.get("window").width*0.07,
     color: "white",
     fontWeight: "700"
   },
+  
   menu: {
 
     position: "absolute",
@@ -655,17 +683,29 @@ const styles = StyleSheet.create({
   },
   searchBar: {
     position: "absolute",
+    top: "65%",
+    alignSelf: "center",
+    marginTop: Platform.OS == 'ios' ? 30 : 20,
+    flexDirection: "row",
+    padding: 10,
+    shadowOpacity: 0.5,
+    width: "80%",
+    height: "8%",
+    borderRadius: 10,
+  },
+  searchBarAfterSetService: {
+    position: "absolute",
     top: "50%",
     alignSelf: "center",
     marginTop: Platform.OS == 'ios' ? 30 : 20,
     flexDirection: "row",
     padding: 10,
     shadowOpacity: 0.5,
-    elevation: 10,
     width: "80%",
     height: "8%",
     borderRadius: 10,
   },
+
   domainswithoutPartners: {
     position: "absolute",
     top: "74%",
@@ -692,7 +732,6 @@ const styles = StyleSheet.create({
     height: "18%",
     marginTop: Platform.OS == 'ios' ? 30 : 20,
     elevation: 10,
-    flexWrap: "wrap"
   },
   SinglePartner: {
 
@@ -702,7 +741,7 @@ const styles = StyleSheet.create({
     width: 180,
     height: "92%",
     alignItems: "flex-start",
-    backgroundColor: '#24A9E1',
+    backgroundColor: '#2474F1',
     flexDirection: "row",
     shadowOffset: { width: 3, height: 3 },
     shadowOpacity: 0.3,
@@ -711,7 +750,7 @@ const styles = StyleSheet.create({
 
   },
   PartnerImageContainer: {
-    backgroundColor: "#24A9E1",
+    backgroundColor: "#2474F1",
     width: "100%",
     height: "100%",
     shadowColor: "white",
@@ -734,18 +773,20 @@ const styles = StyleSheet.create({
     color: "white",
     fontWeight: "500"
   },
+  showmore:{
+    color: "white",
+    fontWeight: "500",
+    fontSize:Dimensions.get("window").width*0.06,
+    textAlign:"center"
+  },
   operations: {
-    backgroundColor: "#219dd1",
+    backgroundColor: "#2474F1",
     width: "30%",
     height: "100%",
     flexDirection: "column",
     alignItems: "flex-start",
     shadowColor: "white",
-    shadowOffset: { width: 3, height: 3 },
-    shadowOpacity: 0.3,
     borderRadius: 8,
-    zIndex: 50,
-    elevation: 10,
     borderColor: "white",
     borderWidth: 0.2
 
@@ -759,7 +800,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     borderRadius: 8,
     zIndex: 50,
-    elevation: 10,
     borderColor: "white",
     borderWidth: 0.2,
     flexDirection: "column",
@@ -769,7 +809,7 @@ const styles = StyleSheet.create({
   messaging: {
     width: "100%",
     height: "50%",
-    backgroundColor: "#219dd1",
+    backgroundColor: "#2474F1",
     shadowColor: "white",
     shadowOffset: { width: 3, height: 3 },
     shadowOpacity: 0.3,
@@ -792,9 +832,9 @@ const styles = StyleSheet.create({
   },
   service: {
     margin: 4,
-    borderRadius: 50,
-    width: 60,
-    height: 60,
+    borderRadius: Dimensions.get("window").width*0.2,
+    width: Dimensions.get("window").width*0.2,
+    height: Dimensions.get("window").width*0.2,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: 'rgba(128,128,128,0.6)',
@@ -802,12 +842,12 @@ const styles = StyleSheet.create({
   },
   serviceChosen: {
     margin: 4,
-    borderRadius: 50,
-    width: 60,
-    height: 60,
+    borderRadius: Dimensions.get("window").width*0.2,
+    width: Dimensions.get("window").width*0.2,
+    height: Dimensions.get("window").width*0.2,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: '#24A9E1',
+    backgroundColor: '#2474F1',
   }
 });
 

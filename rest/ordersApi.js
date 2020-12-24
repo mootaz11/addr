@@ -92,14 +92,15 @@ export const   markOrderAsPrepared = (orderId)=>{
         .catch(err=>{reject(err)})
     })
 }
-export const   markOrderAsTaked = (orderId)=>{
+export const   markOrderAsTaked = (orderId,partnerId)=>{
     return new Promise((resolve,reject)=>{
-        axios.patch(`/order/mark-taked/${orderId}`,{}).then(res=>{
+        axios.patch(`/order/mark-taked/${partnerId}/${orderId}`,{}).then(res=>{
             resolve(res.data.message);
         })
         .catch(err=>{reject(err)})
     })
 }
+ 
 
 
 export const   markOrderAsReceived = (orderId)=>{

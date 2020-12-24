@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { View, Text, StyleSheet, Platform, TouchableOpacity, Image, TextInput, ScrollView } from 'react-native'
+import { View, Text, StyleSheet, Platform, TouchableOpacity, Image, TextInput, ScrollView,Dimensions } from 'react-native'
 import { Icon } from 'react-native-elements';
 import AuthContext from '../../navigation/AuthContext';
 import _ from 'lodash';
@@ -54,10 +54,7 @@ export default function  BusinessOrders (props) {
         })
     },[])
 
-    useEffect(() => {
-        setDark(context.darkMode);
-    }, [context.darkMode])
-
+   
 
 
 
@@ -65,9 +62,12 @@ export default function  BusinessOrders (props) {
         props.navigation.openDrawer();
     }
 
-    const changeOrderState = (item)=>{
 
-    }
+
+    const prepareOrderHandler = (item)=>{
+        markOrderAsPrepared(item._id).then(message=>{
+                setPreparedOrders([...preparedOrders,item]);
+                setOrderstoPrepare(orderstoPrepare.filter(order => order._id != item._id));})}
 
 
 
@@ -77,10 +77,7 @@ export default function  BusinessOrders (props) {
     //    const conversation =  context.openConversationHandler({},{user:order.client,other:order.deliverer});
     //    props.navigation.navigate("conversation",{conversation,orders:true})
     // }
-
-    const orderDone = (item) => {
-        setDone(true);
-    }
+   
 
     const checkStep = (item) => {
         setCheckedStep(item)
@@ -148,25 +145,14 @@ export default function  BusinessOrders (props) {
                             </View>
                             <View style={styles.deliveryInfo}>
                                 <Text style={styles.info}>Nom de Livreur: {item.nomLivreur} </Text>
-                                <Text style={styles.info}>Nom de Produit: {item.productname} </Text>
                                 <Text style={styles.info}>Date: {item.Date}</Text>
-                                {   orderToPrepare&&
-                                    <TouchableOpacity onPress={()=>{changeOrderState(item)}}>
-                                        <Text style={{ fontSize: 12, fontWeight: "600", color: "#2474F1", textDecorationLine: "underline" }}>your opinion about the product</Text>
-                                    </TouchableOpacity>
-                                    
-                            }
-
-
                             </View>
                             {
-                                orderDuringDelivery ?
-
+                                orderToPrepare || deliveredOrder ? 
                                     <View style={{ width: "25%", height: "100%", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
 
-                                        <TouchableOpacity onPress={() => { orderDone(item) }}>
+                                        <TouchableOpacity onPress={() => { orderToPrepare ? prepareOrderHandler(item):null }}>
                                             <FontAwesome color={Done ? "#4BB543" : "#cccccc"} style={{ padding: 0, fontSize: 30, }} name="check" />
-
                                         </TouchableOpacity>
 
                                     </View>
@@ -246,7 +232,7 @@ const styles = StyleSheet.create({
         width: "45%",
         height: 40,
         borderRadius: 14,
-        backgroundColor: "white",
+        backgroundColor: "#fcfcfc",
         margin: 6
     },
     stepChecked: {
@@ -292,7 +278,7 @@ const styles = StyleSheet.create({
     },
     Title: {
         fontWeight: "700",
-        fontSize: 28
+        fontSize: Dimensions.get("window").width * 0.07,
     },
     headerElements: {
         width: "94%",

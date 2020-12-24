@@ -10,7 +10,6 @@ import { NavigationContainer,DarkTheme,DefaultTheme } from '@react-navigation/na
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import CustomDrawer from '../custom/customDrawer'
 import Login from '../screens/LoginScreen';
-import forgotPassword from '../screens/forgotPassword';
 import Settings from '../screens/SettingsScreen';
 import Brand from '../screens/brandScreen';
 import SingleBrand from '../screens/singleBrand';
@@ -81,7 +80,6 @@ return(
             <drawerStack.Screen name="Home" component={Home} />
             <drawerStack.Screen name="chat" component={ChatStack} />
             <drawerStack.Screen name="logout"  component={Login}/>
-            <drawerStack.Screen  name="forgotPassword" component={forgotPassword} />
             <drawerStack.Screen name="conversation"  component={Conversation}/>
             <drawerStack.Screen name ="brand" component={Brand}/>
             <drawerStack.Screen name ="singleBrand" component={SingleBrand}/>

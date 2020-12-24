@@ -10,10 +10,12 @@ export const addLocation =(location)=>{
 }
 
 
-export const getLocation = (code)=>{
+export const getLocation = ()=>{
     return new Promise ((resolve ,reject)=>{
-        axios.get(`/location/${code}`).then(res=>{
+        axios.get(`/location/`).then(res=>{
+            if(res.status===200){
             resolve(res.data.location);
+            }
         })
         .catch(err=>{
             reject(err);
@@ -25,7 +27,14 @@ export const getLocation = (code)=>{
 export const addTemporarlyLocation =(userId,location)=>{
     return new Promise((resolve,reject)=>{
         axios.post(`/location/temp-location/${userId}`,location)
-        .then(res=>{resolve(res.data.location)})
+        .then(res=>{
+            if(res.status===200)
+
+{           
+     resolve(res.data.location)
+}       
+        
+        })
         .catch(err=>{reject(err)})
     })
 }

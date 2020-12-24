@@ -71,7 +71,7 @@ export default function Login(props) {
 
 
     useEffect(() => {
-        if (!context.isloading && context.user) {
+        if (context.user) {
             if(!context.user.isPartner){
                 props.navigation.navigate("Home");
             }
@@ -79,7 +79,7 @@ export default function Login(props) {
             props.navigation.navigate("listProducts");
             }
         }
-    }, [context.user, context.isloading])
+    }, [context.user])
 
 
     useEffect(() => {
@@ -135,15 +135,16 @@ export default function Login(props) {
         navigation.navigate("forgotPassword")
     }
     
-    if(context.isloading && context.user){
+    if(context.user){
         return(
             <View style={{ flex: 1, flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
             <Animated.Image
                 style={{ width:90,height:90, transform: [{ rotate: spin }] }}
                 source={require("../assets/images/logoBlue.png")} />
-        </View>
+            </View>
         )
     }
+    
     else{
         return (
             <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
@@ -152,8 +153,7 @@ export default function Login(props) {
                         <Image
                             source={require('../assets/images/logoBlue.png')}
                             style={styles.image}
-                            resizeMode="contain"
-                            
+                            resizeMode="contain"                
                         />
                     </View>
                     <View style={styles.partTwo}>

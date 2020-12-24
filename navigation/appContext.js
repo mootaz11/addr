@@ -3,8 +3,9 @@ import AuthContext from './AuthContext';
 import io  from 'socket.io-client';
 import AsyncStorageService from '../rest/AsyncStorageService'
 import {createConversation, getUserConversations,sendMessage,markAsreadConversation} from '../rest/conversationApi';
-import {getLocation,addLocation,updateLocation,addTemporarlyLocation} from '../rest/locationApi';
+import {getLocation,updateLocation,addTemporarlyLocation} from '../rest/locationApi';
 import {getConnectedUser,updateLocationState} from '../rest/userApi';
+import { set } from 'react-native-reanimated';
 
 export default  function AppContext(props){
     const [socket, setSocket] = useState(io("http://localhost:3000"));
@@ -21,18 +22,16 @@ export default  function AppContext(props){
     useEffect(() => {
         if (token) {
             getConnectedUser().then(res=>{  
-                if(!res.data.connectedUser.isPartner){setBag(res.data.orders);}
-                if(res.data.connectedUser.isPartner){setPartner(res.data.connectedUser.partners[0])}
-                if(res.data.connectedUser.isVendor){setPartner(res.data.connectedUser.workPlaces[0]);}
-
-                setDarkMode(false);
-                setUser(res.data.connectedUser);
                 setLocationState(res.data.connectedUser.locationState);
-                if(res.data.connectedUser.locationState){
-                    getLocation(res.data.connectedUser.locationCode).then(location=>{
+                    getLocation().then(location=>{
                         setLocation(location);
+                        setDarkMode(false);
+                        setUser(res.data.connectedUser);
+                        if(!res.data.connectedUser.isPartner){setBag(res.data.orders);}
+                        if(res.data.connectedUser.isPartner){setPartner(res.data.connectedUser.partners[0])}
+                        if(res.data.connectedUser.isVendor){setPartner(res.data.connectedUser.workPlaces[0]);}
                     }).catch(err=>{alert("error occured while setting Location")})
-                }
+                                    
                 socket.emit('connectuser',token);
                 setIsloading(false);  
             }).catch(err=>{
@@ -227,9 +226,6 @@ useEffect(()=>{
         }
 
 
-    const updateUser=(user)=>{
-            setUser(user)
-        }
 
 
     const modifyDarkModeHandler =()=>{
@@ -251,25 +247,20 @@ useEffect(()=>{
     const _createOrder =( body ) =>{
         console.log(body);
     }
-    const updateUserLocation =(_location)=>{
-        if(!location){
-            addLocation(_location).then(loc=>{
-                console.log(loc);
-                setLocation(loc);
-            }).catch(err=>{console.log(err)})
-        }
-        else {
-            updateLocation({location:_location['location']}).then(res=>{
-                setLocation({...location,location:_location['location']});
-            })
-            .catch(err=>{alert(err)})
-        }
-    }
-    const updateUserLocationState =(user_id)=>{
-        updateLocationState(user_id).then(user=>{
-            setLocationState(user.locationState)
-        }).catch(err=>alert("update location state failed"))
-        }
+
+
+
+
+    const updateUserLocation =(_location,isHome)=>{
+        updateLocation({location:_location}).then(res=>{
+                setLocation({...location,location:_location});
+                if(isHome){
+                    updateLocationState(user._id).then(message=>{
+                        setUser({...user,locationState:true});    
+                    }).catch(err=>alert("update location state failed"))
+                    }
+            }).catch(err=>{alert("update location failed")})}
+                
 
 
     const handleTemporaryLocation = (loc,user_id)=>{  
@@ -278,7 +269,9 @@ useEffect(()=>{
         })
     }
     const deleteTemprorayLocation = ()=>{
-        setLocation({...location,temperarlyLocation:null})
+        addTemporarlyLocation(user._id,{location:{latitude:null,longitude:null}}).then(_location=>{
+            setLocation({...location,temperarlyLocation:_location["temperarlyLocation"]})
+        }).catch(err=>{alert("update temperarly location failed")})
     }
 
 return(
@@ -292,6 +285,8 @@ return(
     locationState:locationState,
     bag:bag,
     isloading:isloading,
+    setUser:setUser,
+    setLocation:setLocation,
     LoginHandler:LoginHandler,
     openConversationHandler:openConversationHandler,
     logoutHandler:logoutHandler,
@@ -300,9 +295,7 @@ return(
     send_message:send_message,
     handleConversation:handleConversation,
     markAsReadConversation:markAsReadConversation,
-    updateUser:updateUser,
     updateUserLocation:updateUserLocation,
-    updateUserLocationState:updateUserLocationState,
     handleTemporaryLocation:handleTemporaryLocation,
     deleteTemprorayLocation:deleteTemprorayLocation,
     _createOrder:_createOrder

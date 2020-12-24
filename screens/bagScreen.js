@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react'
-import { Dimensions, StyleSheet, View, TouchableOpacity, Image, Text } from 'react-native'
+import { Dimensions, StyleSheet, View, TouchableOpacity, Image, Text,ActivityIndicator} from 'react-native'
 import { FlatList } from 'react-native-gesture-handler';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import AuthContext from '../navigation/AuthContext';
@@ -12,20 +12,21 @@ export default function bag(props) {
     const context = useContext(AuthContext);
     useEffect(()=>{
         setPreOrder(props.route.params.order);
-        if(props.route.params.order.type!='food'){
-            props.route.params.order.items.map(item=>{
-                item.product.total=item.product.basePrice*item.quantity
-            })
-            setProducts(props.route.params.order.items);
+         if(props.route.params.order.type!='food'){
+             props.route.params.order.items.map(item=>{
+                  item.product.total=item.product.basePrice*item.quantity
+                })
+
+                setProducts( props.route.params.order.items);
 
         }
-            else {
-                props.route.params.order.foodItems.map(item=>{
-                    item.product.total=item.product.basePrice*item.quantity
-                })
-                setProducts(props.route.params.order.foodItems);
+             else {
+                 props.route.params.order.foodItems.map(item=>{
+                     item.product.total=item.product.basePrice*item.quantity
+                 })
+                 setProducts(props.route.params.order.foodItems);
 
-            }
+             }
         
     
     },[props.route.params])
@@ -74,13 +75,12 @@ export default function bag(props) {
 
     const goToDeliveryAdress = ()=>{
         updateOrder(props.route.params.order._id,{newItems:products,isFood:props.route.params.order.type=='food'?true:false}).then(message=>{
-            console.log(message);
-            props.navigation.navigate("deliveryAdress",{products:products,order:preOrder._id})
+            props.navigation.navigate("deliveryAdress",{products:products,order:preOrder._id});
         }).catch(err=>{
             alert("error occured during update")
         })
     }
-
+        if(preOrder&&products){
     return (
         <View style={context.darkMode ? styles.containerDark : styles.container}>
             <View style={context.darkMode ? styles.menuDark : styles.menu}>
@@ -94,27 +94,28 @@ export default function bag(props) {
                 </View>
             </View>
             <View style={styles.bagContainer}>
-                <FlatList
+                { <FlatList
                     data={products}
                     renderItem={
                         ({ item }) =>
                             <View style={context.darkMode ? styles.productContainerDark : styles.productContainer}>
-                                <View style={styles.productImageContainer}>
+                                 <View style={styles.productImageContainer}>
                                     <Image style={styles.productImage} source={{uri:item.product.mainImage}} />
                                 </View>
                                 <View style={styles.productInfoContainer}>
                                     <View style={{ width: "92%", height: "20%", marginVertical: 4, alignSelf: "center" }}>
                                         <Text style={context.darkMode ? { fontSize: 17, fontWeight: "700" ,color:"white"}:{ fontSize: 17, fontWeight: "700" }}>{item.product.name}</Text>
                                     </View>
-                                    <TouchableOpacity onPress={()=>{removeProduct(item)}}>
+                                     <TouchableOpacity onPress={()=>{removeProduct(item)}}>
                                         <View style={{ width: "92%", height: "8%", marginVertical: 4, alignSelf: "center" }}>
                                             <Text style={{ fontSize: 16, fontWeight: "500", color: "grey" }}>Remove</Text>
                                         </View>
-                                    </TouchableOpacity>
+                                    </TouchableOpacity> 
 
-                                    <View style={{ width: "92%", height: "10%", marginVertical: 4, alignSelf: "center" }}>
+                                     <View style={{ width: "92%", height: "10%", marginVertical: 4, alignSelf: "center" }}>
                                         <Text style={context.darkMode ? { fontSize: 20, fontWeight: "700",color:"white" } :{ fontSize: 20, fontWeight: "700" }}>{item.product.basePrice.toString()} TND</Text>
                                     </View>
+                                    
                                     <View style={{ width: "92%", height: "10%", marginVertical: 4, alignSelf: "center" }}>
                                         <Text style={context.darkMode ? { fontSize: 20, fontWeight: "700",color:"white" } :{ fontSize: 20, fontWeight: "700" }}>{item.product.total ? item.product.total.toString():item.product.basePrice.toString()} TND</Text>
                                     </View>
@@ -128,21 +129,22 @@ export default function bag(props) {
 
                                         </TouchableOpacity>
 
-                                        <View style={{ width: "30%", height: "100%", marginHorizontal: 6, borderWidth: 3, borderColor: "#bfbfbf", borderRadius: 12, alignItems: "center", justifyContent: "center", flexDirection: "center" }}>
-                                            <Text  style={context.darkMode ? { fontSize: 20, fontWeight: "400" ,color:"white"}:{ fontSize: 20, fontWeight: "400" }}>{item.quantity}</Text>
+                                        <View style={{ width: "30%", height: "100%", marginHorizontal: 6, borderWidth: 3, borderColor: "#bfbfbf", borderRadius: 12, alignItems: "center", justifyContent: "center", flexDirection: "column" }}>
+                                             <Text  style={context.darkMode ? { fontSize: 20, fontWeight: "400" ,color:"white"}:{ fontSize: 20, fontWeight: "400" }}>{item.quantity}</Text> 
                                         </View>
+
                                         <TouchableOpacity onPress={()=>decreaseQuantity(item)}>
                                             <FontAwesome color={context.darkMode ? "white":"black"} style={{ padding: 0, fontSize: 26, fontWeight: "700" }} name="minus" />
                                         </TouchableOpacity>
 
-                                    </View>
-                                </View>
+                                    </View> 
+                                </View> 
                             </View>
                     }
                     keyExtractor={item => item._id}
                 >
 
-                </FlatList>
+                </FlatList> }
             </View>
             <View style={styles.finalSteps}>
                 <View style={styles.orderOverview}>
@@ -153,19 +155,23 @@ export default function bag(props) {
                 <Text style={context.darkMode ? { fontSize: 20, fontWeight: "600" ,color:"white"}:{ fontSize: 20, fontWeight: "600" }}>{preOrder ? preOrder.price: null} DT</Text>
                     </View>
                 </View>
-
             <View style={styles.buttonContainer}>
                 <TouchableOpacity style={styles.addButton} onPress={goToDeliveryAdress}>
                     <View style={{ height: "100%", height: "100%", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
                         <Text style={{ fontSize: 18, fontWeight: "700", color: "white" }}>CONTINUE TO CHECKOUT</Text>
                     </View>
                 </TouchableOpacity>
-
             </View>
          </View>
-
         </View>
-    )
+    )}
+    else{
+        return(
+            <View style={{ flex: 1, justifyContent: "center", flexDirection: "column", alignItems: "center" }}>
+            <ActivityIndicator size="large" />
+        </View>
+        )
+    }
 }
 
 
@@ -287,11 +293,11 @@ const styles = StyleSheet.create({
     },
     Title: {
         fontWeight: "700",
-        fontSize: 28
+        fontSize: Dimensions.get("window").width * 0.07,
     },
     TitleDark:{
         fontWeight: "700",
-        fontSize: 28,
+        fontSize: Dimensions.get("window").width * 0.07,
         color:"white"
 
     },

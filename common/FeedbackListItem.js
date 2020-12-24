@@ -1,12 +1,11 @@
 import React from 'react';
 import {StyleSheet, View, Text, Image} from 'react-native';
-//import StarRating from 'react-native-star-rating';
+import StarRating from 'react-native-star-rating';
 
 const FeedbackListItem = (props) => {
 
     return (
-            <View></View>)
-        /*
+        
         <View style={styles.itemContainer}>
             <View style={styles.imageContainer}>
                 <Image
@@ -30,20 +29,17 @@ const FeedbackListItem = (props) => {
             </View>
         </View>
     );
-*/
 
 };
 
 const styles = StyleSheet.create({
     itemContainer:{
-        //backgroundColor:'blue',
         flex:1,
         height:55,
         flexDirection:'row',
-        marginBottom:5,
+        marginVertical:5,
     },
     imageContainer:{
-        //backgroundColor:'gray',
         flex:1,
     },
     image:{

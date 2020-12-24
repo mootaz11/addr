@@ -87,31 +87,14 @@ export default function CustomDrawer(props) {
                             labelStyle={{ color: "white" }}
 
                             label="Home"
-                            onPress={() => { props.navigation.navigate("Home") }}
+                            onPress={() => { 
+                                props.navigation.navigate("Home",{activation:"activation"}) 
+                            }}
                         />
                         
 
                     </Drawer.Section>
-                    <Drawer.Section style={styles.drawerSection} >
-                        <DrawerItem icon={({ color, size }) => (
-                            <FontAwesome color={"white"} style={{ padding: 0, fontSize: 30, }} name="shopping-cart" />
-
-                        )}
-                            labelStyle={{ color: "white" }}
-
-                            label="Brand"
-                            onPress={() => { props.navigation.navigate("brand",{serviceName:"wear",page:"Brand"}) }}
-                            />
-                            <DrawerItem icon={({ color, size }) => (
-                            <FontAwesome color={"white"} style={{ padding: 0, fontSize: 30, }} name="shopping-cart" />
-
-                        )}
-                            labelStyle={{ color: "white" }}
-
-                            label="Food"
-                            onPress={() => { props.navigation.navigate("brand",{serviceName:"food",page:"Food"}) }}
-                            />
-                            </Drawer.Section>
+                    
                     <Drawer.Section style={styles.drawerSection} >
                         <DrawerItem icon={({ color, size }) => (
                             <FontAwesome color={"white"} style={{ padding: 0, fontSize: 30, }} name="comments" />

@@ -1,130 +1,126 @@
- import React,{useState} from 'react'
- import { View, Text, StyleSheet, TouchableOpacity, Image, SafeAreaView } from 'react-native'
+ import React,{useState,useContext,useEffect} from 'react'
+ import { View, Text, StyleSheet, TouchableOpacity, Image, SafeAreaView ,Dimensions} from 'react-native'
  import { Icon } from 'react-native-elements';
  import AuthContext from '../navigation/AuthContext';
  import _ from 'lodash';
  import { FlatList } from 'react-native-gesture-handler';
  import FontAwesome from 'react-native-vector-icons/FontAwesome';
- 
+ import {getDelivererOrders,markOrderAsTaked} from '../rest/ordersApi'
 
  const order_pipeline = [
-     { step: "Order placed", _id: "1" },
-     { step: "waiting order", _id: "2" },
+     { step: "Order", _id: "1" },
+     { step: "Waiting order", _id: "2" },
      { step: "Order to Deliver", _id: "3" },
      { step: "Order Delivered", _id: "4" },
  ];
  
- const placedorder_data = [
-     {
-         nomLivreur: "sara sara ",
-         productname: "zgougou",
-         Date: "11.08.2020",
-         _id: "1"
-     },
-     {
-         nomLivreur: "sara sara ",
-         productname: "zgougou",
-         Date: "11.08.2020", _id: "2"
-     },
-     {
-         nomLivreur: "sara sara ",
-         productname: "zgougou",
-         Date: "11.08.2020",
-         _id: "3"
-     },
-     {
-         nomLivreur: "sara sara ",
-         productname: "zgougou",
-         Date: "11.08.2020", _id: "4"
-     }
-   ]
  
- const order_during_deliv = [
-     {
-         nomLivreur: "sara sara ",
-         productname: "zgougou",
-         Date: "11.08.2020", _id: "2"
-     },
-     {
-         nomLivreur: "sara sara ",
-         productname: "zgougou",
-         Date: "11.08.2020",
-         _id: "3"
-     },
-    ]
-
- const historique = [
-    {
-         nomLivreur: "sara sara ",
-         productname: "zgougou",
-         Date: "11.08.2020", _id: "2"
-     },
-    ]
- 
+//waiting order (prepared:true,actif:true,taked:false) ok => livreur , taked:true
+//
 
  export default function  Deliveries (props) {
-     const context = React.useContext(AuthContext);
-     const [placedOrdersData, setPlacedOrdersData] = useState(context.actifOrders);
-     const [historyOrdersData, setHistoryOrdersData] = useState(context.historyOrders);
-     const [orderDuringDeliveryData, setOrderDuringDeliveryData] = useState([]);
- 
+     const context = useContext(AuthContext);
+     const [Orders, setOrders] = useState([]);
+     const [waitingOrders, setWaitingOrders] = useState([]);
+     const [OrdersTodeliver, setOrdersToDeliver] = useState([]);
+     const [ordersDelivered,setOrdersDelivered]=useState([]);
      const [checkedStep, setCheckedStep] = useState(order_pipeline[0])
+
+     const [order, setOrder] = useState(true);
+     const [waitingOrder,setWaitingOrder]=useState(false);
+     const [orderToDeliver,setOrderToDeliver]=useState(false);
+     const [orderDelivered,setOrderDelivered]=useState(false);
+
+    
+    useEffect(() => {
+       getDelivererOrders(context.partner._id).then(orders=>{
+           let _orders=[];
+           let _waitingOrders=[];
+           let _ordersToDeliver=[];
+           let _deliveredOrders=[];
+
+           orders.map(order=>{
+            if (order.actif == true && order.taked == false && order.prepared == false) {
+                _orders.push(order);
+            }
+            if(order.actif==true&&order.taked==false&&order.prepared==true){
+                _waitingOrders.push(order);
+            }
+            if(order.actif==true&&order.taked==true&&order.prepared==true){
+                _ordersToDeliver.push(order);
+            }
+            if(order.actif==false&&order.taked==true&&order.prepared==true){
+                _deliveredOrders.push(order);
+                console.log(order);
+            }
+           })
+           setOrders(_orders);
+           setOrdersToDeliver(_ordersToDeliver);
+           setWaitingOrders(_waitingOrders);
+           setOrdersDelivered(_deliveredOrders);
+       })
+    }, [])
  
-     const [orderPlaced, setOrderPlaced] = useState(true);
-     const [orderDuringDelivery, setOrderDuringDelivery] = useState(false);
-     const [history, setHistory] = useState(false);
-     const [Done, setDone] = useState(false);
  
  
-     const [search, setSearch] = useState("");
-     const [searchResult, setSearchResult] = useState(context.historyOrders);
- 
- 
-     /*useEffect(() => {
-         setDark(context.darkMode);
-     }, [context.darkMode])
- */
- 
+   
      const openDrawer = () => {
          props.navigation.openDrawer();
      }
 
-    
+
+    const takeOrder =(item)=>{
+        markOrderAsTaked(item._id,context.partner._id).then(message=>{
+            setOrderToDeliver([...OrdersTodeliver,item]);
+            setWaitingOrders(waitingOrders.filter(order=>order._id!=item._id));
+        })
+    }
  
 
-     const orderDone = (item) => {
-         setDone(true);
-     }
- 
      const checkStep = (item) => {
          setCheckedStep(item)
-         if (item.step == "Order placed") {
-             setOrderPlaced(true);
-             setHistory(false);
-             setOrderDuringDelivery(false);
+     
+         if (item.step == "Order") {
+            setOrder(true);
+            setOrderDelivered(false);
+            setOrderToDeliver(false);
+            setWaitingOrder(false)     
+        
+        }
+         
+        if (item.step == "Waiting order") {
+            setOrder(false);
+            setOrderDelivered(false);
+            setOrderToDeliver(false);
+            setWaitingOrder(true)     
          }
-         if (item.step == "Order during delivery") {
-             setOrderPlaced(false);
-             setHistory(false);
-             setOrderDuringDelivery(true);
+         
+         if(item.step=="Order to Deliver"){
+            setOrder(false);
+            setOrderDelivered(false);
+            setOrderToDeliver(true);
+            setWaitingOrder(false);     
          }
-         if (item.step == "Historique") {
-             setOrderPlaced(false);
-             setHistory(true);
-             setOrderDuringDelivery(false);
+         
+         if (item.step == "Order Delivered") {
+            setOrder(false);
+            setOrderDelivered(true);
+            setOrderToDeliver(false);
+            setWaitingOrder(false)     
          }
+
      }
      return (
- <SafeAreaView>
+ <SafeAreaView style={{flex:1,marginTop:10}}>
  <View style={context.darkMode ? styles.containerDark : styles.container}>
              <View style={context.darkMode ? styles.menuDark : styles.menu}>
                  <TouchableOpacity style={styles.leftArrowContainer}>
                      <View >
-                         <Icon color={context.darkMode ? "white":"#2474F1"} style={{ flex: 1, padding: 0 ,justifyContent:"center"}} name="menu" onPress={openDrawer} />
+                         <Icon color={context.darkMode ? "white":"#2474F1"} style={{ flex: 1, padding: 0 ,justifyContent:"center",marginTop:10}} name="menu" onPress={openDrawer} />
                      </View>
                  </TouchableOpacity>
                  <View style={styles.titleContainer}>
-                     <Text style={context.darkMode ? styles.TitleDark : styles.Title}>Deliveries</Text>
+                     <Text style={context.darkMode ? styles.TitleDark : styles.Title}>Commande</Text>
                  </View>
  
              </View>
@@ -150,38 +146,27 @@
              <View style={styles.ordersContainer}>
  
                  <FlatList
-                     data={orderPlaced ? placedorder_data : orderDuringDelivery ? order_during_deliv : history ? historique : null}
+                     data={order ? Orders : waitingOrder ? waitingOrders : orderToDeliver ? OrdersTodeliver : orderDelivered ? ordersDelivered :null}
                      renderItem={({ item }) =>
-                     <TouchableOpacity>
+                     <TouchableOpacity disabled={!orderDelivered}>
                          <View style={context.darkMode ? styles.deliveryDark :  styles.delivery} >
                              <View style={styles.clientImageContainer}>
                                  <Image style={{ width: "80%", height: "80%", resizeMode: "contain" }} source={require("../assets/mootaz.jpg")} />
                              </View>
                              <View style={styles.deliveryInfo}>
-                                 <Text style={context.darkMode ? styles.infoDark : styles.info}>Nom de Livreur: {item.nomLivreur} </Text>
-                                 <Text style={context.darkMode ? styles.infoDark : styles.info}>Nom de Produit: {item.productname} </Text>
-                                 <Text style={context.darkMode ? styles.infoDark : styles.info}>Date: {item.Date}</Text>
-                                 {   history &&
-                                     <TouchableOpacity>
-                                         <Text style={{ fontSize: 12, fontWeight: "600", color: "#2474F1", textDecorationLine: "underline" }}>your opinion about the product</Text>
-                                     </TouchableOpacity>
-                                     
-                             }
- 
- 
+                                 <Text style={context.darkMode ? styles.infoDark : styles.info}>Nom de client: {item.client.lastName+" "+item.client.firstName} </Text>
+                                 <Text style={context.darkMode ? styles.infoDark : styles.info}>Telephone: +216 {item.client.phone}</Text>
+                                 <Text style={context.darkMode ? styles.infoDark : styles.info}>Date: {item.date.split('T')[0]}</Text>
+
                              </View>
                              {
-                                 orderDuringDelivery ?
- 
-                                     <View style={{ width: "25%", height: "100%", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
- 
-                                         <TouchableOpacity onPress={() => { orderDone(item) }}>
-                                             <FontAwesome color={Done ? "#4BB543" : "#cccccc"} style={{ padding: 0, fontSize: 30, }} name="check" />
- 
+                                 waitingOrder ?
+                                 <View style={{ width: "10%", height: "100%", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
+                                 <TouchableOpacity onPress={() => { waitingOrder ?  takeOrder(item):null }}>
+                                         <FontAwesome color={"#4BB543"} style={{ padding: 0, fontSize: 30, }} name="check" />
                                          </TouchableOpacity>
- 
-                                     </View>
-                                     : null
+                                     </View>                            
+                                 : null
                              }
                          </View>
                          </TouchableOpacity>
@@ -277,7 +262,7 @@ const styles = StyleSheet.create({
         width: "45%",
         height: 40,
         borderRadius: 14,
-        backgroundColor: "white",
+        backgroundColor: "#fcfcfc",
         margin: 6
     },
     stepDark:{
@@ -322,20 +307,17 @@ const styles = StyleSheet.create({
         backgroundColor: "#121212",
         flexDirection: "row",
         marginBottom: 8,
-        
-        
     },
+
     leftArrowContainer: {
         width: "10%",
         height: "100%",
         flexDirection: "column",
         alignItems: "center",
-        justifyContent: "center"
+        justifyContent: "center",
+        marginTop:5
     },
-    leftArrow: {
-        width: 30,
-        height: 30
-    },
+   
 
     titleContainer: {
         width: "80%",
@@ -346,11 +328,11 @@ const styles = StyleSheet.create({
     },
     Title: {
         fontWeight: "700",
-        fontSize: 28
+        fontSize: Dimensions.get("window").width * 0.07,
     },
     TitleDark:{
         fontWeight: "700",
-        fontSize: 28,
+        fontSize: Dimensions.get("window").width * 0.07,
         color:"white"
         
     },

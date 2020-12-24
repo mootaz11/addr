@@ -1,6 +1,3 @@
-
-// Linking.openURL(url);
-
 import React, { useState, useEffect } from 'react'
 import { View, Text, StyleSheet, TouchableOpacity, Image, SafeAreaView, Modal, Dimensions } from 'react-native'
 import { Icon } from 'react-native-elements';
@@ -9,7 +6,7 @@ import _ from 'lodash';
 import { FlatList, TextInput } from 'react-native-gesture-handler';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { getClientOrders, markOrderAsReceived } from "../rest/ordersApi"
-
+import {createFeedback} from '../rest/feedBackApi';
 
 const order_pipeline = [
     { step: "Order placed", _id: "1" },
@@ -36,9 +33,13 @@ export default function Orders(props) {
     const [product,setProduct]=useState(false);
     const [information, setInformation] = useState(false);
     const [enabled, setEnabled] = useState(false);
-    const [ratings, setRatings] = useState(_ratings)
+    const [ratings, setRatings] = useState(null);
+    const [orderRate,setOrderRate]=useState(null);
+    const [feedBack,setFeedBack]=useState("");
     useEffect(() => {
+
         getClientOrders().then(orders => {
+            setRatings(_ratings);
             let _placedOrders = [];
             let _orderDuringDelivery = [];
             let _historyOrders = [];
@@ -64,29 +65,27 @@ export default function Orders(props) {
         }).catch(err => {
             console.log(err);
         })
+        return ()=>{setRatings([])}
     }, [])
 
-    /*    useEffect(() => {
-            setDark(context.darkMode);
-        }, [context.darkMode])
-    */
+    
 
     const openDrawer = () => {
         props.navigation.openDrawer();
     }
 
     const handleRatings = (index) => {
-        let _ratings = [...ratings];
+        let _rates = [...ratings];
         console.log(index)
-        for (let i = 0; i < _ratings.length; i++) {
+        for (let i = 0; i < _rates.length; i++) {
             if (i <= index) {
-                _ratings[i].pressed = true;
+                _rates[i].pressed = true;
             }
             else {
-                _ratings[i].pressed = false;
+                _rates[i].pressed = false;
             }
         }
-        setRatings(_ratings)
+        setRatings(_rates)
     }
 
     // const startConversation = (order)=>{
@@ -121,11 +120,26 @@ export default function Orders(props) {
         }
     }
 
-
+    
+    const rateDeliverer =()=>{
+    
+        const body={
+            deliverer:orderRate.deliverer._id,
+            comment:feedBack,
+            score:ratings.filter(rating=>rating.pressed!=false).length
+        };
+        createFeedback(context.partner._id,body).then(message=>{
+            console.log(message);
+        })
+        .catch(err=>{alert("error occured")})
+        setRatings(_ratings);
+        setEnabled(false);
+        setRate(false);
+    }
 
 
     return (
-        <SafeAreaView style={{ flex: 1 }}>
+        <SafeAreaView style={{ flex: 1,marginTop:10 }}>
             <View style={context.darkMode ? styles.containerDark : styles.container}>
                 <View style={context.darkMode ? styles.menuDark : styles.menu}>
                     <TouchableOpacity style={styles.leftArrowContainer}>
@@ -170,13 +184,10 @@ export default function Orders(props) {
                                         <Text style={context.darkMode ? styles.infoDark : styles.info}>Numero Telephone:  {item.deliverer ? item.deliverer.phone ? item.deliverer.phone : "no phone yet" : ""} </Text>
                                         <Text style={context.darkMode ? styles.infoDark : styles.info}>Date: {item.date.split('T')[0]}</Text>
                                         {history &&
-                                            <TouchableOpacity onPress={() => { setEnabled(!enabled); setRate(!rate) }}>
-                                                <Text style={{ fontSize: 12, fontWeight: "600", color: "#2474F1", textDecorationLine: "underline" }}>your opinion about the product</Text>
+                                            <TouchableOpacity onPress={() => {setOrderRate(item); setEnabled(!enabled); setRate(!rate) }}>
+                                                <Text style={{fontSize: Dimensions.get("window").width*0.038, fontWeight: "600", color: "#2474F1", textDecorationLine: "underline" }}>your opinion about this order</Text>
                                             </TouchableOpacity>
-
                                         }
-
-
                                     </View>
                                     {
                                         orderDuringDelivery ?
@@ -245,7 +256,7 @@ export default function Orders(props) {
                                 rate &&
                                 <View style={{ width: "100%", height: "80%" }}>
                                     <View style={{ width: "100%", height: "20%", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-                                        <Text style={{ fontSize: Dimensions.get("window").width * 0.08, color: "#2474F1" }}>{product ?"Rate product":"Rate delivery man"}</Text>
+                                        <Text style={{ fontSize: Dimensions.get("window").width * 0.08, color: "#2474F1" }}>{"Rate delivery man"}</Text>
                                     </View>
                                     <View style={{ width: "90%", height: "20%", flexDirection: "column", alignSelf: "center" }}>
                                         <Text style={{ fontSize: Dimensions.get("window").width * 0.08, color: "#2474F1" }}>Rate</Text>
@@ -261,14 +272,15 @@ export default function Orders(props) {
                                     </View>
                                     <View style={{ width: "90%", height: "50%", flexDirection: "column", alignSelf: "center" }}>
                                         <Text style={{ fontSize: Dimensions.get("window").width * 0.05, color: "#2474F1", marginBottom: 10 }}>Feedback</Text>
-                                        <TextInput style={{ width: "100%", height: 100, borderColor: "grey", borderWidth: 1, borderRadius: 12 }} />
+                                        <TextInput style={{ width: "100%", height: 100, borderColor: "grey", borderWidth: 1, borderRadius: 12 }} value={feedBack} onChangeText={(text)=>{setFeedBack(text)}} />
                                         <View style={{ flexDirection: "row", width: "60%", alignSelf: "flex-end", height: "30%" }}>
-                                            <TouchableOpacity onPress={()=>{if(product){setRate(!rate);setProduct(false);setEnabled(false)}else {setProduct(true)}}} style={{ width: "40%", height: "80%"}}>
+                                            <TouchableOpacity onPress={()=>{setRate(!rate);setEnabled(false);setRatings(_ratings)}} style={{ width: "40%", height: "80%"}}>
                                             <View style={{ width: "100%", height: "100%", flexDirection: "column", alignItems: "center", marginTop: 10,justifyContent:"center" }}>
                                                 <Text style={{ fontSize: Dimensions.get("window").width * 0.07, textAlign:'center',textDecorationLine: "underline", color: "#2474F1", marginBottom: 10 }}>skip</Text>
                                             </View>
                                             </TouchableOpacity>
-                                            <TouchableOpacity style={{ width: "50%", height: "70%"}}>
+
+                                            <TouchableOpacity onPress={()=>rateDeliverer()} style={{ width: "50%", height: "70%"}}>
                                             <View style={{ width: "100%", height: "100%", borderRadius: 20, flexDirection: "column",justifyContent:"center", alignItems: "center", marginTop: 10, backgroundColor: "#2474F1" }}>
                                             <Text style={{ fontSize: Dimensions.get("window").width * 0.06, color: "white" }}>Rate</Text>
 
@@ -310,11 +322,11 @@ const styles = StyleSheet.create({
 
     },
     info: {
-        fontSize: 12,
+        fontSize: Dimensions.get("window").width*0.038,
         fontWeight: "600"
     },
     infoDark: {
-        fontSize: 12,
+        fontSize: Dimensions.get("window").width*0.038,
         fontWeight: "600",
         color: "white"
     },
@@ -371,7 +383,7 @@ const styles = StyleSheet.create({
         width: "45%",
         height: 40,
         borderRadius: 14,
-        backgroundColor: "white",
+        backgroundColor: "#fcfcfc",
         margin: 6
     },
     stepDark: {
@@ -424,7 +436,8 @@ const styles = StyleSheet.create({
         height: "100%",
         flexDirection: "column",
         alignItems: "center",
-        justifyContent: "center"
+        justifyContent: "center",
+        marginTop:5
     },
     leftArrow: {
         width: 30,

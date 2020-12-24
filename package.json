@@ -53,6 +53,7 @@
     "react-native-vector-icons": "^7.1.0",
     "react-native-web": "^0.13.12",
     "socket.io-client": "^2.3.1",
+    "watchman": "^1.0.0",
     "yup": "^0.29.3"
   },
   "devDependencies": {

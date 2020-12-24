@@ -2,10 +2,12 @@ import axios from "../rest/customAxios";
 
 
 
-export const updateLocationState =(userId)=>{
+export const updateLocationState =()=>{
     return new Promise((resolve,reject)=>{
-        axios.patch(`/user/location-state/${userId}`,{locationState:true}).then(res=>{
-            resolve(res.data.user);
+        axios.patch(`/user/location-state`,{locationState:true}).then(res=>{
+            if(res.status===200){
+            resolve(res.data.message);
+            }
         })
         .catch(err=>{reject(err)})
     })
@@ -14,7 +16,6 @@ export const updateLocationState =(userId)=>{
 export const updateInfo = (info)=>{
     return new Promise((resolve,reject)=>{
         axios.patch("/user/",info).then(res=>{
-            console.log(res);
             resolve(res);
         })
         .catch(err=>{reject(err)})

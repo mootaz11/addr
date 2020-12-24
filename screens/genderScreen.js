@@ -144,11 +144,11 @@ const styles = StyleSheet.create({
     },
     Title:{
         fontWeight:"700",
-        fontSize:28
+        fontSize: Dimensions.get("window").width * 0.07,
     },
     TitleDark:{
         fontWeight:"700",
-        fontSize:28,
+        fontSize: Dimensions.get("window").width * 0.07,
         color:"white"
 
     },

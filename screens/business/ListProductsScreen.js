@@ -138,7 +138,7 @@ const styles = StyleSheet.create({
     },
     Title: {
         fontWeight: "700",
-        fontSize: Dimensions.get("window").width * 0.08
+        fontSize: Dimensions.get("window").width * 0.07,
     },
     searchContainer: {
         width: "10%",
@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
 
     TitleDark: {
         fontWeight: "700",
-        fontSize: 28,
+        fontSize: Dimensions.get("window").width * 0.07,
         color: "white"
 
     },

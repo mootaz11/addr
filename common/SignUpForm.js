@@ -1,9 +1,9 @@
 import React, { useReducer, useCallback, useState, useRef } from 'react';
-import { View, StyleSheet, ScrollView, Dimensions, Keyboard, Alert, Platformn, Text, Image, Modal ,TouchableOpacity} from 'react-native';
+import { View, StyleSheet, ScrollView, Dimensions, Keyboard, Alert, Platformn, Text, Image, Modal, TouchableOpacity } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import * as Permissions from 'expo-permissions';
-import {signup} from '../rest/userApi'
+import { signup } from '../rest/userApi'
 import Input from '../common/Input';
 import SubmitButton from '../common/SubmitButton';
 
@@ -40,13 +40,13 @@ const formReducer = (state, action) => {
 const SignUpForm = (props) => {
     const [password, setPassword] = useState('');
     const [inHome, setInHome] = useState(false);
-    const [openModal,setOpenModal]=useState(false);
-    const [location,setLocation] =useState(null)
+    const [openModal, setOpenModal] = useState(false);
+    const [location, setLocation] = useState(null)
     const [formState, dispatchFormState] = useReducer(formReducer, {
         inputValues: {
             username: '',
             firstName: '',
-            lastName:'',
+            lastName: '',
             username: '',
             email: '',
             password: '',
@@ -56,39 +56,40 @@ const SignUpForm = (props) => {
         },
         inputValidities: {
             username: false,
-            lastName:false,
-            firstName:false,
+            lastName: false,
+            firstName: false,
             email: false,
             password: false,
             repeatPassword: false,
             phone: false,
-            
+
             address: false
         },
         formIsValid: false
     });
 
-    const  handleUserAdress= async ()=>{
-        setInHome(inHome => !inHome); 
+    const handleUserAdress = async () => {
+        setInHome(inHome => !inHome);
 
-        let { status } =  await Permissions.askAsync(Permissions.LOCATION);
+        let { status } = await Permissions.askAsync(Permissions.LOCATION);
 
         if (status !== 'granted') {
-         Alert.alert('Permission to access location was denied');
-                      }
-         else {
-         const _location =await Location.getCurrentPositionAsync({});
-         if(_location){
-             console.log(_location);
-            setLocation( {
-                latitude:_location.coords.latitude,
-                 longitude:_location.coords.longitude  })
-            setOpenModal(true) ;
-}
+            Alert.alert('Permission to access location was denied');
+        }
+        else {
+            const _location = await Location.getCurrentPositionAsync({});
+            if (_location) {
+                console.log(_location);
+                setLocation({
+                    latitude: _location.coords.latitude,
+                    longitude: _location.coords.longitude
+                })
+                setOpenModal(true);
+            }
 
         }
     }
-        const getPasswordHandler = (password) => {
+    const getPasswordHandler = (password) => {
         setPassword(password);
     };
 
@@ -103,26 +104,27 @@ const SignUpForm = (props) => {
 
     }, [dispatchFormState]);
 
-    const saveAdress=()=>{
+    const saveAdress = () => {
         setOpenModal(false);
     }
-    const handleChangeAddress = async (evt)=>{
+    const handleChangeAddress = async (evt) => {
         let _location = evt.nativeEvent.coordinate;
-        setLocation( {
-            latitude:_location.latitude,
-             longitude:_location.longitude})
+        setLocation({
+            latitude: _location.latitude,
+            longitude: _location.longitude
+        })
     }
 
     const signupHandler = () => {
-        if (!formState.formIsValid){
+        if (!formState.formIsValid) {
             Alert.alert('Wrong input!', 'Please check the errors in the form.', [{ text: 'Okay' }]);
             return;
         }
         Keyboard.dismiss();
-        signup({...formState.inputValues,location:{longitude:location ? location.longitude :null,latitude:location ?location.latitude:null},locationState:location?true:false}).then(
-            message=>{
-            Alert.alert('Signup',message,[{text: 'Okay'}])
-        }).catch(err=>{});
+        signup({ ...formState.inputValues, location: { longitude: location ? location.longitude : null, latitude: location ? location.latitude : null }, locationState: location ? true : false }).then(
+            message => {
+                Alert.alert('Signup', message, [{ text: 'Okay' }])
+            }).catch(err => { });
     };
 
 
@@ -164,7 +166,7 @@ const SignUpForm = (props) => {
                             errorText="please enter a valid username"
                             onInputChange={inputChangeHandler}
                             required
-                        
+
                         />
                     </View>
                     <View style={styles.listItem}>
@@ -244,7 +246,7 @@ const SignUpForm = (props) => {
                             <View style={styles.answer}>
 
                                 <Text>yes</Text>
-                                <TouchableOpacity onPress={handleUserAdress }>
+                                <TouchableOpacity onPress={handleUserAdress}>
                                     <Image style={{ width: 20, height: 20, resizeMode: "cover", marginHorizontal: 6 }} source={inHome ? require("../assets/radio_checked.png") : require("../assets/radio_unchecked.png")} />
 
                                 </TouchableOpacity>
@@ -265,83 +267,84 @@ const SignUpForm = (props) => {
             <View style={styles.submitSignUpButtonContainer}>
                 <SubmitButton onPress={signupHandler}>Create account</SubmitButton>
             </View>
-         
-            {
-           openModal &&
+
+
             <Modal
                 animationType={"fade"}
                 transparent={true}
-                visible={true}
-                
-            >
-                <View  style={{ backgroundColor: "#000000aa", flex: 1 }}>
-                    <View style={{ backgroundColor: "#ffffff", margin: 40, flexDirection: "column", borderRadius: 10, height: Dimensions.get("window").height * 0.8, width: Dimensions.get("window").width * 0.9, alignSelf: "center" }}>
-                        <View style={{ width: "100%", height: "100%" }}>
+                visible={openModal}>
 
+                <View style={{ backgroundColor: "#000000aa", flex: 1 }}>
+                    <View style={{ backgroundColor: "#ffffff", margin: 40, flexDirection: "column", borderRadius: 10, height: Dimensions.get("window").height * 0.8, width: Dimensions.get("window").width * 0.9, alignSelf: "center" }}>
+                        <View style={{ width: "100%", height: "80%" }}>
                             <MapView
                                 initialRegion={{
-                                    latitude: Number(location.latitude),
-                                    longitude: Number(location.longitude)
-                                    
+                                    latitude: location ? Number(location.latitude) : 0,
+                                    longitude: location ? Number(location.longitude) : 0
 
-                                                        }}
 
-                                style={{flex:1,borderRadius: 10}}
-                                customMapStyle={ darkStyle }
+                                }}
+
+                                style={{ flex: 1, borderRadius: 10 }}
+                                customMapStyle={darkStyle}
                                 provider="google"
                             >
                                 <Marker
-                                draggable={true}
-                                onDragEnd={(evt)=>{handleChangeAddress(evt)}}
-          coordinate={
-            Platform.OS=='ios' ?
-            {
-            latitude: location ?Number( location.latitude) : 0
+                                    draggable={true}
+                                    onDragEnd={(evt) => { handleChangeAddress(evt) }}
+                                    coordinate={
+                                        Platform.OS == 'ios' ?
+                                            {
+                                                latitude: location ? Number(location.latitude) : 0
 
-            ,
-            longitude:location ?Number (location.longitude) : 0
+                                                ,
+                                                longitude: location ? Number(location.longitude) : 0
 
-          } :
-          {
-            latitude: location ? Number(location.latitude) : 0
+                                            } :
+                                            {
+                                                latitude: location ? Number(location.latitude) : 0
 
-            ,
-            longitude:location ? Number(location.longitude) : 0
+                                                ,
+                                                longitude: location ? Number(location.longitude) : 0
 
-          }
+                                            }
 
-        
-        
-        }
-        >
-          <Image  source={  require('../assets/logoAddresti.png') } style={{ height: 40, width: 40}} />
 
-        </Marker>
+
+                                    }
+                                >
+                                    <Image source={require('../assets/logoAddresti.png')} style={{ height: 40, width: 40 }} />
+
+                                </Marker>
                             </MapView>
-                            <TouchableOpacity onPress={saveAdress}>
-                            <View style={{width:"50%",height:40,backgroundColor:'#2474f1',justifyContent:"center",position:"absolute",borderRadius:20,alignSelf:"center",bottom:-20}}>
-                                <Text style={{textAlign:"center",textAlignVertical:"center",color:"white",fontSize:16, fontWeight:"500"}}>save address</Text>
-                            </View>
 
+                        </View>
+                        <View style={{ width: "100%", height: "20%", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
+                            <TouchableOpacity style={{width: "50%", height: 50,}} onPress={()=>{saveAdress()}}>
+
+                                <View style={{ width: "100%", height: 50, backgroundColor: "#2474F1", borderRadius: 24, flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
+                                    <Text style={{ color: "white", fontSize: Dimensions.get("window").width * 0.05 }}>save Address</Text>
+                                </View>
                             </TouchableOpacity>
 
-                    </View>
                         </View>
+
                     </View>
-    </Modal>}
+                </View>
+            </Modal>
 
         </View>
     );
 };
 
 const styles = StyleSheet.create({
-                formSignupContainerAll: {
-                flex: 1,
+    formSignupContainerAll: {
+        flex: 1,
         alignItems: 'center',
     },
     formContainerSignup: {
-                //flex:1,
-                alignItems: 'center',
+        //flex:1,
+        alignItems: 'center',
         backgroundColor: 'white',
         borderRadius: 20,
         width: '87%',
@@ -354,37 +357,37 @@ const styles = StyleSheet.create({
 
     },
     FormSignupListContainer: {
-                marginVertical: Dimensions.get('window').height * 0.05, //42
+        marginVertical: Dimensions.get('window').height * 0.05, //42
         width: '90%'
     },
 
     listItem: {
-                marginBottom: 12,
+        marginBottom: 12,
     },
     homeCheck: {
-                height: "100%",
+        height: "100%",
         width: "100%",
         flexDirection: "row"
 
     },
     mapContainer: { flex: 1 },
     question: {
-                width: "50%",
+        width: "50%",
         height: "100%",
 
     },
     answer: {
-                height: "100%",
+        height: "100%",
         width: "50%",
         flexDirection: "row",
         justifyContent: "center"
     },
     input: {
-                width: '90%',
+        width: '90%',
         height: 30,
     },
     submitSignUpButtonContainer: {
-                alignItems: 'center',
+        alignItems: 'center',
         width: '45%',
         position: 'absolute',
         bottom: '-5%',
@@ -395,40 +398,40 @@ const styles = StyleSheet.create({
 
 export default SignUpForm;
 const darkStyle = [
-            {
-                "elementType": "geometry",
+    {
+        "elementType": "geometry",
         "stylers": [
             {
                 "color": "#212121"
             }
         ]
     },
-            {
-                "elementType": "labels.icon",
+    {
+        "elementType": "labels.icon",
         "stylers": [
             {
                 "visibility": "off"
             }
         ]
     },
-            {
-                "elementType": "labels.text.fill",
+    {
+        "elementType": "labels.text.fill",
         "stylers": [
             {
                 "color": "#757575"
             }
         ]
     },
-            {
-                "elementType": "labels.text.stroke",
+    {
+        "elementType": "labels.text.stroke",
         "stylers": [
             {
                 "color": "#212121"
             }
         ]
     },
-            {
-                "featureType": "administrative",
+    {
+        "featureType": "administrative",
         "elementType": "geometry",
         "stylers": [
             {
@@ -436,8 +439,8 @@ const darkStyle = [
             }
         ]
     },
-            {
-                "featureType": "administrative.country",
+    {
+        "featureType": "administrative.country",
         "elementType": "labels.text.fill",
         "stylers": [
             {
@@ -445,16 +448,16 @@ const darkStyle = [
             }
         ]
     },
-            {
-                "featureType": "administrative.land_parcel",
+    {
+        "featureType": "administrative.land_parcel",
         "stylers": [
             {
                 "visibility": "off"
             }
         ]
     },
-            {
-                "featureType": "administrative.locality",
+    {
+        "featureType": "administrative.locality",
         "elementType": "labels.text.fill",
         "stylers": [
             {
@@ -462,8 +465,8 @@ const darkStyle = [
             }
         ]
     },
-            {
-                "featureType": "poi",
+    {
+        "featureType": "poi",
         "elementType": "labels.text.fill",
         "stylers": [
             {
@@ -471,8 +474,8 @@ const darkStyle = [
             }
         ]
     },
-            {
-                "featureType": "poi.park",
+    {
+        "featureType": "poi.park",
         "elementType": "geometry",
         "stylers": [
             {
@@ -480,8 +483,8 @@ const darkStyle = [
             }
         ]
     },
-            {
-                "featureType": "poi.park",
+    {
+        "featureType": "poi.park",
         "elementType": "labels.text.fill",
         "stylers": [
             {
@@ -489,8 +492,8 @@ const darkStyle = [
             }
         ]
     },
-            {
-                "featureType": "poi.park",
+    {
+        "featureType": "poi.park",
         "elementType": "labels.text.stroke",
         "stylers": [
             {
@@ -498,8 +501,8 @@ const darkStyle = [
             }
         ]
     },
-            {
-                "featureType": "road",
+    {
+        "featureType": "road",
         "elementType": "geometry.fill",
         "stylers": [
             {
@@ -507,8 +510,8 @@ const darkStyle = [
             }
         ]
     },
-            {
-                "featureType": "road",
+    {
+        "featureType": "road",
         "elementType": "labels.text.fill",
         "stylers": [
             {
@@ -516,8 +519,8 @@ const darkStyle = [
             }
         ]
     },
-            {
-                "featureType": "road.arterial",
+    {
+        "featureType": "road.arterial",
         "elementType": "geometry",
         "stylers": [
             {
@@ -525,8 +528,8 @@ const darkStyle = [
             }
         ]
     },
-            {
-                "featureType": "road.highway",
+    {
+        "featureType": "road.highway",
         "elementType": "geometry",
         "stylers": [
             {
@@ -534,8 +537,8 @@ const darkStyle = [
             }
         ]
     },
-            {
-                "featureType": "road.highway.controlled_access",
+    {
+        "featureType": "road.highway.controlled_access",
         "elementType": "geometry",
         "stylers": [
             {
@@ -543,8 +546,8 @@ const darkStyle = [
             }
         ]
     },
-            {
-                "featureType": "road.local",
+    {
+        "featureType": "road.local",
         "elementType": "labels.text.fill",
         "stylers": [
             {
@@ -552,8 +555,8 @@ const darkStyle = [
             }
         ]
     },
-            {
-                "featureType": "transit",
+    {
+        "featureType": "transit",
         "elementType": "labels.text.fill",
         "stylers": [
             {
@@ -561,8 +564,8 @@ const darkStyle = [
             }
         ]
     },
-            {
-                "featureType": "water",
+    {
+        "featureType": "water",
         "elementType": "geometry",
         "stylers": [
             {
@@ -570,8 +573,8 @@ const darkStyle = [
             }
         ]
     },
-            {
-                "featureType": "water",
+    {
+        "featureType": "water",
         "elementType": "labels.text.fill",
         "stylers": [
             {

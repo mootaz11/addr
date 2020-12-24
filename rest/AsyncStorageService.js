@@ -10,9 +10,7 @@ const getToken = async (item) => {
   return token;
 }
 
-  
-  
-  
+    
   const AsyncStorageService = (function () {
     var _service;
     function _getService() {

@@ -43,22 +43,22 @@ export default function Basket(props){
                 </View>
             </View>
             <View style={styles.bagContainer}>
-                <Text style={{ fontSize:Dimensions.get("screen").width*0.05, fontWeight: "500" }}>Basket({baskets.length})</Text>
+                <Text style={context.darkMode ? { fontSize:Dimensions.get("screen").width*0.05, fontWeight: "500",color:"white" }:{ fontSize:Dimensions.get("screen").width*0.05, fontWeight: "500" }}>Basket({baskets.length})</Text>
                 <FlatList
                     data={baskets}
                     renderItem={
                         ({ item }) =>
-                        <TouchableOpacity onPress={()=>checkBag(item)}>
+                        <TouchableOpacity  onPress={()=>checkBag(item)}>
                             <View style={context.darkMode ? styles.productContainerDark : styles.productContainer}>
                                 <View style={{ width: "30%", height: "100%", flexDirection: "column",justifyContent:"center"  ,borderRadius:12}}>
                                     <View style={{flexWrap:"wrap",margin:5}}>
-                                        <Text style={{textAlign:"left" ,fontSize:Dimensions.get("screen").width*0.04,fontWeight:"500"}}>Partner :</Text>
+                                        <Text style={context.darkMode ? {textAlign:"left" ,fontSize:Dimensions.get("screen").width*0.04,fontWeight:"500",color:"white"}:{textAlign:"left" ,fontSize:Dimensions.get("screen").width*0.04,fontWeight:"500"}}>Partner :</Text>
                                     </View>
                                     <View style={{flexWrap:"wrap",margin:5}}>
-                                        <Text style={{textAlign:"left",fontSize:Dimensions.get("screen").width*0.04,fontWeight:"500"}}>Date :</Text>
+                                        <Text style={context.darkMode ? {textAlign:"left",fontSize:Dimensions.get("screen").width*0.04,fontWeight:"500",color:"white"} : {textAlign:"left",fontSize:Dimensions.get("screen").width*0.04,fontWeight:"500"}}>Date :</Text>
                                     </View>
                                     <View style={{flexWrap:"wrap",margin:5}}>
-                                        <Text style={{textAlign:"left",fontSize:Dimensions.get("screen").width*0.04,fontWeight:"500"}}>Total Price :</Text>
+                                        <Text style={context.darkMode ? {textAlign:"left",fontSize:Dimensions.get("screen").width*0.04,fontWeight:"500",color:"white"} : context.darkMode ? {textAlign:"left",fontSize:Dimensions.get("screen").width*0.04,fontWeight:"500",color:"white"} : {textAlign:"left",fontSize:Dimensions.get("screen").width*0.04,fontWeight:"500"}}>Total Price :</Text>
                                     </View>
                                 </View>
                                 <View style={{ width: "40%", height: "100%", flexDirection: "column",justifyContent:"center",borderRadius:12 }}>
@@ -66,10 +66,10 @@ export default function Basket(props){
                                         <Text style={{textAlign:"left" ,fontSize:Dimensions.get("screen").width*0.04,fontWeight:"500",color:"#2474F1"}}>{item.partner.partnerName}</Text>
                                     </View>
                                     <View style={{flexWrap:"wrap",margin:5}}>
-                                        <Text style={{textAlign:"left",fontSize:Dimensions.get("screen").width*0.04,fontWeight:"500"}}>{item.date.toString().split('T')[0]}</Text>
+                                        <Text style={context.darkMode ? {textAlign:"left",fontSize:Dimensions.get("screen").width*0.04,fontWeight:"500",color:"white"} : {textAlign:"left",fontSize:Dimensions.get("screen").width*0.04,fontWeight:"500"}}>{item.date.toString().split('T')[0]}</Text>
                                     </View>
                                     <View style={{flexWrap:"wrap",margin:5}}>
-                                        <Text style={{textAlign:"left",fontSize:Dimensions.get("screen").width*0.04,fontWeight:"500"}}>{item.price} DT</Text>
+                                        <Text style={context.darkMode ? {textAlign:"left",fontSize:Dimensions.get("screen").width*0.04,fontWeight:"500",color:"white"} : {textAlign:"left",fontSize:Dimensions.get("screen").width*0.04,fontWeight:"500"}}>{item.price} DT</Text>
                                     </View>
                     
                                 </View>
@@ -146,12 +146,13 @@ const styles = StyleSheet.create({
         marginVertical: 10,
         flexDirection: "row",
         borderRadius: 12,
-        shadowColor:"black",
-        shadowOpacity:0.3,
+        shadowColor:"grey",
+        shadowOpacity:1,
         shadowOffset:{width:1,height:1},
         borderColor:"white",
         borderWidth:1,
-        shadowRadius:12
+        shadowRadius:12,
+        
     },
     productContainerDark: {
         width: "100%",
@@ -221,11 +222,11 @@ const styles = StyleSheet.create({
     },
     Title: {
         fontWeight: "700",
-        fontSize: 28
+        fontSize: Dimensions.get("window").width * 0.07,
     },
     TitleDark: {
         fontWeight: "700",
-        fontSize: 28,
+        fontSize: Dimensions.get("window").width * 0.07,
         color: "white"
 
     },
