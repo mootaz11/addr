@@ -29,11 +29,12 @@ const ListProductsScreen = (props) => {
 
 
     useEffect(() => {
+        if(context.partner._id){
         getPartnerProducts(context.partner._id).then(data => {
             setProducts(data.products)
             setSearchResult(data.products)
 
-        })
+        })}
     }, [])
     const addProductHandle =()=>{
         props.navigation.navigate("addProduct")
@@ -50,23 +51,23 @@ const ListProductsScreen = (props) => {
                 stock={itemData.item.stock}
                 price={itemData.item.basePrice}
                 image={itemData.item.mainImage}
-                dark ={dark}
+                dark ={context.darkMode}
             />
         );
     };
 
     return (
         <SafeAreaView style={{flex:1}}>
-        <View style={dark ? styles.mainContainerDark: styles.mainContainer}>
-            <View style={dark ? styles.menuDark : styles.menu}>
+        <View style={context.darkMode ? styles.mainContainerDark: styles.mainContainer}>
+            <View style={context.darkMode ? styles.menuDark : styles.menu}>
                 <View style={styles.leftArrowContainer}>
                     <TouchableOpacity style={styles.leftArrow}>
-                        <Icon color={dark ? "white":"black"} style={{ padding: 4, alignSelf: "center", justifyContent: "center" }} name="menu" onPress={openDrawer} />
+                        <Icon color={context.darkMode ? "white":"black"} style={{ padding: 4, alignSelf: "center", justifyContent: "center" }} name="menu" onPress={openDrawer} />
 
                     </TouchableOpacity>
                 </View>
                 <View style={styles.titleContainer}>
-                    <Text style={dark ? styles.TitleDark : styles.Title}>Partner products</Text>
+                    <Text style={context.darkMode ? styles.TitleDark : styles.Title}>Partner products</Text>
                 </View>
 
 
@@ -139,6 +140,7 @@ const styles = StyleSheet.create({
     Title: {
         fontWeight: "700",
         fontSize: Dimensions.get("window").width * 0.07,
+        color:"black"
     },
     searchContainer: {
         width: "10%",

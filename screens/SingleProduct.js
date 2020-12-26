@@ -15,17 +15,21 @@ export default function SingleProduct(props) {
     const [active, setActive] = useState();
     const [productImages, setProductsImages] = useState([]);
     useEffect(() => {
-
         getProduct(props.route.params.product._id).then(product => {
-            product.secondaryImages.forEach(element => {
-                if (productImages.findIndex(image => { return image == element }) == -1) {
-                    setProductsImages([...productImages, element])
+            let _product_images=[];
+            product.secondaryImages.map(element => {
+                if (_product_images.findIndex(image => { return image == element }) === -1) {
+                    _product_images.push(element);
                 }
             });
-            if (productImages.findIndex(image => { return image == product.mainImage }) == -1)
-                setProductsImages([product.mainImage, ...productImages])
-            setProduct(product)
-        })
+            if (_product_images.findIndex(image => { return image == product.mainImage }) == -1)
+           { 
+                _product_images.push(product.mainImage);
+        }
+                setProductsImages(_product_images);
+                setProduct(product)
+        
+            })
     }, [props.route.params.product])
 
     const _createOrder = () => {
@@ -50,6 +54,8 @@ export default function SingleProduct(props) {
     }
     const goBack = () => {
         props.navigation.goBack()
+        setProduct(null);
+        setProductsImages([]);
     }
 
     const changeImage = ({ nativeEvent }) => {
@@ -72,8 +78,7 @@ export default function SingleProduct(props) {
                                 (
                                     <Image key={index} style={styles.headerImage} source={{ uri: image }} />
 
-                                ))
-
+                                ))                                
                         }
                     </ScrollView>
                     <TouchableOpacity style={styles.leftArrow} onPress={goBack}>
@@ -178,7 +183,7 @@ export default function SingleProduct(props) {
     }
     else {
         return (<View style={{ flex: 1, justifyContent: "center", flexDirection: "column", alignItems: "center" }}>
-            <ActivityIndicator size="large" />
+            <ActivityIndicator color="#2474F1" size="large" />
         </View>)
     }
 

@@ -267,7 +267,12 @@ const checkPartner=(value)=>{
          initialRegion={{
           latitude: context.location ?context.location.location ? Number(context.location.location.latitude) : 0:0,
           longitude: context.location ? context.location.location?Number(context.location.location.longitude) : 0:0
-      }}
+          ,latitudeDelta: 0.5,
+          longitudeDelta: 0.5// * (Dimensions.get("window").width / Dimensions.get("window").height )
+          ,latitudeDelta: 0.5,
+          longitudeDelta: 0.5// * (Dimensions.get("window").width / Dimensions.get("window").height )
+
+        }}
 
         style={styles.container}
         customMapStyle={context.darkMode ?darkStyle : defaultStyle}
@@ -436,7 +441,6 @@ const checkPartner=(value)=>{
                   </TouchableOpacity>
 
                 </View>
-
 
                 <View style={styles.messaging}>
                   <TouchableOpacity onPress={()=>{startPartnerConversation(item)}} style={{ width: "100%", height: "100%" }} >
@@ -824,12 +828,13 @@ const styles = StyleSheet.create({
 
   },
   messagingImage: {
-    width: "100%",
-    height: "100%",
+    width: "80%",
+    height: "80%",
     resizeMode: "contain",
     shadowColor: "white",
-    shadowOffset: { width: 2, height: 2 }
+    shadowOffset: { width: 2, height: 2 },
   },
+  
   service: {
     margin: 4,
     borderRadius: Dimensions.get("window").width*0.2,

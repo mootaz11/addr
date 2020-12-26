@@ -2,7 +2,7 @@ import axios from 'axios'
 import AsyncStorageService from '../rest/AsyncStorageService'
 const production = false;
 
-const host = production ? 'https://addresti-back-end.herokuapp.com' : 'http://192.168.1.5:3000'
+const host = production ? 'https://addresti-back-end.herokuapp.com' : 'http://192.168.0.10:3000'
 const custom_axios = axios.create({
     baseURL: host,
 })
@@ -10,7 +10,6 @@ const custom_axios = axios.create({
 
 custom_axios.interceptors.request.use(
     async (config) => {
-        
         const accessToken = await  AsyncStorageService.getAccessToken();
         if (AsyncStorageService.getAccessToken()) {
             config.headers['Authorization'] = 'Bearer ' +accessToken;

@@ -1,9 +1,6 @@
 import React, { useContext, useState, useEffect } from 'react'
-import { View, Text, StyleSheet, Dimensions, Image, TouchableOpacity, SectionList,ActivityIndicator } from 'react-native'
-import AuthContext from '../navigation/AuthContext';
+import { View, Text, StyleSheet, Dimensions, Image, TouchableOpacity, SectionList,ActivityIndicator,Alert } from 'react-native'
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import { RadioButton, Checkbox } from 'react-native-paper';
-import { add } from 'react-native-reanimated';
 import {getProduct} from '../rest/productApi';
 import { createOrder } from '../rest/ordersApi';
 
@@ -92,7 +89,7 @@ export default function foodProduct(props) {
             if(createdOrder){
                 Alert.alert(
                     "",
-                    "order created done !",
+                    "food order created done !",
                     [
                       
                       { text: "OK" }

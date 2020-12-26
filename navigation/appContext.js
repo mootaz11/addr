@@ -5,7 +5,7 @@ import AsyncStorageService from '../rest/AsyncStorageService'
 import {createConversation, getUserConversations,sendMessage,markAsreadConversation} from '../rest/conversationApi';
 import {getLocation,updateLocation,addTemporarlyLocation} from '../rest/locationApi';
 import {getConnectedUser,updateLocationState} from '../rest/userApi';
-import { set } from 'react-native-reanimated';
+import Loading from '../screens/Loading';
 
 export default  function AppContext(props){
     const [socket, setSocket] = useState(io("http://localhost:3000"));
@@ -14,34 +14,29 @@ export default  function AppContext(props){
     const [conversations,setConversations]=useState(null);
     const [darkMode,setDarkMode]=useState(false);
     const [locationState,setLocationState]=useState(false);
-    const token_init = AsyncStorageService.getAccessToken();
-    const [token,setToken]=useState(token_init)
     const [isloading,setIsloading]=useState(true);
     const [partner,setPartner]=useState(null)
     const [bag,setBag]=useState(bag);
     useEffect(() => {
-        if (token) {
+        if (AsyncStorageService.getAccessToken()) {
             getConnectedUser().then(res=>{  
-                setLocationState(res.data.connectedUser.locationState);
                     getLocation().then(location=>{
+                        if(!res.data.connectedUser.isPartner){setBag(res.data.orders);}
                         setLocation(location);
                         setDarkMode(false);
                         setUser(res.data.connectedUser);
-                        if(!res.data.connectedUser.isPartner){setBag(res.data.orders);}
-                        if(res.data.connectedUser.isPartner){setPartner(res.data.connectedUser.partners[0])}
-                        if(res.data.connectedUser.isVendor){setPartner(res.data.connectedUser.workPlaces[0]);}
                     }).catch(err=>{alert("error occured while setting Location")})
                                     
                 socket.emit('connectuser',token);
-                setIsloading(false);  
             }).catch(err=>{
-                console.log(err)
+                setIsloading(false);
             })
         } 
 
         else {
-            setIsloading(false);}
-    },[token])
+            setIsloading(false);
+        }
+    },[])
 
 useEffect(()=>{
     if(user){
@@ -58,6 +53,8 @@ useEffect(()=>{
                  let _convs = [..._conversations];
                  const _convSorted = _convs.sort((a,b)=>a.last-b.last);       
                 setConversations(_convSorted);
+
+                setIsloading(false);
                 }).catch(err=>{console.log(err)})
             }
             },[user])
@@ -73,7 +70,6 @@ useEffect(()=>{
         if(conversations ){
             socket.on('send-message',(message)=>{
                 const _conversations = [...conversations];
-                console.log(_conversations);    
                     const conv_index =_conversations.findIndex(conv => {return conv._id == message.conversation});
                     if(conv_index >=0){
                          let _convReal = {..._conversations[conv_index]};
@@ -235,14 +231,12 @@ useEffect(()=>{
     
     const LoginHandler = async ({ user, token }) => {
         AsyncStorageService.setToken(token);
-        setToken(token);
         setUser(user);
     }
 
-    const logoutHandler =  async () => {
+    const logoutHandler =  () => {
         AsyncStorageService.clearToken();
-        setToken(null);
-        setUser(null);
+    
     }
     const _createOrder =( body ) =>{
         console.log(body);
@@ -282,11 +276,11 @@ return(
     socket:socket,
     conversations:conversations,
     location:location,
-    locationState:locationState,
     bag:bag,
     isloading:isloading,
     setUser:setUser,
     setLocation:setLocation,
+    setPartner:setPartner,
     LoginHandler:LoginHandler,
     openConversationHandler:openConversationHandler,
     logoutHandler:logoutHandler,
@@ -302,7 +296,8 @@ return(
 }
 }>
 
-{props.children}
+{isloading ? <Loading/> : props.children}
+
 </AuthContext.Provider>
 )
 

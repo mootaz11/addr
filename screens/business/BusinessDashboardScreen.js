@@ -19,19 +19,16 @@ const BusinessDashboardScreen = (props) => {
     const [dashboard, setDashboard] = useState(null)
     const [managers, setManagers] = useState([]);
     const [deliverers, setDeliverers] = useState([]);
-    const [dark,setDark]=useState(context.darkMode);
 
-    useEffect(() => {
+        useEffect(() => {
         getPartnerDashboard(context.partner._id).then(dash => {
             setDashboard(dash)
             setManagers(dash.partner.managers);
             setDeliverers(dash.partner.deliverers);
         })
+
     }, [])
 
-    useEffect(()=>{
-        setDark(context.darkMode);
-    },[context.darkMode])
     const deleteManagerHandler = (user) => {
 
 
@@ -104,24 +101,24 @@ const BusinessDashboardScreen = (props) => {
 
     return (
         <SafeAreaView style={{ flex: 1 }}>
-            <View style={dark ?  styles.menuDark: styles.menu}>
+            <View style={context.darkMode ?  styles.menuDark: styles.menu}>
                 <View style={styles.leftArrowContainer}>
                     <TouchableOpacity style={styles.leftArrow}>
-                        <Icon color={dark ? "white" :"black"} style={{ padding: 4, alignSelf: "center", justifyContent: "center" }} name="menu" onPress={openDrawer} />
+                        <Icon color={context.darkMode ? "white" :"black"} style={{ padding: 4, alignSelf: "center", justifyContent: "center" }} name="menu" onPress={openDrawer} />
 
                     </TouchableOpacity>
                 </View>
                 <View style={styles.titleContainer}>
-                    <Text style={dark ? styles.TitleDark : styles.Title}>Business Dashboard</Text>
+                    <Text style={context.darkMode ? styles.TitleDark : styles.Title}>Business Dashboard</Text>
                 </View>
 
 
             </View>
 
             { dashboard ?
-                <View style={dark ? styles.mainContainerDark : styles.mainContainer}>
+                <View style={context.darkMode ? styles.mainContainerDark : styles.mainContainer}>
 
-                    <View style={dark ? styles.partOneDark : styles.partOne}>
+                    <View style={context.darkMode ? styles.partOneDark : styles.partOne}>
                         <LinearGradient
                             colors={['#2071f1', '#f0a8f0']}
                             start={[0, 0]}
@@ -154,7 +151,7 @@ const BusinessDashboardScreen = (props) => {
                         <View style={styles.part2}>
 
                             <View style={styles.cardContainer}>
-                            <Text style={dark ? {color:"white"}:{color:"black"}}>
+                            <Text style={context.darkMode ? {color:"white"}:{color:"black"}}>
                                     My earnings
                         </Text>
                                 <LinearGradient
@@ -169,7 +166,7 @@ const BusinessDashboardScreen = (props) => {
                                 </LinearGradient>
                             </View>
                             <View style={styles.cardContainer}>
-                            <Text style={dark ? {color:"white"}:{color:"black"}}>
+                            <Text style={context.darkMode ? {color:"white"}:{color:"black"}}>
                                     Number of Orders
                         </Text>
                                 <LinearGradient
@@ -189,7 +186,7 @@ const BusinessDashboardScreen = (props) => {
 
                         <View style={styles.part2}>
                             <View style={styles.cardContainer}>
-                                <Text style={dark ? {color:"white"}:{color:"black"}}>
+                                <Text style={context.darkMode ? {color:"white"}:{color:"black"}}>
                                     Addressti fees
       </Text>
                                 <LinearGradient
@@ -204,7 +201,7 @@ const BusinessDashboardScreen = (props) => {
                                 </LinearGradient>
                             </View>
                             <View style={styles.cardContainer}>
-                            <Text style={dark ? {color:"white"}:{color:"black"}}>
+                            <Text style={context.darkMode ? {color:"white"}:{color:"black"}}>
                                     Number of Views
                                  </Text>
                                 <LinearGradient
@@ -233,7 +230,7 @@ const BusinessDashboardScreen = (props) => {
 
  <View
  style={{
-     borderBottomColor: dark ? "#292929": '#d8d8d8',
+     borderBottomColor: context.darkMode ? "#292929": '#d8d8d8',
 
      borderBottomWidth: 1,
      marginLeft: 5,
@@ -248,9 +245,9 @@ const BusinessDashboardScreen = (props) => {
                     {
                         context.user.isPartner == true && dashboard.partner.owner != null && dashboard.partner.owner === context.user._id && managers.length > 0 ?
 
-                            <View style={dark ? styles.partTwoDark : styles.partTwo}>
+                            <View style={context.darkMode ? styles.partTwoDark : styles.partTwo}>
 
-                                <Text style={dark ? styles.titlesStylesDark : styles.titlesStyles}>Managers</Text>
+                                <Text style={context.darkMode ? styles.titlesStylesDark : styles.titlesStyles}>Managers</Text>
                                 <View style={styles.listManagersContainer}>
 
                                     <FlatList
@@ -266,9 +263,9 @@ const BusinessDashboardScreen = (props) => {
                     }
                     {
                     
-                    deliverers.length>0 &&        <View
+                    deliverers.length>0 &&<View
                         style={{
-                            borderBottomColor: dark ? "#292929": '#d8d8d8',                         
+                            borderBottomColor: context.darkMode ? "#292929": '#d8d8d8',                         
                             borderBottomWidth: 1,
                             marginLeft: 5,
                             marginRight: 5,
@@ -279,8 +276,8 @@ const BusinessDashboardScreen = (props) => {
 }
 
 
-                   { deliverers.length>0 &&<View style={dark ? styles.partThreeDark : styles.partThree}>
-                        <Text style={dark ? styles.titlesStylesDark : styles.titlesStyles}>Delivery management</Text>
+                   { deliverers.length>0 &&<View style={context.darkMode ? styles.partThreeDark : styles.partThree}>
+                        <Text style={context.darkMode ? styles.titlesStylesDark : styles.titlesStyles}>Delivery management</Text>
                         <View style={styles.listDeliveryContainer}>
                             <FlatList
                                 data={deliverers}
@@ -293,7 +290,7 @@ const BusinessDashboardScreen = (props) => {
                 </View>
                 :
                 <View style={{ justifyContent: "center", alignItems: "center", flexDirection: "column", flex: 1 }}>
-                    <ActivityIndicator size={"small"} />
+                    <ActivityIndicator color={"blue"} size={"small"} />
 
                 </View>
             }

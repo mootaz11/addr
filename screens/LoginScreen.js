@@ -38,6 +38,7 @@ import SignUpForm from '../common/SignUpForm';
 import LoginForm from '../common/LoginForm';
 import * as Facebook from 'expo-facebook';
 import { ActivityIndicator } from 'react-native-paper';
+import Loading from './Loading';
 
 
 
@@ -45,6 +46,7 @@ import { ActivityIndicator } from 'react-native-paper';
 
 export default function Login(props) {
     const spinValue = new Animated.Value(0);
+    const [isLoading, setIsloading] = useState(true);
 
     // First set up animation 
     Animated.timing(
@@ -59,7 +61,7 @@ export default function Login(props) {
     // Next, interpolate beginning and end values (in this case 0 and 1)
     const spin = spinValue.interpolate({
         inputRange: [0, 1],
-        outputRange: ['0deg', '360deg']
+        outputRange: ['0deg', '180deg']
     })
     const [signupClicked, setSignupClicked] = useState(true);
     const clickSignupHandler = (val) => {
@@ -71,15 +73,17 @@ export default function Login(props) {
 
 
     useEffect(() => {
-        if (context.user) {
-            if(!context.user.isPartner){
-                props.navigation.navigate("Home");
-            }
-            else{
-            props.navigation.navigate("listProducts");
-            }
+        if (context.load&&context.user) {
+            if(!context.user.isPartner&&!context.user.isVendor){
+                props.navigation.navigate("Home");}
+                
+            else{props.navigation.navigate("partners");}
+        setIsloading(false);
         }
-    }, [context.user])
+        else{
+            setIsloading(false);
+        }
+    },[context.user,context.isloading])
 
 
     useEffect(() => {
@@ -134,19 +138,9 @@ export default function Login(props) {
     const checkForgotPassword = () => {
         navigation.navigate("forgotPassword")
     }
-    
-    if(context.user){
-        return(
-            <View style={{ flex: 1, flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
-            <Animated.Image
-                style={{ width:90,height:90, transform: [{ rotate: spin }] }}
-                source={require("../assets/images/logoBlue.png")} />
-            </View>
-        )
-    }
-    
-    else{
+        if(!isLoading){
         return (
+        
             <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
                 <View style={styles.fullContainer}>
                     <View style={styles.partOne}>
@@ -176,7 +170,7 @@ export default function Login(props) {
 
                                     <SignUpForm />
                                     :
-                                    <LoginForm isKeyboardVisible={isKeyboardVisible} />
+                                    <LoginForm  isKeyboardVisible={isKeyboardVisible} />
                                 }
                                 {/* signupClicked ? 
                         <View style={styles.submitSignUpButtonContainer}>
@@ -214,10 +208,13 @@ export default function Login(props) {
 
                 </View>
             </TouchableWithoutFeedback>
-        );
+        );}
+        else {
+            return <Loading/>
+        }
     }
   
-}
+
 
 
 const styles = StyleSheet.create({

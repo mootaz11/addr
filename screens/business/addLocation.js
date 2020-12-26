@@ -1,5 +1,5 @@
-import React, { useContext, useState } from 'react'
-import { View, Text, StyleSheet, Dimensions, Image, TouchableOpacity, SafeAreaView,Modal,TextInput } from 'react-native'
+import React, { useContext, useState,useEffect } from 'react'
+import { View, Text, StyleSheet, Dimensions, Image, TouchableOpacity, SafeAreaView, Modal, TextInput } from 'react-native'
 import { FlatList } from 'react-native-gesture-handler';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
@@ -16,32 +16,54 @@ import AuthContext from '../../navigation/AuthContext';
 export default function addLocation(props) {
     const context = useContext(AuthContext);
     const [dark, setDark] = useState(false);
-    const [openModal,setOpenModal]=useState(false)
-    const [address,setAddress]=useState("")
-    const [partnerLocations,setPartnerLocations]=useState([]);
+    const [openModal, setOpenModal] = useState(false)
+    const [address, setAddress] = useState("")
+    const [partnerLocations, setPartnerLocations] = useState([]);
+    
+    useEffect(() => {
+        // setPartnerLocations(context.partner.localisations);
+
+        return () => {
+        }
+    }, [])
     const openDrawer = () => {
         props.navigation.openDrawer();
 
     }
-    const addNewLocationHandler=()=>{
-     
-    }
-    const addNewLocationByMapHandler=(evt)=>{
-        const localisation = evt.nativeEvent.coordinate;
-        addPartnerLocalisation(context.partner._id,localisation).then(_localisation=>{
-            setPartnerLocations(partnerLocations=>[...partnerLocations,_localisation]);
+    const addNewLocationHandler = async  () => {
+        let { status } =  await Permissions.askAsync(Permissions.LOCATION);
+
+        if (status !== 'granted') {
+         Alert.alert('Permission to access location was denied');}
+         else {
+         const _location =await Location.getCurrentPositionAsync({});
+
+         const location= {
+                 latitude:_location.coords.latitude,
+                  longitude:_location.coords.longitude  
+         }
+         addPartnerLocalisation(context.partner._id, location).then(_localisation => {
+            setPartnerLocations(partnerLocations => [...partnerLocations, _localisation]);
         })
     }
-    const getPosition=()=>{}
+}
+    const addNewLocationByMapHandler = (evt) => {
+        const localisation = evt.nativeEvent.coordinate;
+        addPartnerLocalisation(context.partner._id, localisation).then(_localisation => {
+            setPartnerLocations(partnerLocations => [...partnerLocations, _localisation]);
+        })
+    }
+    const getPosition = () => { }
     return (
         <SafeAreaView style={{ flex: 1 }}>
             <View style={dark ? styles.containerDark : styles.container}>
                 <View style={dark ? styles.menuDark : styles.menu}>
                     <View style={styles.leftArrowContainer}>
-                        <TouchableOpacity style={styles.leftArrow}>
-                            <Icon color={"black"} style={{ padding: 4, alignSelf:"center",justifyContent: "center" }} name="menu" onPress={openDrawer} />
-
-                        </TouchableOpacity>
+                        <View >
+                            <TouchableOpacity onPress={openDrawer} style={{ height: 30, width: 30 }}>
+                                <Image source={context.darkMode ? require("../../assets/menu_dark.png") : require("../../assets/menu.png")} style={{ height: "100%", width: "100%", resizeMode: "cover" }} />
+                            </TouchableOpacity>
+                        </View>
                     </View>
                     <View style={styles.titleContainer}>
                         <Text style={styles.Title}>add Location</Text>
@@ -58,47 +80,47 @@ export default function addLocation(props) {
 
                         }}
                         on
-                        onPress={(evt)=>{addNewLocationByMapHandler(evt)}} 
+                        onPress={(evt) => { addNewLocationByMapHandler(evt) }}
                         style={{ flex: 1 }}
                         customMapStyle={darkStyle}
                         provider="google"
                     >
-                                            
-                      {
-                      partnerLocations.length>0 
-                      && partnerLocations.map((location)=>(
-                        <Marker
-                        key={location._id}
-                        draggable={true}
-                        onDragEnd={(evt)=>{handleChangeAddress(evt)}}
-  coordinate={
-    Platform.OS=='ios' ?
-    {
-    latitude:Number( location.latitude) 
 
-    ,
-    longitude:Number (location.longitude)
+                        {
+                            partnerLocations.length > 0
+                            && partnerLocations.map((location) => (
+                                <Marker
+                                    key={location._id}
+                                    draggable={true}
+                                    onDragEnd={(evt) => { handleChangeAddress(evt) }}
+                                    coordinate={
+                                        Platform.OS == 'ios' ?
+                                            {
+                                                latitude: Number(location.latitude)
 
-  } :
-  {
-    latitude:  Number(location.latitude) 
+                                                ,
+                                                longitude: Number(location.longitude)
 
-    ,
-    longitude:Number(location.longitude) 
+                                            } :
+                                            {
+                                                latitude: Number(location.latitude)
 
-  }
+                                                ,
+                                                longitude: Number(location.longitude)
+
+                                            }
 
 
 
-}
->
-  <Image  source={ context.partner.profileImage ? {uri:context.partner.profileImage}: require('../../assets/logoAddresti.png') } style={{ height: 40, width: 40,borderRadius:40,}} />
+                                    }
+                                >
+                                    <Image source={context.partner.profileImage ? { uri: context.partner.profileImage } : require('../../assets/logoAddresti.png')} style={{ height: 40, width: 40, borderRadius: 40, }} />
 
-</Marker>
+                                </Marker>
 
-                      )) 
-                      }
-        
+                            ))
+                        }
+
                     </MapView>
                     <TouchableOpacity style={styles.addLocation} onPress={addNewLocationHandler}>
                         <View style={{
@@ -117,7 +139,7 @@ export default function addLocation(props) {
                         </View>
                     </TouchableOpacity>
                 </View>
-              
+
 
 
             </View>
@@ -133,7 +155,7 @@ const styles = StyleSheet.create({
         marginLeft: 10,
         top: "70%",
     },
-    getPosition:{
+    getPosition: {
         width: "40%",
         height: 40,
         position: "absolute",
@@ -169,20 +191,22 @@ const styles = StyleSheet.create({
         height: "8%",
         backgroundColor: "white",
         flexDirection: "row",
+        marginTop: 10
     },
     menuDark: {
         width: "100%",
         height: "8%",
         backgroundColor: "#121212",
         flexDirection: "row",
-
+        marginTop: 10
     },
     leftArrowContainer: {
         width: "10%",
         height: "100%",
         flexDirection: "column",
         alignItems: "center",
-        justifyContent: "center"
+        justifyContent: "center",
+        marginTop: 5
     },
     leftArrow: {
         width: 30,

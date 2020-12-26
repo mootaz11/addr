@@ -127,12 +127,6 @@ export default function Settings({navigation}){
         }
     }
     
-    
-
-
-
-    
-
     const changetoTextInputUsername =()=>{
         if(!editUsername)
         {setEditUsername(true);}
@@ -282,7 +276,10 @@ export default function Settings({navigation}){
 <SafeAreaView style={{flex:1,marginTop:35}}>
         <View style={context.darkMode ? styles.containerdark : styles.Container}>
             <View style={styles.menuContainer}>
-                <Icon color={ context.darkMode ? "white": "#2474F1"} size={35} name="menu" onPress={openDrawer} />
+                <TouchableOpacity onPress={openDrawer} style={{height:30,width:30}}>
+                        <Image source={context.darkMode ?  require("../assets/menu_dark.png"):require("../assets/menu.png")} style={{height:"100%",width:"100%",resizeMode:"cover"}}/>
+                        </TouchableOpacity>
+
                 <Text style={context.darkMode ? styles.TitleDark : styles.Title}>My Account</Text>
             </View>
             <View style={styles.imageContainer}>
@@ -294,7 +291,7 @@ export default function Settings({navigation}){
                         {context.user.photo&&<Image style={styles.editImage} source={require("../assets/pencil.png")}/>}
                     </TouchableOpacity>
                     <View style={{marginTop:5}}>
-                    <Text style={{fontSize:Dimensions.get("window").width*0.09,color:"#828282",textAlign:"center"}}>{context.user.lastName[0].toUpperCase()+context.user.lastName.slice(1) +" "+ context.user.firstName}</Text>
+                    <Text style={{fontSize:Dimensions.get("window").width*0.09,color:"#828282",textAlign:"center"}}>{context.user.lastName&&context.user.firstName ? context.user.lastName[0].toUpperCase()+context.user.lastName.slice(1) +" "+ context.user.firstName:""}</Text>
                     <Text style={{textAlign:"center",color:"#828282"}}>joined: {new Date(context.user.joined).toLocaleString().split(':')[0]+":"+new Date(context.user.joined).toLocaleString().split(':')[1]}</Text>
                     </View>
             </View>
@@ -369,7 +366,7 @@ export default function Settings({navigation}){
                     </TouchableOpacity>
                 </View>
 
-
+                <Text style={context.darkMode ? {fontSize:Dimensions.get("window").width*0.06,marginLeft:10,color:"white"}:{fontSize:Dimensions.get("window").width*0.06,marginLeft:10,color:"#828282"}}>Refresh Location :</Text>
                 <View style={context.darkMode ? styles.infoDark : styles.info}>
                     <Image style={styles.infoImage} source={require("../assets/location_profile.png")} />
                     {!editlocation && <Text style={context.darkMode ? styles.userInfoDark : styles.userInfo}>{context.user.address}</Text>}
@@ -393,8 +390,11 @@ export default function Settings({navigation}){
                         <View style={{ width: "100%", height: "80%" }}>
                             <MapView
                                 initialRegion={{
-                                    latitude: context.location ? Number(context.location.location.latitude) : 0,
-                                    longitude: context.location ? Number(context.location.location.longitude):0
+                                    latitude: context.location?context.location.location ? Number(context.location.location.latitude) : 0:0,
+                                    longitude: context.location?context.location.location ? Number(context.location.location.longitude):0:0
+                                    ,latitudeDelta: 0.5,
+                                    longitudeDelta: 0.5 * (Dimensions.get("window").width / Dimensions.get("window").height )
+                    
                                 }}
 
                                 style={{ flex: 1, borderRadius: 10 }}
@@ -483,12 +483,21 @@ const styles = StyleSheet.create({
     },
     Title:{
         fontSize:22,
-        color:"#2474F1",
+        color:"black",
         fontWeight:"600",
         letterSpacing:1,
         justifyContent:"center",
         marginHorizontal:5
     },
+    TitleDark:{
+        fontSize:22,
+        color:"white",
+        fontWeight:"600",
+        letterSpacing:1,
+        justifyContent:"center",
+        marginHorizontal:5
+    }
+,
     imageContainer:{
         width:"100%",
         height:"35%",

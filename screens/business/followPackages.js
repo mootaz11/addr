@@ -44,22 +44,22 @@ export default function followPackages(props) {
     const context = useContext(AuthContext)
     const [user, setUser] = useState(context.user)
     const [dark, setDark] = useState(false);
+    
     const openDrawer = () => {
         props.navigation.openDrawer();
-
     }
+
     return (
         <SafeAreaView style={{ flex: 1 }}>
-            <View style={dark ? styles.containerDark : styles.container}>
-                <View style={dark ? styles.menuDark : styles.menu}>
+            <View style={context.darkMode ? styles.containerDark : styles.container}>
+                <View style={context.darkMode ? styles.menuDark : styles.menu}>
                     <View style={styles.leftArrowContainer}>
-                        <TouchableOpacity style={styles.leftArrow}>
-                            <Icon color={"black"} style={{ padding: 4, alignSelf: "center", justifyContent: "center" }} name="menu" onPress={openDrawer} />
-
+                        <TouchableOpacity onPress={openDrawer} style={styles.leftArrow}>
+                        <Image source={context.darkMode ?  require("../../assets/menu_dark.png"):require("../../assets/menu.png")} style={{height:"100%",width:"100%",resizeMode:"cover"}}/>
                         </TouchableOpacity>
                     </View>
                     <View style={styles.titleContainer}>
-                        <Text style={styles.Title}>Follow packages</Text>
+                        <Text style={context.darkMode ? styles.TitleDark : styles.Title}>Follow packages</Text>
                     </View>
 
 
@@ -246,12 +246,14 @@ const styles = StyleSheet.create({
         height: "8%",
         backgroundColor: "white",
         flexDirection: "row",
+        marginTop:10
     },
     menuDark: {
         width: "100%",
         height: "8%",
         backgroundColor: "#121212",
         flexDirection: "row",
+        marginTop:10
 
     },
     leftArrowContainer: {
@@ -263,7 +265,8 @@ const styles = StyleSheet.create({
     },
     leftArrow: {
         width: 30,
-        height: 30
+        height: 30,
+        marginTop:10
     },
 
     titleContainer: {
@@ -275,7 +278,7 @@ const styles = StyleSheet.create({
     },
     Title: {
         fontWeight: "700",
-        fontSize: 28
+        fontSize: Dimensions.get("window").width * 0.08
     },
     searchContainer: {
         width: "10%",
@@ -287,7 +290,7 @@ const styles = StyleSheet.create({
 
     TitleDark: {
         fontWeight: "700",
-        fontSize: 28,
+        fontSize: Dimensions.get("window").width * 0.08,
         color: "white"
 
     },

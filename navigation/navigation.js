@@ -29,6 +29,7 @@ import addLocation from '../screens/business/addLocation'
 import followPackages from '../screens/business/followPackages';
 import Basket from '../screens/BasketScreen';
 import Contact from '../screens/contactScreen'
+import Partners from '../screens/business/partners';
 
 
 
@@ -71,8 +72,8 @@ export default function NavigationScreen(){
 
 
 return(
-<NavigationContainer >
-          <drawerStack.Navigator  drawerContent={props => <CustomDrawer {...props}/>}>
+<NavigationContainer  >
+          <drawerStack.Navigator   drawerContent={props => <CustomDrawer  {...props}/>}>
             <drawerStack.Screen name="Login" component={Login} />
             <drawerStack.Screen name="orders" component={Orders}/>
             <drawerStack.Screen name="deliveries" component={Deliveries}/>
@@ -99,6 +100,7 @@ return(
             <drawerStack.Screen name="addLocation" component={addLocation}/>
             <drawerStack.Screen name="followPackages" component={followPackages}/>
             <drawerStack.Screen name="contact" component={Contact}/>
+            <drawerStack.Screen name="partners" component={Partners}/>
 
           </drawerStack.Navigator>
       </NavigationContainer>

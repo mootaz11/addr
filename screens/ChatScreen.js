@@ -9,13 +9,11 @@ import AuthContext from '../navigation/AuthContext';
 export default function Chat({navigation}){
     const context = useContext(AuthContext);
     const [user,setUser]=useState(context.user)
-
-    
-        
     
     const checkConversation =(conversation)=>{
     navigation.navigate("conversation",{conversation,chat:true})
 }
+
 const  openDrawer =()=>{
     navigation.openDrawer();
 }
@@ -24,13 +22,15 @@ const  openDrawer =()=>{
 return(
     <View style={context.darkMode ? styles.containerDark :styles.container}>
     <View style={styles.menu}>
-        <Icon color={"white"} style={{ flex: 1, padding: 0 }} name="menu" onPress={openDrawer} />
+    <TouchableOpacity onPress={openDrawer} style={{height:30,width:30}}>
+        <Image source={  require("../assets/menu_dark.png")} style={{height:"100%",width:"100%",resizeMode:"cover"}}/>
+            </TouchableOpacity>
         <Text style={styles.Title}>Chat</Text>
      </View>
        
         <View style={styles.friends}>
 
-       {context.conversations &&
+       {context.conversations && context.conversations.length>0 &&
             <FlatList
                 horizontal
                 data={context.conversations}
@@ -39,25 +39,25 @@ return(
                         <TouchableOpacity onPress={()=>{checkConversation(item)}}>
                             <View  style={styles.headUserImageContainer}>
                              <Image style={styles.headUserImage} source = {
-                                    item.type=="personal"?item.users[item.users.findIndex(u=>{return u._id != context.context.user._id})].photo ? {uri:item.users[item.users.findIndex(u=>{return u._id != context.context.user._id})].photo} :require('../assets/user_image.png'):
-                                        item.users[item.users.findIndex(u=>{return u._id != context.user._id})]&&item.users[item.users.findIndex(u=>{return u._id != context.user._id})].isPartner ?{uri:item.image}:
-                                         item.users[item.users.findIndex(u=>{return u._id != context.user._id})].photo ? {uri:item.image} :require('../assets/user_image.png')                  
+                        item.type=="personal"?
+                        item.users[item.users.findIndex(u=>{return u._id != context.user._id})].photo ? 
+                        {uri:item.users[item.users.findIndex(u=>{return u._id != context.user._id})].photo} :require('../assets/user_image.png'):
+                            item.image ?  {uri:item.image} : require("../assets/mootaz.jpg")
                                         }
                             />
                              
                              
                              <Text numberOfLines={1} style={styles.friendHeadName}>{
                                 item.type=="personal"? 
-                                item.users[item.users.findIndex(u=>{return u._id != context.user._id})].firstName:
-                                item.users[item.users.findIndex(u=>{return u._id!= context.user._id})]&&item.users[item.users.findIndex(u=>{return u._id!= context.user._id})].isPartner 
-                                ? item.title :   item.users[item.users.findIndex(u=>{return u._id!= context.user._id})].firstName}</Text>
+                                    item.users[item.users.findIndex(u=>{return u._id != context.user._id})].firstName ?
+                                        item.users[item.users.findIndex(u=>{return u._id != context.user._id})].firstName : "" :
+                                            item.title ? item.title : ""} </Text>
     
                              <Text numberOfLines={1} style={styles.friendHeadName}>{
                              item.type=="personal" ? 
                               item.users[item.users.findIndex(u=>{return u._id != context.user._id})].lastName.length>8 
                                 ? item.users[item.users.findIndex(u=>{return u._id != context.user._id})].lastName.substring(0,8)+".." :
-                                    item.users[item.users.findIndex(u=>{return u._id != context.user._id})].lastName : 
-                                        ""
+                                        "" :""
                                         
                                         }</Text>
 
@@ -87,17 +87,17 @@ return(
                         <View style={styles.ConvimageContainer}>
                         <Image style={styles.headUserImage} source = {
                                     item.type=="personal"?item.users[item.users.findIndex(u=>{return u._id != context.user._id})].photo ? {uri:item.users[item.users.findIndex(u=>{return u._id != context.user._id})].photo} :require('../assets/user_image.png'):
-                                        item.users[item.users.findIndex(u=>{return u._id != context.user._id})]&&item.users[item.users.findIndex(u=>{return u._id != context.user._id})].isPartner ?{uri:item.image}:
-                                         item.users[item.users.findIndex(u=>{return u._id != context.user._id})].photo ? {uri:item.image} :require('../assets/user_image.png')                  
+                                     item.image ?{uri:item.image}:require("../assets/mootaz.jpg")
                                         }
                             />
                         </View>
                         <View style={styles.messageBody}>
                             <Text style={context.darkMode ? styles.senderDark : styles.sender}>{
-                                item.type=="personal"? 
-                                item.users[item.users.findIndex(u=>{return u._id != context.user._id})].firstName+" "+item.users[item.users.findIndex(u=>{return u._id != context.user._id})].lastName:
-                                item.users[item.users.findIndex(u=>{return u._id!= context.user._id})]&&item.users[item.users.findIndex(u=>{return u._id!= context.user._id})].isPartner 
-                                ? item.title :   item.users[item.users.findIndex(u=>{return u._id!= context.user._id})].firstName+" "+item.users[item.users.findIndex(u=>{return u._id!= context.user._id})].lastName
+                            item.type=="personal"?
+                            item.users[item.users.findIndex(u=>{return u._id != context.user._id})].firstName !=null && item.users[item.users.findIndex(u=>{return u._id != context.user._id})].lastName !=null?
+                                item.users[item.users.findIndex(u=>{return u._id != context.user._id})].firstName+" "+item.users[item.users.findIndex(u=>{return u._id != context.user._id})].lastName:"":
+                                item.title ? item.title :""
+                            
                             }</Text>
                             <Text numberOfLines={1}  style={styles.message}>{item.messages[item.messages.length-1].content.length>20 ? item.messages[item.messages.length-1].content.substr(0,20)+"...":item.messages[item.messages.length-1].content}</Text>
                         </View>

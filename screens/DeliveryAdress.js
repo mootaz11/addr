@@ -41,7 +41,15 @@ export default function deliveryAdress(props) {
 
 
     useEffect(()=>{
-     async  function handlelocation (){
+        // getDeliveryOptions(order.partner._id).then(deliveryOptions=>{
+        //     setDeliveryOptions(deliveryOptions);
+        // }).catch(err=>{
+        //     alert("error while getting delivery options");
+        // })
+    
+
+
+        async  function handlelocation (){
         let { status } =  await Permissions.askAsync(Permissions.LOCATION);
     
         if (status !== 'granted') {
@@ -88,7 +96,7 @@ export default function deliveryAdress(props) {
 
 
     return (
-        <SafeAreaView>
+        <SafeAreaView >
             <View style={context.darkMode ? styles.containerDark : styles.container}>
 
                 <View style={context.darkMode ? styles.menuDark : styles.menu}>

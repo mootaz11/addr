@@ -1,38 +1,42 @@
 import React, { useState, useEffect, useContext } from 'react'
 import { Dimensions, StyleSheet, View, TouchableOpacity, Image, Text,ActivityIndicator } from 'react-native'
 import { FlatList } from 'react-native-gesture-handler';
-import {getOrder} from '../rest/ordersApi';
+import AuthContext from '../navigation/AuthContext';
+import {getOrder,placeOrder,getDeliveryOptions} from '../rest/ordersApi';
 
 
 export default function orderReview(props) {
-    const [dark,setDark]=useState(true);
+    const  context = useContext(AuthContext);
     const [orderReview,setOrderReview]=useState(null);
+    const [deliveryOptions,setDeliveryOptions] = useState(null);
     useEffect(()=>{
             getOrder(props.route.params.order).then(order=>{
-                console.log(order);
                 setOrderReview(order);
             })
             .catch(err=>{
-                alert("error occured");
-            })
+                alert("getting order error");
+            })       
     },[props.route.params])
     
 
     const goToDeliveryAdress = ()=>{
-        props.navigation.navigate("deliveryAdress")
+                placeOrder(orderReview,orderReview._id).then()
+                
+//        props.navigation.navigate("deliveryAdress")
+
     }
     if(orderReview){
     return (
-        <View style={dark ? styles.containerDark : styles.container}>
+        <View style={context.darkMode ? styles.containerDark : styles.container}>
 
-            <View style={dark ? styles.menuDark : styles.menu}>
-                <TouchableOpacity style={styles.leftArrowContainer} onPress={goToDeliveryAdress}>
+            <View style={context.darkMode ? styles.menuDark : styles.menu}>
+                <TouchableOpacity style={styles.leftArrowContainer} onPress={()=>{goToDeliveryAdress()}}>
                     <View >
-                        <Image style={styles.leftArrow} source={ dark ? require("../assets/left-arrow-dark.png") : require("../assets/left-arrow.png")} />
+                        <Image style={styles.leftArrow} source={ context.darkMode ? require("../assets/left-arrow-dark.png") : require("../assets/left-arrow.png")} />
                     </View>
                 </TouchableOpacity>
                 <View style={styles.titleContainer}>
-                    <Text style={dark ? styles.TitleDark : styles.Title}>Review your order</Text>
+                    <Text style={context.darkMode ? styles.TitleDark : styles.Title}>Review your order</Text>
                 </View>
 
             </View>
@@ -40,29 +44,29 @@ export default function orderReview(props) {
                 <View style={styles.orderInfoContainer}>
                     <View style={styles.clientInfo}>
                         <View style={styles.info}>
-                            <Text style={dark ? {fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500",color:"white"}: {fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500"}}>{orderReview.client.firstName+" "+orderReview.client.lastName}</Text>
+                            <Text style={context.darkMode ? {fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500",color:"white"}: {fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500"}}>{orderReview.client.firstName+" "+orderReview.client.lastName}</Text>
                         </View>
                         <View style={styles.info}>
-                            <Text style={dark ? {fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500",color:"white"}:{fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500"}}>Client code: {orderReview.client.locationCode}</Text>
+                            <Text style={context.darkMode ? {fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500",color:"white"}:{fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500"}}>Client code: {orderReview.client.locationCode}</Text>
                         </View>
                         <View style={styles.info}>
-                            <Text style={dark ? {fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500",color:"white"}:{fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500"}}>kssar hellel,</Text>
+                            <Text style={context.darkMode ? {fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500",color:"white"}:{fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500"}}>kssar hellel,</Text>
                         </View>
                         <View style={styles.info}>
-                            <Text style={dark ? {fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500",color:"white"} : {fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500"}}>Monastir</Text>
+                            <Text style={context.darkMode ? {fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500",color:"white"} : {fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500"}}>Monastir</Text>
                         </View>
                        
                     </View>
                     <View style={styles.orderPaymentInfo}>
 
                     <View style={styles.info}>
-                            <Text style={dark ? {fontSize:Dimensions.get("screen").width*0.035,fontWeight:"500",color:"white"} : {fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500"}}>phone number : 28896426</Text>
+                            <Text style={context.darkMode ? {fontSize:Dimensions.get("screen").width*0.035,fontWeight:"500",color:"white"} : {fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500"}}>phone number : 28896426</Text>
                         </View>
                         <View style={styles.info}>
                             <Text style={{fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500",color: "#2474F1"}}>payment method</Text>
                         </View>
                         <View style={styles.info}>
-                            <Text style={dark ? {fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500",color:"white"} : {fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500"}}>cash on delivery</Text>
+                            <Text style={context.darkMode ? {fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500",color:"white"} : {fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500"}}>cash on delivery</Text>
                         </View>
 
                     </View>
@@ -73,20 +77,20 @@ export default function orderReview(props) {
                     data={orderReview.type=="food" ? orderReview.foodItems : orderReview.items}
                     renderItem={
                         ({ item }) =>
-                        <View style={dark ? styles.productContainerDark : styles.productContainer}>
+                        <View style={context.darkMode ? styles.productContainerDark : styles.productContainer}>
                         <View style={styles.productImageContainer}>
                             <Image style={styles.productImage} source={item.product.mainImage} />
 
                         </View>
                         <View style={styles.productInfoContainer}>
                             <View style={{ width: "92%", height: "20%", marginVertical: 4, alignSelf: "center" }}>
-                                <Text style={dark ? { fontSize: 17, fontWeight: "700" ,color:"white"}:{ fontSize: 17, fontWeight: "700" }}>{item.product.name}</Text>
+                                <Text style={context.darkMode ? { fontSize: 17, fontWeight: "700" ,color:"white"}:{ fontSize: 17, fontWeight: "700" }}>{item.product.name}</Text>
                             </View>
                             <View style={{ width: "92%", height: "10%", marginVertical: 4, alignSelf: "center" }}>
-                                <Text style={dark ? { fontSize: 20, fontWeight: "700",color:"white" } :{ fontSize: 20, fontWeight: "700" }}>{item.product.basePrice} TND</Text>
+                                <Text style={context.darkMode ? { fontSize: 20, fontWeight: "700",color:"white" } :{ fontSize: 20, fontWeight: "700" }}>{item.product.basePrice} TND</Text>
                             </View>
                             <View style={{ width: "92%", height: "10%", marginVertical: 4, alignSelf: "center" }}>
-                                <Text style={dark ? { fontSize: 20, fontWeight: "700",color:"white" } :{ fontSize: 20, fontWeight: "700" }}>{item.product.basePrice} TND</Text>
+                                <Text style={context.darkMode ? { fontSize: 20, fontWeight: "700",color:"white" } :{ fontSize: 20, fontWeight: "700" }}>{item.product.basePrice} TND</Text>
                             </View>
                             <View style={{ width: "92%", height: "15%", marginVertical: 4, alignSelf: "center" }}>
                                 {/* <Text style={dark ?{ fontSize: 14 ,color:"white"} :{ fontSize: 14 }}>{item.color}</Text>
@@ -96,7 +100,7 @@ export default function orderReview(props) {
                   
 
                                 <View style={{ width: "30%", height: "100%", marginHorizontal: 6, borderWidth: 3, borderColor: "#bfbfbf", borderRadius: 12, alignItems: "center", justifyContent: "center", flexDirection: "column" }}>
-                                    <Text  style={dark ? { fontSize: 20, fontWeight: "400" ,color:"white"}:{ fontSize: 20, fontWeight: "400" }}>{item.quantity}</Text>
+                                    <Text  style={context.darkMode ? { fontSize: 20, fontWeight: "400" ,color:"white"}:{ fontSize: 20, fontWeight: "400" }}>{item.quantity}</Text>
                                 </View>
 
                             </View>
@@ -111,7 +115,7 @@ export default function orderReview(props) {
             <View style={styles.finalSteps}>
             <View style={styles.orderOverview}>
                     <View >
-                        <Text style={dark ? { fontSize: 20,fontWeight: "600",color:"white"}: { fontSize: 20,fontWeight: "600"}}>Order Summary</Text>
+                        <Text style={context.darkMode ? { fontSize: 20,fontWeight: "600",color:"white"}: { fontSize: 20,fontWeight: "600"}}>Order Summary</Text>
                     </View>
                   
                 </View>
@@ -121,23 +125,23 @@ export default function orderReview(props) {
                         <Text style={dark ?{ fontSize: 20,color:"white"}:{ fontSize: 20}}>Items Total</Text>
                     </View>
                     <View >
-                        <Text style={dark ? { fontSize: 20 ,color:"white"}: { fontSize: 20 }}>{orderReview.price} TND</Text>
+                        <Text style={context.darkMode ? { fontSize: 20 ,color:"white"}: { fontSize: 20 }}>{orderReview.price} TND</Text>
                     </View>
                 </View>
                 <View style={styles.orderOverview}>
                     <View >
-                        <Text style={dark ? { fontSize: 20 ,color:"white"} :{ fontSize: 20}}>Delivery</Text>
+                        <Text style={context.darkMode ? { fontSize: 20 ,color:"white"} :{ fontSize: 20}}>Delivery</Text>
                     </View>
                     <View >
-                        <Text style={dark ? { fontSize: 20,color:"white" }:{ fontSize: 20 }}>129,99TND</Text>
+                        <Text style={context.darkMode ? { fontSize: 20,color:"white" }:{ fontSize: 20 }}>{orderReview.price}</Text>
                     </View>
                 </View>
                 <View style={styles.orderOverview}>
                     <View >
-                        <Text style={dark ? { fontSize: 20, fontWeight: "600" ,color:"white"}:{ fontSize: 20, fontWeight: "600" }}>Total</Text>
+                        <Text style={context.darkMode ? { fontSize: 20, fontWeight: "600" ,color:"white"}:{ fontSize: 20, fontWeight: "600" }}>Total</Text>
                     </View>
                     <View >
-                        <Text style={dark ? { fontSize: 20, fontWeight: "600",color:"white" } : {  fontSize: 20, fontWeight: "600" }}>129,99TND</Text>
+                        <Text style={context.darkMode ? { fontSize: 20, fontWeight: "600",color:"white" } : {  fontSize: 20, fontWeight: "600" }}>129,99TND</Text>
                     </View>
                 </View>
 

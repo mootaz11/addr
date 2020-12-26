@@ -15,7 +15,7 @@ const FeedbackListItem = (props) => {
             </View>
             <View style={styles.paragraphContainer}>
                 <View style={styles.messageContainer}>
-                    <Text style={{fontSize: 11.5}}>{props.message} </Text>
+                    <Text style={props.darkMode ? {fontSize: 11.5,color:"white"}:{fontSize: 11.5,color:"black"}}>{props.message} </Text>
                 </View>
                 <View style={styles.favRateContainer}>
                     <StarRating
@@ -24,7 +24,8 @@ const FeedbackListItem = (props) => {
                     maxStars={5}
                     rating={props.rate}
                     starSize={20}
-                    />
+                    fullStarColor={props.darkMode ? "white":"black"}
+/>
                 </View>
             </View>
         </View>

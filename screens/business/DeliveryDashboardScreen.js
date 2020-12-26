@@ -12,7 +12,6 @@ import { SafeAreaView } from 'react-native';
 
 
 const DeliveryDashboardScreen = (props) => {
-    const [dark, setDark] = useState(false);
     const context = useContext(AuthContext);
     const [dashboard,setDashboard]= useState(null);
 
@@ -47,7 +46,8 @@ const DeliveryDashboardScreen = (props) => {
         if(itemData.item.partner){
         return (
             <MarkListItem
-                index={itemData.index + 1}
+            darkMode={context.darkMode}
+            index={itemData.index + 1}
                 image={{uri:itemData.item.partner.profileImage}}
                 name={itemData.item.partner.partnerName}
                 price={itemData.item.price+"DT"}
@@ -61,9 +61,9 @@ const DeliveryDashboardScreen = (props) => {
     };
 
     const renderListFeedbacksItem = (itemData) => {
-        console.log(itemData.item);
         return (
             <FeedbackListItem
+                darkMode={context.darkMode}
                 image={{uri:itemData.item.user.photo}}
                 message={itemData.item.comment}
                 rate={itemData.item.score}
@@ -76,19 +76,19 @@ const DeliveryDashboardScreen = (props) => {
 
     
     return (
-        <SafeAreaView style={{flex:1,marginTop:10}}>
+        <SafeAreaView style={{flex:1}}>
 
-<View style={styles.mainContainer}>
+<View style={context.darkMode ? styles.mainContainerDark : styles.mainContainer}>
 
-            <View style={dark ? styles.menuDark : styles.menu}>
+            <View style={context.darkMode ?styles.menuDark : styles.menu}>
                 <View style={styles.leftArrowContainer}>
                     <TouchableOpacity style={styles.leftArrow}>
-                        <Icon color={dark ? "white" : "black"} style={{ padding: 4, alignSelf: "center", justifyContent: "center" }} name="menu" onPress={openDrawer} />
+                        <Icon color={context.darkMode ?"white" : "black"} style={{ padding: 4, alignSelf: "center", justifyContent: "center" }} name="menu" onPress={openDrawer} />
 
                     </TouchableOpacity>
                 </View>
                 <View style={styles.titleContainer}>
-                    <Text style={dark ? styles.TitleDark : styles.Title}>Deliverer Dashboard</Text>
+                    <Text style={context.darkMode ?styles.TitleDark : styles.Title}>Deliverer Dashboard</Text>
                 </View>
 
 
@@ -115,7 +115,7 @@ const DeliveryDashboardScreen = (props) => {
                 </LinearGradient>
                 <View style={styles.part2}>
                     <View style={styles.cardContainer}>
-                        <Text>Delivery Fees</Text>
+                        <Text style={context.darkMode ?{color:"white"}:{color:"black"}}>Delivery Fees</Text>
                         <LinearGradient
                             colors={['#256ced', '#564fc6']}
                             start={[0, 0]}
@@ -126,7 +126,7 @@ const DeliveryDashboardScreen = (props) => {
                         </LinearGradient>
                     </View>
                     <View style={styles.cardContainer}>
-                        <Text>Business Money</Text>
+                    <Text style={context.darkMode ?{color:"white"}:{color:"black"}}>Business Money</Text>
                         <LinearGradient
                             colors={['#6454c3', '#9440a1']}
                             start={[0, 0]}
@@ -139,7 +139,7 @@ const DeliveryDashboardScreen = (props) => {
                 </View>
                 <View style={styles.part2}>
                     <View style={styles.cardContainer}>
-                        <Text>Total</Text>
+                    <Text style={context.darkMode ?{color:"white"}:{color:"black"}}>Total</Text>
                         <LinearGradient
                             colors={['#376de5', '#654fbd']}
                             start={[0, 0]}
@@ -152,7 +152,7 @@ const DeliveryDashboardScreen = (props) => {
                     <View style={styles.cardContainer}>
                     </View>
                 </View>
-                <View style={styles.part4}>
+                <View style={context.darkMode ? styles.part4Dark :styles.part4}>
                     <View style={styles.wheelImageContainer}>
                         <Image
                             style={styles.wheelImage}
@@ -160,11 +160,11 @@ const DeliveryDashboardScreen = (props) => {
                         />
                     </View>
                     <View style={styles.drivingTotalContainer}>
-                        <Text style={{ fontWeight: 'bold' }}>Driving Totals</Text>
+                        <Text style={context.darkMode ? {fontWeight:"bold",color:"white"}:{ fontWeight: 'bold',color:"black" }}>Driving Totals</Text>
                     </View>
                     <View style={styles.completedDeliveryContainer}>
-                        <Text>{dashboard.completedOrdersCount}</Text>
-                        <Text style={styles.smallText}>completed Delivery</Text>
+                        <Text style={context.darkMode?{color:"white"}:{color:"black"}}>{dashboard.completedOrdersCount}</Text>
+                        <Text style={context.darkMode ? styles.smallTextDark:styles.smallText}>completed Delivery</Text>
                     </View>
                     {/* <View style={styles.completedDeliveryContainer}>
                         <Text>9,074.63</Text>
@@ -174,7 +174,7 @@ const DeliveryDashboardScreen = (props) => {
             </View>
             <View
                 style={{
-                    borderBottomColor: '#d8d8d8',
+                    borderBottomColor:context.darkMode ? "#292929": '#d8d8d8',
                     borderBottomWidth: 1,
                     marginLeft: 5,
                     marginRight: 5,
@@ -185,11 +185,11 @@ const DeliveryDashboardScreen = (props) => {
        
             {
                dashboard && dashboard.unCompletedOrders  &&
-            <View style={styles.partTwo}>
+            <View style={context.darkMode ? styles.partTwoDark: styles.partTwo}>
             
                
                 <View style={styles.titreContainer}>
-                    <Text style={styles.titreStyle}>Money for return </Text>
+                    <Text style={context.darkMode ? styles.titreStyleDark:styles.titreStyle}>Money for return </Text>
                 </View>
                 <View style={styles.listContainer}>
                     <FlatList
@@ -205,7 +205,7 @@ const DeliveryDashboardScreen = (props) => {
             }
     <View
                 style={{
-                    borderBottomColor: '#d8d8d8',
+                    borderBottomColor:context.darkMode ? "#292929": '#d8d8d8',
                     borderBottomWidth: 1,
                     marginLeft: 5,
                     marginRight: 5,
@@ -215,9 +215,9 @@ const DeliveryDashboardScreen = (props) => {
             />
     {
      dashboard.feedbacks&& dashboard.feedbacks.length>0 &&
-     <View style={styles.partThree}>
+     <View style={context.darkMode ?styles.partThreeDark : styles.partThree}>
                 <View style={styles.feedbacksTitreContainer}>
-                    <Text style={styles.titreStyle}>Feedbacks</Text>
+                    <Text style={context.darkMode ? styles.titreStyleDark: styles.titreStyle}>Feedbacks</Text>
                 </View>
                 <View style={styles.listFeedbacksContainer}>
                     <FlatList
@@ -244,6 +244,10 @@ const styles = StyleSheet.create({
     mainContainer: {
         backgroundColor: Colors.background,
         flex: 1,
+    },
+    mainContainerDark:{
+        backgroundColor: "#121212",
+        flex:1
     },
     partOne: {
         //backgroundColor:'blue',
@@ -309,12 +313,15 @@ const styles = StyleSheet.create({
         height: "8%",
         backgroundColor: "white",
         flexDirection: "row",
+        marginTop:10
     },
+    
     menuDark: {
         width: "100%",
         height: "8%",
         backgroundColor: "#121212",
         flexDirection: "row",
+        marginTop:10
 
     },
     leftArrowContainer: {
@@ -372,10 +379,20 @@ const styles = StyleSheet.create({
 
     part4: {
         backgroundColor: '#e6e6e6',
-        flex: 0.5,
+        flex: 0.7,
         width: '92%',
         flexDirection: 'row',
-        marginVertical: 10
+        marginVertical: 10,
+        borderRadius:8
+    },
+    part4Dark:{
+        backgroundColor: '#292929' ,
+        flex: 0.7,
+        width: '92%',
+        flexDirection: 'row',
+        marginVertical: 10,
+        borderRadius:8
+
     },
     wheelImageContainer: {
         //backgroundColor:'orange',
@@ -403,17 +420,27 @@ const styles = StyleSheet.create({
     },
     smallText: {
         fontSize: 10,
-        fontWeight: 'bold'
+        fontWeight: 'bold',
+        color:"black"
     },
-
-
+    smallTextDark:{
+        fontSize: 10,
+        fontWeight: 'bold',
+        color:"white"
+    },
 
     partTwo: {
         backgroundColor: 'white',
         flex: 1.4,
         borderRadius: 25,
     },
+    partTwoDark:{
+        backgroundColor: '#292929' ,
+        flex: 1.4,
+        borderRadius: 25,
 
+    }
+,
     titreContainer: {
         flex: 1,
         //width:'90%',
@@ -422,7 +449,16 @@ const styles = StyleSheet.create({
     titreStyle: {
         fontWeight: 'bold',
         fontSize: 16,
+        marginVertical:1
         //fontStyle:'italic'
+    },
+    titreStyleDark:{
+        marginVertical:1,
+        fontWeight: 'bold',
+        fontSize: 16,
+        color:"white"
+        //fontStyle:'italic'
+
     },
     listContainer: {
         //backgroundColor:'purple',
@@ -434,6 +470,11 @@ const styles = StyleSheet.create({
 
     partThree: {
         backgroundColor: 'white',
+        flex: 2,
+        borderRadius: 20
+    },
+    partThreeDark:{
+        backgroundColor: '#292929',
         flex: 2,
         borderRadius: 20
     },

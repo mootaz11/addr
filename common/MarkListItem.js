@@ -10,7 +10,7 @@ const MarkListItem = (props) => {
         return (
             <View style={styles.itemContainer}>
                 <View style={styles.indexContainer}>
-                    <Text style={{fontWeight: 'bold', fontSize:18}}>{props.index}</Text>
+                    <Text style={ props.darkMode ?{fontWeight: 'bold',color:"white" ,fontSize:18}: {fontWeight: 'bold', fontSize:18}}>{props.index}</Text>
                 </View>
                 <View style={styles.imageContainer}>
                 <Image 
@@ -19,8 +19,8 @@ const MarkListItem = (props) => {
                     />
                 </View>
                 <View style={styles.paragraphContainer}>
-                    <Text>{props.name}</Text>
-                    <Text style={{fontWeight: 'bold', fontSize: 16}}>{props.price} TDN</Text>
+                    <Text style={props.darkMode ? {color:"white"}:{color:"black"}}>{props.name}</Text>
+                    <Text style={props.darkMode ? {fontWeight: 'bold', fontSize: 16,color:"white"}:{fontWeight: 'bold', fontSize: 16,color:"black"}}>{props.price} TDN</Text>
                 </View>
     
             </View>

@@ -1,5 +1,29 @@
 import axios from "../rest/customAxios";
 
+export const getDeliveryOptions = (partnerId)=>{
+return new Promise((resolve,reject)=>{
+    axios.post(`/orders/delivery-options/${partnerId}`).then(res=>{
+        if(res.status===200){
+            resolve(res.data.deliveryOptions);
+        }
+    }).catch(err=>{reject(err)})
+})
+}
+
+
+export const placeOrder = (_id,body)=>{
+return new Promise((resolve,reject)=>{
+    axios.patch(`/order/place-order/${_id}`,body).then(res=>{
+        if(res.status===200){
+            resolve(res.data.message);
+        }
+    })
+    .catch(err=>{reject(err)})
+})
+}
+
+
+
 
 
 export const createOrder =(order )=>{
@@ -92,6 +116,7 @@ export const   markOrderAsPrepared = (orderId)=>{
         .catch(err=>{reject(err)})
     })
 }
+
 export const   markOrderAsTaked = (orderId,partnerId)=>{
     return new Promise((resolve,reject)=>{
         axios.patch(`/order/mark-taked/${partnerId}/${orderId}`,{}).then(res=>{

@@ -5,8 +5,6 @@ import { FlatList } from 'react-native-gesture-handler';
 import AuthContext from '../navigation/AuthContext';
 import {getClientPreOrders} from '../rest/ordersApi';
 
-
-
 export default function Basket(props){
     const context = useContext(AuthContext);
     const [baskets, setBaskets] = useState([]);

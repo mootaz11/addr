@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, Image, ActivityIndicator } from 'react-native';
 import { DrawerContentScrollView, DrawerItem } from '@react-navigation/drawer';
-import { Avatar, Title, Caption, Text, TouchableRipple, Switch, Drawer, Paragraph } from 'react-native-paper';
+import {Title,Switch,Drawer} from 'react-native-paper';
 import { Icon } from 'react-native-elements'
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import AuthContext from '../navigation/AuthContext';
@@ -22,7 +22,6 @@ export default function CustomDrawer(props) {
     }
     if (context.user) {
         return (
-
             <View style={{ flex: 1, backgroundColor: "#2474F1" }}>
                 <DrawerContentScrollView {...props}>
                     <View style={styles.drawerContent}>
@@ -160,7 +159,7 @@ export default function CustomDrawer(props) {
                         labelStyle={{ color: "white" }}
 
                         label="Logout"
-                        onPress={() => { context.logoutHandler();props.navigation.navigate("Login") }}
+                        onPress={() => { context.logoutHandler(); props.navigation.navigate("Login")}}
                     />
 
                 </Drawer.Section>

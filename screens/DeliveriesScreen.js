@@ -111,12 +111,14 @@
 
      }
      return (
- <SafeAreaView style={{flex:1,marginTop:10}}>
+ <SafeAreaView style={{flex:1}}>
  <View style={context.darkMode ? styles.containerDark : styles.container}>
              <View style={context.darkMode ? styles.menuDark : styles.menu}>
                  <TouchableOpacity style={styles.leftArrowContainer}>
                      <View >
-                         <Icon color={context.darkMode ? "white":"#2474F1"} style={{ flex: 1, padding: 0 ,justifyContent:"center",marginTop:10}} name="menu" onPress={openDrawer} />
+                     <TouchableOpacity onPress={openDrawer} style={{height:30,width:30}}>
+                        <Image source={context.darkMode ?  require("../assets/menu_dark.png"):require("../assets/menu.png")} style={{height:"100%",width:"100%",resizeMode:"cover"}}/>
+                        </TouchableOpacity>
                      </View>
                  </TouchableOpacity>
                  <View style={styles.titleContainer}>
@@ -295,6 +297,7 @@ const styles = StyleSheet.create({
         flexDirection: "column",
     },
     menu: {
+        marginTop:10,
         width: "100%",
         height: "8%",
         backgroundColor: "white",
@@ -302,6 +305,7 @@ const styles = StyleSheet.create({
         marginBottom: 8
     },
     menuDark:{
+        marginTop:10,
         width: "100%",
         height: "8%",
         backgroundColor: "#121212",
