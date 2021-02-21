@@ -1,14 +1,11 @@
 import React, { useContext, useState,useEffect } from 'react'
-import { View, Text, StyleSheet, Dimensions, Image, TouchableOpacity, SafeAreaView, Modal, TextInput } from 'react-native'
-import { FlatList } from 'react-native-gesture-handler';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import { View, Text, StyleSheet, Dimensions, Image, TouchableOpacity,TouchableHighlight, SafeAreaView, Modal,Alert, TextInput } from 'react-native'
 
 
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import * as Permissions from 'expo-permissions';
-import { Icon } from 'react-native-elements';
-import { addPartnerLocalisation } from '../../rest/partnerApi';
+import { addPartnerLocalisation, deletePartnerLocation } from '../../rest/partnerApi';
 import AuthContext from '../../navigation/AuthContext';
 
 
@@ -19,10 +16,12 @@ export default function addLocation(props) {
     const [openModal, setOpenModal] = useState(false)
     const [address, setAddress] = useState("")
     const [partnerLocations, setPartnerLocations] = useState([]);
+    const [selectedLocation,setSelectedLocation]=useState();
+
+
     
     useEffect(() => {
-        // setPartnerLocations(context.partner.localisations);
-
+         setPartnerLocations(context.partner.localisations);
         return () => {
         }
     }, [])
@@ -39,8 +38,8 @@ export default function addLocation(props) {
          const _location =await Location.getCurrentPositionAsync({});
 
          const location= {
-                 latitude:_location.coords.latitude,
-                  longitude:_location.coords.longitude  
+                 lat:_location.coords.latitude,
+                  lng:_location.coords.longitude  
          }
          addPartnerLocalisation(context.partner._id, location).then(_localisation => {
             setPartnerLocations(partnerLocations => [...partnerLocations, _localisation]);
@@ -49,11 +48,26 @@ export default function addLocation(props) {
 }
     const addNewLocationByMapHandler = (evt) => {
         const localisation = evt.nativeEvent.coordinate;
-        addPartnerLocalisation(context.partner._id, localisation).then(_localisation => {
+        addPartnerLocalisation(context.partner._id, {lng:localisation.longitude,lat:localisation.latitude}).then(_localisation => {
             setPartnerLocations(partnerLocations => [...partnerLocations, _localisation]);
         })
     }
-    const getPosition = () => { }
+    const getPosition = () => {}
+
+    const deleteLocation =()=>{ 
+        deletePartnerLocation(context.partner._id,selectedLocation).then(message=>{
+            setOpenModal(!openModal)
+            setPartnerLocations(partnerLocations.filter(location=>location._id!=selectedLocation._id))
+            Alert.alert('',"localisation deleted ! ", [{ text: "OK" }],{cancelable:false})
+        }).catch(err=>{
+            alert("operation failed")
+        })
+
+    }
+    const selectLocation=(location)=>{
+        setSelectedLocation(location);
+        setOpenModal(!openModal)
+    }
     return (
         <SafeAreaView style={{ flex: 1 }}>
             <View style={dark ? styles.containerDark : styles.container}>
@@ -76,10 +90,13 @@ export default function addLocation(props) {
                         initialRegion={{
                             latitude: 35.7643,
                             longitude: 10.8113
+                            ,latitudeDelta: 0.5,
+                            longitudeDelta: 0.5
+                  
 
 
                         }}
-                        on
+                        
                         onPress={(evt) => { addNewLocationByMapHandler(evt) }}
                         style={{ flex: 1 }}
                         customMapStyle={darkStyle}
@@ -91,22 +108,18 @@ export default function addLocation(props) {
                             && partnerLocations.map((location) => (
                                 <Marker
                                     key={location._id}
+                                    onPress={()=>{selectLocation(location)}}
                                     draggable={true}
-                                    onDragEnd={(evt) => { handleChangeAddress(evt) }}
                                     coordinate={
                                         Platform.OS == 'ios' ?
                                             {
-                                                latitude: Number(location.latitude)
-
-                                                ,
-                                                longitude: Number(location.longitude)
-
+                                                latitude: location.lat,
+                                                longitude: location.lng
                                             } :
                                             {
-                                                latitude: Number(location.latitude)
-
+                                                latitude: Number(location.lat)
                                                 ,
-                                                longitude: Number(location.longitude)
+                                                longitude: Number(location.lng)
 
                                             }
 
@@ -122,6 +135,43 @@ export default function addLocation(props) {
                         }
 
                     </MapView>
+                    <Modal
+                                        animationType="slide"
+                                        transparent={true}
+                                        visible={openModal}
+                                    >
+                                        <View style={styles.centeredViewModal}>
+                                            <View style={styles.modalContainer}>
+                                                <View style={styles.variantInputTitleContainer}>
+                                                    <Text style={{textAlign:"center"}}>location selected : </Text>
+                                                </View>
+                                                <View style={{flexDirection:"column"}}>
+                                                    <Text style={{textAlign:"center",marginVertical:5}}>Longitude : {selectedLocation ? selectedLocation.lng:""}</Text>
+                                                    <Text style={{textAlign:"center",marginVertical:5}}>Latitude : {selectedLocation ?selectedLocation.lat:""}</Text>
+
+                                                </View>
+                                                <View style={styles.modalButtonsContainer}>
+
+                                                    <TouchableHighlight
+                                                        style={{ ...styles.modalButton, backgroundColor: '#2196F3' }}
+                                                        onPress={deleteLocation}>
+                                                        <Text style={{color:"white"}}>delete location</Text>
+                                                    </TouchableHighlight>
+
+                                                    <TouchableHighlight
+                                                        style={{ ...styles.openButton, backgroundColor: '#fa382a' }}
+                                                        onPress={() => {
+                                                           setOpenModal(!openModal)
+                                                        }}>
+                                                        <Text style={{color:"white"}}>Cancel</Text>
+                                                    </TouchableHighlight>
+
+                                                </View>
+
+                                            </View>
+                                        </View>
+
+                                    </Modal>
                     <TouchableOpacity style={styles.addLocation} onPress={addNewLocationHandler}>
                         <View style={{
                             flexDirection: "row", justifyContent: "space-between", alignItems: "center"
@@ -148,6 +198,42 @@ export default function addLocation(props) {
 }
 
 const styles = StyleSheet.create({
+    centeredViewModal: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'center'
+    },
+    modalButton: {
+        borderRadius: Dimensions.get('window').height * 0.0255, //20
+        padding: Dimensions.get('window').height * 0.013, //10
+        marginVertical: Dimensions.get('window').height * 0.013,//10
+        elevation: 2,
+        flexDirection:"column",
+        justifyContent:"center",
+        alignItems:"center"
+    },
+    openButton: {
+        borderRadius: Dimensions.get('window').height * 0.0255,
+        padding: Dimensions.get('window').height * 0.013,
+        elevation: 2,
+        flexDirection:"column",
+        justifyContent:"center",
+        alignItems:"center"
+    },
+    modalContainer: {
+        margin: Dimensions.get('window').height * 0.0255, //20
+        backgroundColor: 'white',
+        borderRadius: Dimensions.get('window').height * 0.0255, //20
+        padding: Dimensions.get('window').height * 0.0256, //20
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+    },
     addLocation: {
         width: "50%",
         height: 40,
