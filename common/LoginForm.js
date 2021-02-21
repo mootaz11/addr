@@ -68,11 +68,11 @@ const LoginForm = (props) => {
         Keyboard.dismiss();
         login(formState.inputValues).then(res=>{
             Alert.alert('', 'Login Done!', [{text: 'Okay'}]);
-            context.LoginHandler({user:res.data.user,token:{accessToken:res.data.accessToken,refreshToken:res.data.refreshToken}})
+            context.LoginHandler({user:res.data.user,token:res.data.accessToken})
                 }).catch(err=>{
                     
-                    alert("failed")
-                  console.log(err.message)})         
+                    alert("Login Failed ! wrong credentials")
+                  })         
       };
 
     return(
@@ -105,19 +105,17 @@ const LoginForm = (props) => {
             onInputChange={inputChangeHandler}
             />
         </View>
-        <View style={styles.forgetPass}>
-            <Text style={styles.forgetPassText}>Forget your password</Text>
-        </View>
+        
     </ScrollView>
     </View>
 
     {
         Platform.OS === 'ios' ? 
-        <View style={{...styles.submitLoginButtonContainer,...{bottom: '43%'}}}>
+        <View style={{...styles.submitLoginButtonContainer,...{bottom: '46%'}}}>
             <SubmitButton onPress={loginHandler}>Get started</SubmitButton>
          </View>
         :  
-        <View style={{...styles.submitLoginButtonContainer,...{bottom:  props.isKeyboardVisible ? '17%' : '43%'}}}>
+        <View style={{...styles.submitLoginButtonContainer,...{bottom:  props.isKeyboardVisible ? '1%' : '44%'}}}>
             <SubmitButton onPress={loginHandler}>Get started</SubmitButton>
         </View>
     }

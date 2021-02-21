@@ -114,15 +114,13 @@
  <SafeAreaView style={{flex:1}}>
  <View style={context.darkMode ? styles.containerDark : styles.container}>
              <View style={context.darkMode ? styles.menuDark : styles.menu}>
-                 <TouchableOpacity style={styles.leftArrowContainer}>
-                     <View >
+                     <View style={styles.leftArrowContainer} >
                      <TouchableOpacity onPress={openDrawer} style={{height:30,width:30}}>
                         <Image source={context.darkMode ?  require("../assets/menu_dark.png"):require("../assets/menu.png")} style={{height:"100%",width:"100%",resizeMode:"cover"}}/>
                         </TouchableOpacity>
                      </View>
-                 </TouchableOpacity>
                  <View style={styles.titleContainer}>
-                     <Text style={context.darkMode ? styles.TitleDark : styles.Title}>Commande</Text>
+                     <Text style={context.darkMode ? styles.TitleDark : styles.Title}>Deliveries</Text>
                  </View>
  
              </View>
@@ -153,7 +151,7 @@
                      <TouchableOpacity disabled={!orderDelivered}>
                          <View style={context.darkMode ? styles.deliveryDark :  styles.delivery} >
                              <View style={styles.clientImageContainer}>
-                                 <Image style={{ width: "80%", height: "80%", resizeMode: "contain" }} source={require("../assets/mootaz.jpg")} />
+                                 <Image style={{ width: "80%", height: "80%", resizeMode: "contain" }} source={require("../assets/user_image.png")} />
                              </View>
                              <View style={styles.deliveryInfo}>
                                  <Text style={context.darkMode ? styles.infoDark : styles.info}>Nom de client: {item.client.lastName+" "+item.client.firstName} </Text>

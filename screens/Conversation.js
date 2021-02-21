@@ -26,25 +26,29 @@ export default function Conversation(props) {
     useEffect(() => {
         let mounted=true;
         if(mounted){
-        setConversation(props.route.params.conversation);    
-        let _conversations = [...context.conversations];
-        
+        setConversation(props.route.params.conversation);              
+        let _conversations = [...context.conversations];                
         const index = _conversations.findIndex(conv => { return conv._id == props.route.params.conversation._id });
-        const index_first=  _conversations.findIndex(conv => { return conv._id == conversationId });
+        
+        let index_first=-1;
+        if(conversationId.length>0){
+             index_first=  _conversations.findIndex(conv => { return conv._id == conversationId });
+        }
+
         if (index >= 0 ) {
-            console.log(index);
             let _conversation = _conversations[index];
+            (_conversation.messages)
             setMessages(_conversation.messages);
             setConversation(_conversation);
         }
-        if(index_first>=0){
+
+        if(index_first>=0 && index==-1){
             let _conversation = _conversations[index_first];
             setMessages(_conversation.messages);
             setConversation(_conversation);
-            setConversationId("");
         }
     }
-        return () =>{ mounted=false;setMessages([]);setConversation(null)}
+        return () =>{ mounted=false;setMessages([]);setConversation(null);}
     }, [context.conversations,props.route.params])
 
     const sendQrCode = () => {
@@ -54,17 +58,18 @@ export default function Conversation(props) {
                 title: conversation.title,
                 image: conversation.image,
                 type: conversation.type,
-                content: "mon code est   :" + context.user.locationCode,
+                content: "mon code est   :" + context.user.location.locationCode,
             }
             context.startNewConversation(data).then(conversation => {
                 setConversationId(conversation._id)
+                context.handleConversation(conversation);
             }).catch(err => { alert(err) })
         }
         else {
             const data = {
                 conversationId: conversation._id,
-                content: "mon code est   :" + context.user.locationCode,
-                code: context.user.locationCode
+                content: "mon code est   :" + context.user.location.locationCode,
+                code: context.user.location.locationCode
             }
             context.send_message(data);
         }
@@ -73,6 +78,7 @@ export default function Conversation(props) {
     const sendMessage = () => {
         if (messages.length == 0)
         {
+            (" no messages ")
             const data = {
                 partner:conversation.partner?conversation.partner._id:null,
                 users: conversation.users,
@@ -84,7 +90,7 @@ export default function Conversation(props) {
             context.startNewConversation(data).then(conversation => {
                 setConversationId(conversation._id)
                 context.handleConversation(conversation);
-            }).catch(err => { console.log(err) })
+            }).catch(err => { (err) })
         }
         else {
             const data = {
@@ -99,21 +105,28 @@ export default function Conversation(props) {
     }
 
     const goBack = () => {
-        //console.log (Object.keys(props.route.params));
-        props.navigation.goBack()
+        // (Object.keys(props.route.params));
+        setConversationId("");
+        props.navigation.goBack();
     }
     return (
         <View style={context.darkMode ?styles.containerDark : styles.container}>
             <View style={styles.menu}>
                 <FontAwesome color={"white"} style={{ padding: 0, fontSize: 30 }} name="arrow-left" onPress={goBack} />
-                <Image style={styles.friendImage} source={{uri:props.route.params.conversation.image}} />
+                <Image style={styles.friendImage} source={
+                       props.route.params.conversation.type=="personal"?
+
+                       props.route.params.conversation.users[props.route.params.conversation.users.findIndex(u=>{return u._id != context.user._id})].photo ? 
+                       
+                       {uri:props.route.params.conversation.users[props.route.params.conversation.users.findIndex(u=>{return u._id != context.user._id})].photo} :{uri:props.route.params.conversation.image}:
+                           props.route.params.conversation.image ?  {uri:props.route.params.conversation.image} : require("../assets/user_image.png")
+                } />
                 <Text style={styles.Title}>{
                 props.route.params.conversation.type == "personal" ?
                     props.route.params.conversation.other ? 
-                            props.route.params.conversation.other : 
-                                props.route.params.conversation.users.filter(user => user._id != context.user._id)[0].firstName + " " + props.route.params.conversation.users.filter(user => user._id != context.user._id)[0].lastName : 
-                                    !context.user.isPartner ? props.route.params.conversation.title:
-                                       props.route.params.conversation.users.filter(user => user != context.user._id)[0].firstName+" "+props.route.params.conversation.users.filter(user => user != context.user._id)[0].lastName}</Text>
+                            props.route.params.conversation.other :props.route.params.conversation.users.filter(user => user._id != context.user._id)[0].firstName + " " + props.route.params.conversation.users.filter(user => user._id != context.user._id)[0].lastName 
+                            : 
+                         props.route.params.conversation.title? props.route.params.conversation.title :""}</Text>
             </View>
             <ScrollView  ref={scrollViewRef}
                 onContentSizeChange={() => scrollViewRef.current.scrollToEnd({ animated: true })}
@@ -154,7 +167,7 @@ export default function Conversation(props) {
                                                     }
 
                                                 </View>
-                                                <Image style={styles.FriendImage} source={{uri:conversation.users[conversation.users.findIndex(user=>{return user._id==message.sender})].photo}}/>
+                                                <Image style={styles.FriendImage} source={conversation.users[conversation.users.findIndex(user=>{return user._id==message.sender._id})].photo?{uri:conversation.users[conversation.users.findIndex(user=>{return user._id==message.sender._id})].photo}:require('../assets/user_image.png')}/>
 
                                             </View>
                                         )
@@ -286,7 +299,7 @@ const styles = StyleSheet.create({
     },
     ConversationBody: {
         width: "100%",
-        height: "72%",
+        height: "70%",
         position: "absolute",
         top: "19%",
         elevation: 10,
@@ -297,7 +310,7 @@ const styles = StyleSheet.create({
     },
     ConversationBodyDark: {
         width: "100%",
-        height: "72%",
+        height: "70%",
         position: "absolute",
         top: "19%",
         elevation: 10,
@@ -308,9 +321,9 @@ const styles = StyleSheet.create({
     },
     sendMessageContainer: {
         width: "100%",
-        height: "12%",
+        height: "13%",
         position: "absolute",
-        top: "90%",
+        top: "89%",
         elevation: 10,
         flexDirection: "row",
         alignItems: "center",
@@ -320,9 +333,9 @@ const styles = StyleSheet.create({
     },
     sendMessageContainerDark: {
         width: "100%",
-        height: "12%",
+        height: "13%",
         position: "absolute",
-        top: "90%",
+        top: "89%",
         elevation: 10,
         flexDirection: "row",
         alignItems: "center",

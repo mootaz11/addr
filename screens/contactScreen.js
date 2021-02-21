@@ -1,8 +1,9 @@
-import React, { useCallback, useReducer, useState } from 'react';
+import React, { useCallback, useReducer, useState,useContext } from 'react';
 import { SafeAreaView } from 'react-native';
 import {View , StyleSheet, Text, Image, TextInput, TouchableOpacity, KeyboardAvoidingView, ScrollView, Linking,Platform, Dimensions, Alert} from 'react-native';
 import ContactUsInput from '../common/ContactUsInput';
-
+import AuthContext from '../navigation/AuthContext';
+import {sendContact} from '../rest/userApi'
 const FORM_INPUT_UPDATE = "FORM_INPUT_UPADATE"
 
 const formReducer = (state, action) => {
@@ -29,18 +30,18 @@ const formReducer = (state, action) => {
 };
 
 const Contact = (props) => {
-    const [dark,setDark]=useState(false);
+    const context = useContext(AuthContext);    
     const [formState, dispatchFormState] = useReducer(formReducer, {
         inputValues: {
-            nom: '',
+            name: '',
             email:'',
-            objet:'',
+            subject:'',
             message:''
         },
         inputValidites:{
-            nom:false,
+            name:false,
             email:false,
-            objet:false,
+            subject:false,
             message:false
         },
         formIsValid: false
@@ -111,6 +112,10 @@ const Contact = (props) => {
             return;
         }else {
             console.log(formState.inputValues);
+            sendContact(formState.inputValues).then(message=>{
+                Alert.alert('',message, [{ text: "OK" }],{cancelable:false})
+
+            })
         }
 
     },[formState]);
@@ -120,17 +125,17 @@ const Contact = (props) => {
         <KeyboardAvoidingView
         behavior={Platform.OS == "android" ?  "height":"height"}
         style={{flex:1}}>    
-         <View style={dark ? styles.menuDark : styles.menu}>
+         <View style={context.darkMode  ? styles.menuDark :  styles.menu}>
                 <TouchableOpacity style={styles.leftArrowContainer} onPress={goBack}>
-                    <View >
-                        <Image style={styles.leftArrow} source={dark ? require("../assets/left-arrow-dark.png"):require("../assets/left-arrow.png")} />
+                    <View>
+                        <Image style={styles.leftArrow} source={ context.darkMode ? require("../assets/left-arrow-dark.png"):require("../assets/left-arrow.png")} />
                     </View>
                 </TouchableOpacity>
                 <View style={styles.titleContainer}>
-                    <Text style={dark ? styles.TitleDark : styles.Title}>Contact us</Text>
+                    <Text style={context.darkMode ?  styles.TitleDark : styles.Title}>Contact us</Text>
                 </View>
             </View>
-          <ScrollView style={styles.mainContainer}>
+          <ScrollView style={context.darkMode ? styles.mainContainerDark:styles.mainContainer}>
             <View style={styles.imageContainer}>
                 <Image
                 style={styles.image} 
@@ -138,19 +143,20 @@ const Contact = (props) => {
                 />
             </View>
             <View style={styles.formContainer}>
-                <Text style={styles.titre}>Contact us</Text>
+                <Text style={context.darkMode ? styles.titreDark: styles.titre}>Contact us</Text>
                 <View style={styles.questionContainer}>
-                <Text style={styles.questionStyle}>Vous avez des questions à propos Addressti ? </Text>
-                <Text style={styles.questionStyle}>Etes vous interessé par un partenariat avec nous ? </Text>
-                <Text style={styles.questionStyle}>Avez vous des suggestions ou avez vous simplement envie de nous dire bonjour ? </Text>
+                <Text style={context.darkMode ? styles.questionStyleDark :  styles.questionStyle}>Vous avez des questions à propos Addressti ? </Text>
+                <Text style={context.darkMode ? styles.questionStyleDark :  styles.questionStyle}>Etes vous interessé par un partenariat avec nous ? </Text>
+                <Text style={context.darkMode ? styles.questionStyleDark :  styles.questionStyle}>Avez vous des suggestions ou avez vous simplement envie de nous dire bonjour ? </Text>
                 <Text style={styles.questionStyle}>N'hésitez pas alors à nous contacter !</Text>
                 </View>
                 <ContactUsInput 
-                    id='nom'
+                    id='name'
                     placeholder="Votre nom"
                     returnKeyType="next"
                     errorText="Svp entrer un nom!"
                     required
+                    dark={context.darkMode}
                     onInputChange={inputChangeHandler}
                 />
                  <ContactUsInput
@@ -160,15 +166,17 @@ const Contact = (props) => {
                     returnKeyType="next"
                     errorText="Svp entrer un email valide !"
                     required
+                    dark={context.darkMode}
                     email
                     onInputChange={inputChangeHandler}
                 />
                  <ContactUsInput
-                    id="objet" 
-                    placeholder="Objet"
+                    id="subject" 
+                    placeholder="subject"
                     returnKeyType="next"
                     errorText="Svp entrer votre objet!"
                     required
+                    dark={context.darkMode}
                     onInputChange={inputChangeHandler}
                 />
                  <ContactUsInput 
@@ -178,6 +186,7 @@ const Contact = (props) => {
                     numberOfLines={3}
                     errorText="Svp entrer votre message!"
                     required
+                    dark={context.darkMode}
                     onInputChange={inputChangeHandler}
                 />
                 <View style={styles.buttonSubmitContainer}>
@@ -189,15 +198,15 @@ const Contact = (props) => {
             <View style={styles.footerContainer}>
                 <View style={styles.addressContainer}>
                     <View style={styles.emailTelContainer}>
-                        <Text style={styles.questionStyle}>addresti@gmail.com</Text>
-                        <Text style={styles.questionStyle}>31 19 30 50</Text>
+                        <Text style={context.darkMode ?styles.questionStyleDark:  styles.questionStyle}>addresti@gmail.com</Text>
+                        <Text style={context.darkMode ?styles.questionStyleDark: styles.questionStyle}>31 19 30 50</Text>
                     </View>
                     <View style={styles.verticleLine}>
 
                     </View>
                     <View style={styles.openTimeContainer}>
-                        <Text style={styles.questionStyle}>Monday  -  Saturday</Text>
-                        <Text style={styles.questionStyle}>9:00am   -  5:00pm</Text>
+                        <Text style={context.darkMode ?styles.questionStyleDark:  styles.questionStyle}>Monday  -  Saturday</Text>
+                        <Text style={context.darkMode ?styles.questionStyleDark:  styles.questionStyle}>9:00am   -  5:00pm</Text>
                     </View>
                 </View>
                 <View style={styles.buttonsContainer}>
@@ -288,6 +297,10 @@ const styles = StyleSheet.create({
     mainContainer:{
         flex:1
     },
+    mainContainerDark:{
+        flex:1,
+        backgroundColor: "#121212",
+    },  
     imageContainer:{
         //backgroundColor:'red',
         height:Dimensions.get('window').height * 0.285,//220
@@ -306,13 +319,21 @@ const styles = StyleSheet.create({
     titre:{
         fontSize:45,
         fontWeight: 'bold',
-    
+    },
+    titreDark : {
+        fontSize:45,
+        fontWeight:'bold',
+        color:"white"
     },
     questionContainer:{
         width:'75%'
     },
     questionStyle:{
         fontSize:13
+    },
+    questionStyleDark:{
+        fontSize:13,
+        color:"white"
     },
     inputStyle:{
         height:Dimensions.get('window').height * 0.045, //35
@@ -332,11 +353,9 @@ const styles = StyleSheet.create({
         height:'100%',
         alignItems:'center',
         justifyContent:'center',
-
         borderColor: 'black',
         borderWidth: 1,
         borderRadius:10,
-
         shadowColor: '#f3f3f3',
         shadowOffset: {width:1, height:2},
         shadowOpacity: 0.36,
@@ -348,6 +367,7 @@ const styles = StyleSheet.create({
         fontWeight: '700',
         color:'black'
     },
+     
     footerContainer:{
         //backgroundColor:'pink',
         flex:1,

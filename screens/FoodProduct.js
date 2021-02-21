@@ -3,11 +3,13 @@ import { View, Text, StyleSheet, Dimensions, Image, TouchableOpacity, SectionLis
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import {getProduct} from '../rest/productApi';
 import { createOrder } from '../rest/ordersApi';
+import AuthContext from '../navigation/AuthContext';
 
 
 
 export default function foodProduct(props) {
     const [checked, setChecked] = useState("");
+    const context = useContext(AuthContext)
     const [product, setProduct] = useState(null);
     const [choice, setChoice] = useState(null);
     const [supplements, setSupplements] = useState([]);
@@ -28,15 +30,35 @@ export default function foodProduct(props) {
                  })
                 
                 setFoodData(_food_data)
+                product.total=product.basePrice
                 setProduct(product);  
             })
             .catch(err=>{
                 alert("error while getting product")
             })
         }
+        return ()=>{setProduct(null),setChecked('');setChoice(null);setIngredients([]);setSupplements([])}
     }, [props.route.params])
 
     const addChoice = (item) =>{
+       if(choice&&choice._id==item._id){
+            let _product={...product};
+            _product.total+=item.price;
+            setProduct(_product);
+        }
+        if(choice&& choice._id!=item._id){
+            let _product={...product};
+            _product.total-=choice.price;
+            _product.total+=item.price;
+            setProduct(_product);
+
+        }
+        if(!choice){
+            let _product={...product};
+            _product.total+=item.price;
+            setProduct(_product);
+
+        }
         setChecked(item);
         setChoice(item);
     }
@@ -45,9 +67,17 @@ export default function foodProduct(props) {
         
         if (ingredients.findIndex(i => { return i._id == item._id }) >= 0) {
             setIngredients(ingredients.filter(i => i._id != item._id))
+            let _product ={...product};
+            _product.total-=item.price
+            setProduct(_product)
+
         }
         else {
             setIngredients(ingredients => [...ingredients, item])
+            let _product ={...product};
+            _product.total+=item.price
+            setProduct(_product)
+
         }
 
     }
@@ -60,9 +90,15 @@ export default function foodProduct(props) {
 
             if (supplements.findIndex(i => { return i._id == item._id }) >= 0) {
                 setSupplements(supplements.filter(i => i._id != item._id))
+                let _product ={...product};
+                _product.total-=item.price
+                setProduct(_product)
             }
             else {
                 setSupplements(supplements => [...supplements, item])
+                let _product ={...product};
+                _product.total+=item.price
+                setProduct(_product)
 
             }
 
@@ -110,20 +146,22 @@ export default function foodProduct(props) {
             alert("please choose at least one option")
         }
     }
+const checkBag =()=>{
+    props.navigation.navigate("basket",{last_screen:"product food"});
 
+}
     const goBack = () => {
         props.navigation.goBack();
     }
     if (product) {
         return (
-            <View style={styles.container}>
+            <View style={context.darkMode ? styles.containerDark : styles.container}>
                 <View style={styles.headerImageContainer}>
-
                     <Image style={styles.headerImage} source={product.mainImage ? { uri: product.mainImage } : require("../assets/mixmax.jpg")} />
                     <TouchableOpacity style={styles.leftArrow} onPress={goBack}>
                         <Image style={{ width: "100%", height: "100%" }} source={require("../assets/left-arrow-dark.png")} />
                     </TouchableOpacity>
-                    <FontAwesome color={"white"} style={{ padding: 0, fontSize: 24, position: "absolute", top: "5%", right: "2%" }} name="shopping-bag" />
+                    <FontAwesome color={"white"} style={{ padding: 0, fontSize: 24,textShadowColor:"black",textShadowOffset:{width:0.5,height:0.5},textShadowRadius:1, position: "absolute", top: "8%", right: "2%" }} name="shopping-bag" onPress={()=>{checkBag()}} />
                 </View>
                 <View style={styles.details}>
                     <Text style={{fontSize:Dimensions.get("window").width*0.1,marginLeft:10,fontWeight:'500',letterSpacing:0.1}}>{product.name[0].toUpperCase()+product.name.slice(1)}</Text>
@@ -137,52 +175,46 @@ export default function foodProduct(props) {
                                         item.title == "CHOIX" ?
                                             <TouchableOpacity key={item.choix} onPress={() => addChoice(item)}>
                                                 <View style={styles.RadioButton}>
-                                                    <Image style={{ width: "90%", height: "90%", resizeMode: "cover" }} source={item == checked ? require("../assets/button_checked.png") : require("../assets/button_unchecked.png")} />
+                                                    <Image style={{ width: "90%", height: "90%", resizeMode: "cover" }} source={item == checked ? context.darkMode ? require("../assets/radio_checked_dark.png"):  require("../assets/button_checked.png")  :context.darkMode ? require("../assets/radio_unchecked_dark.png"):  require("../assets/button_unchecked.png")} />
                                                 </View>
                                             </TouchableOpacity>
-
-
                                             :
                                             <TouchableOpacity key={item.choix} onPress={() => item.title == "INGREDIENTS" ? addIngredients(item) : addSupplements(item)}>
                                                 <View style={styles.RadioButton}>
                                                     <Image style={{ width: "90%", height: "90%", resizeMode: "cover" }} source={item.title == "INGREDIENTS" ? ingredients.findIndex(i => { return i == item }) >= 0 ? require("../assets/checkbox_checked.png") : require("../assets/checkbox_unchecked.png") : supplements.findIndex(i => { return i == item }) >= 0 ? require("../assets/checkbox_checked.png") : require("../assets/checkbox_unchecked.png")} />
                                                 </View>
-                                            </TouchableOpacity>
+                                            </TouchableOpacity> 
 
                                     }
 
-                                    <Text style={{ fontSize: 17 }}>{item.choix}</Text>
+                                    <Text style={context.darkMode ?{ fontSize: 17 ,color:"white"} : { fontSize: 17,color:"black" }}>{item.choix}</Text>
 
                                 </View >
-                                <Text style={{ fontSize: 17 }}>{item.price}00</Text>
+                                <Text style={context.darkMode ?{ fontSize: 17 ,color:"white"} : { fontSize: 17 }}>{item.price} dt</Text>
 
                             </View>}
                         renderSectionHeader={({ section: { title } }) => (
-                            <View style={styles.headerSection}>
-                                <Text style={styles.sectionHeaderTitle}>{title}</Text>
+                            <View style={context.darkMode ? styles.headerSectionDark : styles.headerSection}>
+                                <Text style={context.darkMode ? styles.sectionHeaderTitleDark : styles.sectionHeaderTitle}>{title}</Text>
                                 {
                                     title === "SUPPLEMENTS" ?
-                                        <Text style={{ fontSize: 15, fontWeight: "700", color: "white", backgroundColor: "#787878" }}>MAX 16</Text> :
+                                        <Text style={context.darkMode ? { fontSize: 15, fontWeight: "700", color: "white", backgroundColor: "#787878" }:{ fontSize: 15, fontWeight: "700", color: "white", backgroundColor: "#787878" }}>MAX 16</Text> :
                                         title === "CHOIX" ?
-                                            <Text style={{ fontSize: 15, fontWeight: "700", color: "white", backgroundColor: "#787878" }}>Obligatoire</Text> :
+                                            <Text style={context.darkMode ?{ fontSize: 15, fontWeight: "700", color: "white", backgroundColor: "#404040" }: { fontSize: 15, fontWeight: "700", color: "white", backgroundColor: "#787878" }}>Obligatoire</Text> :
                                             null
-
                                 }
                             </View>
-
                         )}
                         keyExtractor={(item, index) => item + index}
-
                     />
                 </View>
                 <View style={styles.addProductContainer}>
-
                     <View style={styles.cost}>
                         <View >
-                            <Text style={{ fontSize: 20, fontWeight: "600" }}>Cost</Text>
+                            <Text style={context.darkMode ? { fontSize: 20, fontWeight: "600",color:"white" }:{ fontSize: 20, fontWeight: "600" }}>Cost</Text>
                         </View>
                         <View >
-                            <Text style={{ fontSize: 20, fontWeight: "600" }}>129,99TND</Text>
+                            <Text style={context.darkMoZde ? { fontSize: 20, fontWeight: "600" ,color:"white"}:{ fontSize: 20, fontWeight: "600" }}>{product.total} DT</Text>
                         </View>
                     </View>
 
@@ -207,7 +239,7 @@ export default function foodProduct(props) {
     }
     else {
         return (<View style={{ flex: 1, justifyContent: "center", flexDirection: "column", alignItems: "center" }}>
-            <ActivityIndicator size="large" />
+            <ActivityIndicator size="large" color={"#2474F1"} />
         </View>)
     }
 
@@ -271,6 +303,11 @@ const styles = StyleSheet.create({
         fontSize: 15,
         fontWeight: "700"
     },
+    sectionHeaderTitleDark:{
+        color: "white",
+        fontSize: 15,
+        fontWeight: "700"
+    },
     headerSection: {
         height: 30,
         width: "90%",
@@ -279,6 +316,16 @@ const styles = StyleSheet.create({
         padding: 3,
         flexDirection: "row",
         justifyContent: "space-between"
+    },
+    headerSectionDark:{
+        height: 30,
+        width: "90%",
+        backgroundColor: "#292929",
+        alignSelf: "center",
+        padding: 3,
+        flexDirection: "row",
+        justifyContent: "space-between"
+
     },
     details: {
         width: "100%",
@@ -293,7 +340,9 @@ const styles = StyleSheet.create({
         height: Dimensions.get("window").height,
         width: Dimensions.get("window").width,
     },
+    
     containerDark: {
+        backgroundColor: "#121212",
         flex: 1,
         flexDirection: "column",
         height: Dimensions.get("window").height,
@@ -305,7 +354,7 @@ const styles = StyleSheet.create({
         width: 30,
         height: 30,
         position: "absolute",
-        top: "5%",
+        top: "8%",
         left: "2%",
         zIndex: 50,
         elevation: 10,

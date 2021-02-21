@@ -8,6 +8,7 @@ export default React.createContext({
     socket:null,
     location:null,
     locationState:false,
+    loggedIn:false,
     bag:[]
 
 }) 

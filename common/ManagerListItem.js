@@ -22,7 +22,7 @@ const ManagerListItem = (props) => {
                     <Text style={dark ? {color:"white"}:{color:"black"}}>{props.title}</Text>
                 </View>
                 <View style={styles.buttonsContainer}>
-                    <TouchableOpacity onPress={()=>{}}> 
+                    <TouchableOpacity onPress={props.startConversation.bind(this,props.manager)}> 
                         <Image
                         style={styles.imageButton}
                         source={dark ? require("../assets/speech-bubble.png") : require("../assets/images/speech.png")}

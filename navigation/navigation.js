@@ -74,12 +74,12 @@ export default function NavigationScreen(){
 return(
 <NavigationContainer  >
           <drawerStack.Navigator   drawerContent={props => <CustomDrawer  {...props}/>}>
-            <drawerStack.Screen name="Login" component={Login} />
+            <drawerStack.Screen     options={{ swipeEnabled: false }}  name="Login" component={Login} />
             <drawerStack.Screen name="orders" component={Orders}/>
             <drawerStack.Screen name="deliveries" component={Deliveries}/>
             <drawerStack.Screen name="Settings" component={Settings}/>
-            <drawerStack.Screen name="Home" component={Home} />
-            <drawerStack.Screen name="chat" component={ChatStack} />
+            <drawerStack.Screen name="Home" component={Home}/>
+            <drawerStack.Screen name="chat" component={ChatStack}/>
             <drawerStack.Screen name="logout"  component={Login}/>
             <drawerStack.Screen name="conversation"  component={Conversation}/>
             <drawerStack.Screen name ="brand" component={Brand}/>
@@ -100,7 +100,7 @@ return(
             <drawerStack.Screen name="addLocation" component={addLocation}/>
             <drawerStack.Screen name="followPackages" component={followPackages}/>
             <drawerStack.Screen name="contact" component={Contact}/>
-            <drawerStack.Screen name="partners" component={Partners}/>
+            <drawerStack.Screen  options={{ swipeEnabled: false }}   name="partners" component={Partners}/>
 
           </drawerStack.Navigator>
       </NavigationContainer>

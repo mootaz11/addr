@@ -1,8 +1,9 @@
 import React, { useState, useContext, useEffect } from 'react'
-import { StyleSheet, Dimensions, View, Image, Platform, Text, Clipboard, Modal, Alert,Share, Linking, TouchableOpacity,Keyboard  } from 'react-native';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
+import { StyleSheet, Dimensions, View, Image, Platform, Text, Clipboard, Modal, Alert,Share, Linking, TouchableOpacity,Keyboard  } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
-import { Icon, SearchBar } from 'react-native-elements';
+import { Icon, SearchBar} from 'react-native-elements';
 import { FlatList } from 'react-native-gesture-handler';
 import _ from 'lodash';
 import AuthContext from '../navigation/AuthContext';
@@ -15,11 +16,11 @@ import {getPartner} from '../rest/partnerApi';
 const api_directions_key = "AIzaSyDcbXzRxlL0q_tM54tnAWHMlGdmPByFAfE";
 
 const services_init = [
-  {_id:1,serviceName:"taxi",icon:require("../assets/taxi-dark.png")},
-  {_id:2,serviceName:"delivery",icon:require("../assets/delivery-bike-dark.png")},
-  {_id:3,serviceName:"building",icon:require("../assets/builder-dark.png")},
-  {_id:4,serviceName:"food",icon:require("../assets/fast-food-dark.png")},
-  {_id:5,serviceName:"emergency",icon:require("../assets/ambulance-dark.png")}
+  {_id:'1',serviceName:"taxi",icon:require("../assets/taxi-dark.png")},
+  {_id:'2',serviceName:"delivery",icon:require("../assets/delivery-bike-dark.png")},
+  {_id:'3',serviceName:"building",icon:require("../assets/builder-dark.png")},
+  {_id:'4',serviceName:"food",icon:require("../assets/fast-food-dark.png")},
+  {_id:'5',serviceName:"emergency",icon:require("../assets/ambulance-dark.png")}
 ]
 
 
@@ -41,6 +42,7 @@ export default function Home(props) {
   const [initServices,setInitServices]=useState();
 
   useEffect(() => {
+
     setServices(services_init);
     setPartners(null);
     setServiceChosen(false)
@@ -48,14 +50,15 @@ export default function Home(props) {
     setInitServices(true)
     setSearchResult([]);
     getCities().then(cities =>{
-    setCities(cities)
-    setSearchResult(cities)
+      setCities([...cities])
+      setSearchResult([...cities])
+
   }).catch(err=>{alert("getting cities error")})
   return ()=>{setCities([]);setServices([]);setPartners([]);setDomain(null)}  
 },[props.route.params])
 
 
-  useEffect(() => {    
+  useEffect(() => { 
     if(!context.user.locationState){
       Alert.alert(
         "Are you at Home",
@@ -67,8 +70,7 @@ export default function Home(props) {
               let { status } =  await Permissions.askAsync(Permissions.LOCATION);
 
               if (status !== 'granted') {
-               Alert.alert('Permission to access location was denied');
-                            }
+               Alert.alert('Permission to access location was denied');}
                else {
                const _location =await Location.getCurrentPositionAsync({});
 
@@ -113,6 +115,7 @@ export default function Home(props) {
 
 useEffect(()=>{
   if(context.location){
+    if(context.location.temperarlyLocation){
   if (context.location.temperarlyLocation.latitude!=null&&context.location.temperarlyLocation.longitude!=null) 
   {
     setTemporaryLocation(true);
@@ -121,6 +124,7 @@ useEffect(()=>{
     setTemporaryLocation(false);
 
   }
+}
 }
 },[context.location])
 
@@ -133,29 +137,14 @@ useEffect(()=>{
     setSearchResult(citiesResult)
   }
 
-  const turnTemporaryLocation = async () => {
-    if (context.location.temperarlyLocation.latitude!=null&&context.location.temperarlyLocation.longitude!=null) {     
-      setTemporaryLocation(false);
-      context.deleteTemprorayLocation();
-    }
-    else {
-      setTemporaryLocation(true);
-      let _location = await Location.getCurrentPositionAsync();
-      context.handleTemporaryLocation({
-        location: {
-          latitude: _location.coords.latitude,
-          longitude: _location.coords.longitude
-        }
-      }
-        , context.user._id)
-    }
-  }
+  
 
   const checkProfile = () => {
     props.navigation.navigate("Settings")
   }
 
 const handleServicePartners= (service)=>{
+  
   if(!initServices){
   var partners_ids = []
   var  _partners=[];
@@ -180,7 +169,7 @@ const handleServicePartners= (service)=>{
         }
 
         }          
-        }).catch(err=>alert("no partners found"))
+        }).catch(err=>console.log(err))
   })
   }
 
@@ -201,40 +190,47 @@ const startPartnerConversation =(partner)=>{
   users_id.push(context.user._id);
   users_id.push(partner.owner._id);
   const conversation =  context.openConversationHandler({},{users_id},"group",partner);
-  console.log(conversation);
   props.navigation.navigate("conversation",{conversation,home:true})
 }
-
-
-
 
 
 const checkService =(item)=>{
   props.navigation.navigate("brand",{serviceName:item.serviceName})
 }
+  const checkBasket =()=>{
+    props.navigation.navigate("basket",{last_screen:"Home"});
 
+}
 const shareCode=async()=>{
   try {
-      const shareResponse =await Share.share({message:context.user.locationCode.toString()});
+      const shareResponse =await Share.share({message:context.user.location.locationCode.toString()});
 
   } catch (error) {
-    console.log(error)
+    alert(error.message)
   }
 }
-    const _pressCall = () => {
-    let phoneNumber = "28896426";
+    const _pressCall = (partner) => {
+      console.log(partner.phones[0])
+    let phoneNumber = "";
 if (Platform.OS !== 'android') {
-      phoneNumber = `telprompt:${"28896426"}`;
+      phoneNumber = `telprompt:${partner.phones[0]}`;
     }
     else {
-      phoneNumber = `tel:${"28896426"}`;
-    } Linking.openURL(phoneNumber)
+      phoneNumber = `tel:${partner.phones[0]}`;
+    } 
+    Linking.openURL(phoneNumber)
   }
 
   const openDrawer = () => {
     props.navigation.openDrawer();
   }
+const copyCode =()=>{
+  Clipboard.setString(context.user.location.locationCode);
+  Alert.alert('', "code copied ! ", [{ text: "OK" }],{cancelable:false})
 
+  
+  
+}
   const handleItemCheck = (item) => {
     if(!regions){
       setRegions(item.regions);
@@ -268,10 +264,7 @@ const checkPartner=(value)=>{
           latitude: context.location ?context.location.location ? Number(context.location.location.latitude) : 0:0,
           longitude: context.location ? context.location.location?Number(context.location.location.longitude) : 0:0
           ,latitudeDelta: 0.5,
-          longitudeDelta: 0.5// * (Dimensions.get("window").width / Dimensions.get("window").height )
-          ,latitudeDelta: 0.5,
-          longitudeDelta: 0.5// * (Dimensions.get("window").width / Dimensions.get("window").height )
-
+          longitudeDelta: 0.5
         }}
 
         style={styles.container}
@@ -297,7 +290,7 @@ const checkPartner=(value)=>{
 
           }
         >
-          <Image source={context.user.photo ? {uri:context.user.photo} : require('../assets/mootaz.jpg')} style={context.darkMode ? { height: 30, width: 30, borderRadius: 30, borderColor: "white", borderWidth: 2 }: { height: 30, width: 30, borderRadius: 30, borderColor: "#2474F1", borderWidth: 2 }} />
+          <Image source={context.user.photo ? {uri:context.user.photo} : require('../assets/user_image.png')} style={context.darkMode ? { height: 30, width: 30, borderRadius: 30, borderColor: "white", borderWidth: 2 }: { height: 30, width: 30, borderRadius: 30, borderColor: "#2474F1", borderWidth: 2 }} />
 
         </Marker>
 
@@ -309,8 +302,7 @@ const checkPartner=(value)=>{
           }}
 
         >
-          <Image source={require('../assets/mootaz.jpg')} style={context.darkMode ? { height: 30, width: 30, borderRadius: 30, borderColor: "white", borderWidth: 2 }: { height: 30, width: 30, borderRadius: 30, borderColor: "#2474F1", borderWidth: 2 }} />
-
+          <Image source={require('../assets/user_image.png')} style={context.darkMode ? { height: 30, width: 30, borderRadius: 30, borderColor: "white", borderWidth: 2 }: { height: 30, width: 30, borderRadius: 30, borderColor: "#2474F1", borderWidth: 2 }} />
         </Marker>
         <MapViewDirections
           apikey={api_directions_key}
@@ -318,14 +310,11 @@ const checkPartner=(value)=>{
           destination={{
             latitude: 35.7773,
             longitude: 10.8313
-
           }}
           strokeWidth={3}
           strokeColor={context.darkMode ? "#2474F1" : "#3d3d3d"}
         />
-
       </MapView>
-
       <View style={styles.Mycode}>
         <View style={styles.dropDownContainer}>
           <TouchableOpacity style={{width:"100%",height:"100%"}} onPress={() => { setdropDown(!dropDown)}}>
@@ -333,7 +322,7 @@ const checkPartner=(value)=>{
           </TouchableOpacity>
         </View>
 
-        <Text style={styles.smartCode}>Smart Code:{context.user.locationCode}</Text>
+        <Text style={styles.smartCode}>Smart Code:{context.user.location.locationCode}</Text>
       </View>
 
       <View style={styles.menu}>
@@ -341,6 +330,11 @@ const checkPartner=(value)=>{
           <Image source={context.darkMode ?  require("../assets/menu_dark.png"):require("../assets/menu.png")} style={{height:30,width:30,resizeMode:"cover"}}/>
         </TouchableOpacity>
       </View>
+      <TouchableOpacity style={{ position: "absolute",marginTop: Platform.OS == 'ios' ? 40 : 30, right: "50%" }} onPress={checkBasket}>
+                        <FontAwesome color={context.darkMode ? "white":"black"} style={{ padding: 0, fontSize: 24}} name="shopping-bag" />
+
+                    </TouchableOpacity>
+
 
       <View style={styles.imageContainer}>
         <TouchableOpacity onPress={checkProfile}>
@@ -353,7 +347,7 @@ const checkPartner=(value)=>{
         <View style={styles.geoInfo}>
           <View style={styles.coordinatesSettings}>
             <Image style={styles.coordSettingsIcon} source={require("../assets/copy-dark.png")} />
-            <TouchableOpacity onPress={() => { Clipboard.setString(context.user.locationCode) }}>
+            <TouchableOpacity onPress={() => { copyCode() }}>
               <Text style={styles.codeManup}>copier mon code</Text>
             </TouchableOpacity>
 
@@ -367,25 +361,19 @@ const checkPartner=(value)=>{
             </TouchableOpacity>
 
           </View>
-          <View style={styles.coordinatesSettings}>
-            <Image style={styles.coordSettingsIcon} source={require("../assets/temporary-dark.png")} />
-            <TouchableOpacity onPress={()=>{turnTemporaryLocation()}}>
-              <Text style={styles.codeManup}>postion temporaire({temporaryLocation ? "activé" : "desactivé"})</Text>
-            </TouchableOpacity>
-          </View>
+          
 
         </View>
         : null
       }
-      <View style={seviceChosen && partners ?  styles.searchBarAfterSetService:styles.searchBar}>
+    { searchResult.length>0 && cities.length>0&& <View style={seviceChosen && partners ?  styles.searchBarAfterSetService:styles.searchBar}>
         <Icon name="search" size={Dimensions.get("window").width*0.08} color={"#2474F1"} />
         <TouchableOpacity onPress={() => { setShowmodal(true) }}>
-          
-        <Text   style={context.darkMode ? styles.searchInputDark : styles.searchInput} >Rechercher votre ville</Text>
+        <Text   style={context.darkMode ? styles.searchInputDark : styles.searchInput} >{ searchResult.length>0 && cities.length>0?"Rechercher votre ville":"il ya pas de services encore"}</Text>
         </TouchableOpacity>
 
       </View>
-
+}
 
 
 <View        style={seviceChosen&&partners&&partners.length>0 ?styles.domainswithPartners : styles.domainswithoutPartners}>
@@ -400,7 +388,6 @@ const checkPartner=(value)=>{
               <View style={domain == item.serviceName ? styles.serviceChosen : styles.service} >
                 <Image style={styles.imageService} source={initServices ? item.icon : {uri:item.icon}} />
               </View>
-
             </TouchableOpacity>
             <Text style={styles.servicetitle}>{item.serviceName}</Text>
           </View>
@@ -436,14 +423,14 @@ const checkPartner=(value)=>{
              { item.partnerName!="see Others" && <View style={styles.operations}>
 
                 <View style={styles.call}>
-                  <TouchableOpacity style={{ width: "100%", height: "100%" }} onPress={_pressCall}>
+                  <TouchableOpacity style={{ width: "80%", height: "80%"}} onPress={()=>{_pressCall(item)}}>
                     <Image style={styles.messagingImage} source={require("../assets/phone-call.png")} />
                   </TouchableOpacity>
 
                 </View>
 
                 <View style={styles.messaging}>
-                  <TouchableOpacity onPress={()=>{startPartnerConversation(item)}} style={{ width: "100%", height: "100%" }} >
+                  <TouchableOpacity onPress={()=>{startPartnerConversation(item)}} style={{ width: "80%", height: "80%" }} >
                     <Image style={styles.messagingImage} source={require("../assets/speech-bubble.png")} />
 
                   </TouchableOpacity>
@@ -470,7 +457,6 @@ const checkPartner=(value)=>{
           animationType={'slide'}
           visible={showModal}
 
-
         >
           <View style={{ backgroundColor: "#000000aa", flex: 1 }}>
 
@@ -487,18 +473,16 @@ const checkPartner=(value)=>{
 
               <View style={{ width: "100%", height: "65%", flexDirection: "column" }}>
                 <FlatList
-                  data={regions ? regions : searchResult}
+                  data={regions ? regions :searchResult }
+
                   renderItem={({ item }) =>
                     <TouchableOpacity onPress={() => { handleItemCheck(item) }}>
 
                       <View style={styles.City}>
                         <Text style={{ fontSize: 18, fontWeight: "600" }}>{regions ? item.regionName :item.cityName}</Text>
-
                       </View>
                     </TouchableOpacity>
-
                   }
-
                   keyExtractor={item => item._id}
                 />
               </View>
@@ -508,14 +492,13 @@ const checkPartner=(value)=>{
                   setRegions(null);
                   setShowmodal(false);
                 }
+
               } style={{ width: "50%", height: "70%", borderRadius: 18, backgroundColor: "#2474f1",}}>
                   <View style={{ width: "100%", height: "100%",flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
                     <Text style={{ fontSize: Dimensions.get("window").width * 0.06, color: "white" }}>close</Text>
                   </View>
                 </TouchableOpacity>
-
               </View>
-
             </View>
           </View>
 
@@ -569,7 +552,8 @@ const styles = StyleSheet.create({
 
 
   servicetitle: {
-    color: "white"
+    color: "white",
+    textAlign:"center"
   },
   imageService: {
     width: "40%",
@@ -656,7 +640,10 @@ const styles = StyleSheet.create({
     color: "white",
     fontWeight: "700",
     letterSpacing: 1,
-    fontSize: 15
+    fontSize: 15,
+    textShadowColor:"black",
+    textShadowOffset:{width:0.5,height:0.5},
+    textShadowRadius:1
   },
   dropDown: {
     width: "100%",
@@ -713,17 +700,17 @@ const styles = StyleSheet.create({
   domainswithoutPartners: {
     position: "absolute",
     top: "74%",
-    left: "14%",
+    left: "2%",
     height: "18%",
-    width:"86%",
+    width:"100%",
     marginTop: Platform.OS == 'ios' ? 30 : 20,
     elevation: 10,
   },
   domainswithPartners: {
     position: "absolute",
     top: "55%",
-    width:"86%",
-    left: "14%",
+    width:"100%",
+    left: "2%",
     height: "18%",
     marginTop: Platform.OS == 'ios' ? 30 : 20,
     elevation: 10,
@@ -731,14 +718,13 @@ const styles = StyleSheet.create({
   partners: {
     position: "absolute",
     top: "74%",
-    left: "14%",
-    width:"86%",
+    left: "2%",
+    width:"100%",
     height: "18%",
     marginTop: Platform.OS == 'ios' ? 30 : 20,
     elevation: 10,
   },
   SinglePartner: {
-
 
     margin: 4,
     borderRadius: 10,
@@ -828,13 +814,13 @@ const styles = StyleSheet.create({
 
   },
   messagingImage: {
-    width: "80%",
-    height: "80%",
+    width: "100%",
+    height: "100%",
     resizeMode: "contain",
     shadowColor: "white",
     shadowOffset: { width: 2, height: 2 },
   },
-  
+
   service: {
     margin: 4,
     borderRadius: Dimensions.get("window").width*0.2,

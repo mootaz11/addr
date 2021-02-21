@@ -1,15 +1,14 @@
 import axios from "../rest/customAxios";
 
-export const getDeliveryOptions = (partnerId)=>{
+export const getDeliveryOptions = (partnerId,body)=>{
 return new Promise((resolve,reject)=>{
-    axios.post(`/orders/delivery-options/${partnerId}`).then(res=>{
+    axios.post(`/order/delivery-options/${partnerId}`,body).then(res=>{
         if(res.status===200){
             resolve(res.data.deliveryOptions);
         }
     }).catch(err=>{reject(err)})
 })
 }
-
 
 export const placeOrder = (_id,body)=>{
 return new Promise((resolve,reject)=>{

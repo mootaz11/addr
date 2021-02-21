@@ -43,7 +43,6 @@ const ListProductsScreen = (props) => {
         props.navigation.openDrawer();
     }
     const renderListItem = itemData => {
-        console.log(itemData.item.mainImage)
         return (
             <ProductListItem
                 index={itemData.index + 1}
@@ -51,6 +50,8 @@ const ListProductsScreen = (props) => {
                 stock={itemData.item.stock}
                 price={itemData.item.basePrice}
                 image={itemData.item.mainImage}
+                isActive={itemData.item.isActive}
+                id={itemData.item._id}
                 dark ={context.darkMode}
             />
         );
@@ -60,12 +61,11 @@ const ListProductsScreen = (props) => {
         <SafeAreaView style={{flex:1}}>
         <View style={context.darkMode ? styles.mainContainerDark: styles.mainContainer}>
             <View style={context.darkMode ? styles.menuDark : styles.menu}>
-                <View style={styles.leftArrowContainer}>
-                    <TouchableOpacity style={styles.leftArrow}>
-                        <Icon color={context.darkMode ? "white":"black"} style={{ padding: 4, alignSelf: "center", justifyContent: "center" }} name="menu" onPress={openDrawer} />
-
-                    </TouchableOpacity>
-                </View>
+            <View style={styles.leftArrowContainer} >
+                     <TouchableOpacity onPress={openDrawer} style={{height:30,width:30}}>
+                        <Image source={context.darkMode ?  require("../../assets/menu_dark.png"):require("../../assets/menu.png")} style={{height:"100%",width:"100%",resizeMode:"cover"}}/>
+                        </TouchableOpacity>
+                     </View>
                 <View style={styles.titleContainer}>
                     <Text style={context.darkMode ? styles.TitleDark : styles.Title}>Partner products</Text>
                 </View>

@@ -1,21 +1,3 @@
-
-
-
-
-// if(pressedLogin){
-//    
-// }
-// else {
-//   signup(values).then(res=>{
-//       console.log(res.data);
-//       alert("user Created Done !");
-//       actions.resetForm();
-//   })
-//   .catch(err=>{console.log(err)})
-// }
-
-
-
 import React, { useState, useEffect, useContext } from 'react';
 import AuthContext from '../navigation/AuthContext';
 import { config } from '../secretKeys/appkeys'
@@ -39,6 +21,7 @@ import LoginForm from '../common/LoginForm';
 import * as Facebook from 'expo-facebook';
 import { ActivityIndicator } from 'react-native-paper';
 import Loading from './Loading';
+import AsyncStorageService from '../rest/AsyncStorageService';
 
 
 
@@ -73,17 +56,19 @@ export default function Login(props) {
 
 
     useEffect(() => {
-        if (context.load&&context.user) {
+
+        if (!context.isloading&&context.user) {
+            
             if(!context.user.isPartner&&!context.user.isVendor){
-                props.navigation.navigate("Home");}
+                props.navigation.navigate("Home");
+            }
                 
-            else{props.navigation.navigate("partners");}
-        setIsloading(false);
+            else{
+                props.navigation.navigate("partners");}
         }
         else{
-            setIsloading(false);
         }
-    },[context.user,context.isloading])
+    },[context.isloading,context.user])
 
 
     useEffect(() => {
@@ -120,11 +105,9 @@ export default function Login(props) {
             } = await Facebook.logInWithReadPermissionsAsync({
                 permissions: ['public_profile', 'email'],
             });
+            console.log(type)
             if (type === 'success') {
-                // Get the user's name using Facebook's Graph API
                 const response = await fetch(`https://graph.facebook.com/me?access_token=${token}&fields=id,name,email,birthday,picture.type(large)`);
-                /*const user =  await response.json();
-                console.log(user);*/
                 Alert.alert('Logged in!', `Hi ${(await response.json()).name}! `);
                 Facebook.logOutAsync()
             } else {
@@ -138,7 +121,7 @@ export default function Login(props) {
     const checkForgotPassword = () => {
         navigation.navigate("forgotPassword")
     }
-        if(!isLoading){
+        if(!context.isloading&&!context.loggedIn){
         return (
         
             <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
@@ -151,7 +134,7 @@ export default function Login(props) {
                         />
                     </View>
                     <View style={styles.partTwo}>
-                        <View style={styles.partTwoPartOne}>
+                        <View style={{...styles.partTwoPartOne,...{flex:isKeyboardVisible ?4:2}}}>
                             <View style={styles.SharedPart}>
                                 <View style={Platform.OS === 'ios' ? styles.buttonConIOS : styles.buttonConAndroid}>
                                     <View style={styles.loginSingupContainer}>
@@ -181,7 +164,7 @@ export default function Login(props) {
                         </View>*/}
                             </View>
                         </View>
-                        {signupClicked ? <View style={styles.lastPart}>
+                        {signupClicked ? <View style={{...styles.lastPart,...{flex:isKeyboardVisible ? 0.1 : 1}}}>
                             <Text style={{ marginTop: Dimensions.get('window').height * 0.04 }}>or Connect with</Text>
 
                             {Platform.OS === 'ios' ?
@@ -189,16 +172,16 @@ export default function Login(props) {
                                     <TouchableOpacity onPress={() => { }} >
                                         <Image style={styles.logoApi} source={require('../assets/images/google.png')} />
                                     </TouchableOpacity>
-                                    <TouchableOpacity onPress={() => { }} >
+                                    <TouchableOpacity onPress={()=>{facebookLoginHandler()}} >
                                         <Image style={styles.logoApi} source={require('../assets/images/facebook1.png')} />
                                     </TouchableOpacity>
                                 </View>
                                 :
                                 <View style={{ ...styles.logoApis, ...{ marginTop: isKeyboardVisible ? Dimensions.get('window').height * 0.02 : Dimensions.get('window').height * 0.06 } }}>
-                                    <TouchableOpacity onPress={() => { console.log("hhhhh") }} >
+                                    <TouchableOpacity onPress={() => { console.log("hh")}} >
                                         <Image style={styles.logoApi} source={require('../assets/images/google.png')} />
                                     </TouchableOpacity>
-                                    <TouchableOpacity onPress={facebookLoginHandler} >
+                                    <TouchableOpacity onPress={()=>{facebookLoginHandler()}} >
                                         <Image style={styles.logoApi} source={require('../assets/images/facebook1.png')} />
                                     </TouchableOpacity>
                                 </View>
@@ -244,7 +227,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     partTwoPartOne: {
-        flex: 2, // peut etre modifier 
         //backgroundColor: 'red',
         width: '100%'
     },
@@ -285,7 +267,6 @@ const styles = StyleSheet.create({
 
 
     lastPart: {
-        flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
         //backgroundColor: 'green',

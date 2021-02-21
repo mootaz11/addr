@@ -4,13 +4,28 @@ export const getPartner =(partnerId)=>{
     return new Promise((resolve,reject)=>{
         axios.get(`/partner/${partnerId}`).then(res=>{
             if(res.status==200){
-                resolve(res.data);
+                resolve(res.data.partner);
             }
             else {
                 resolve(res.data.message);
             }
         }).catch(err=>{
             reject(err);
+        })
+    })
+}
+
+
+
+export const addCategory=(partnerId,nameCategory)=>{
+    return new Promise((resolve,reject)=>{
+        axios.post(`/partner/${partnerId}/category`,{name:nameCategory})
+        .then(res=>{
+            if(res.status===200){
+                resolve(res.data.category)
+            }
+        }).catch(err=>{
+            reject(err.message);
         })
     })
 }
@@ -59,7 +74,7 @@ export const deleteManager = (partnerId,user)=>{
 export const  addPartnerLocalisation =(partnerId,localisation)=>{
 
     return new Promise((resolve,reject)=>{
-        axios.post(`/partner/${partnerId}/localisation`,{localisation}).then(res=>{
+        axios.post(`/partner/${partnerId}/localisation`,{localisation:localisation}).then(res=>{
             resolve(res.data.localisation);
         })
         .catch(err=>{
@@ -70,13 +85,11 @@ export const  addPartnerLocalisation =(partnerId,localisation)=>{
 }
 export const deletePartnerLocation = (partnerId,localisation)=>{
     return new Promise((resolve,reject)=>{
-        axios.patch(`/partner/${partnerId}/delete-localisation`,localisation).then(res=>{
+        axios.patch(`/partner/${partnerId}/delete-localisation`,{localisation:localisation}).then(res=>{
             if(res.status===200){
                 resolve(res.data.message);
             }
-            else {
-                resolve('operation not effected');
-            }
+            
         }).catch(err=>{reject(err)})
     })
 }

@@ -28,7 +28,6 @@ export default function  BusinessOrders (props) {
     const [deliveredOrder, setDeliveredOrder] = useState(false);
 
 
-    const [dark, setDark] = useState(context.darkMode);
     useEffect(()=>{
         getPartnerOrders(context.user._id).then(orders=>{
             let _ordersToPrepare =[]
@@ -71,13 +70,11 @@ export default function  BusinessOrders (props) {
 
 
 
-
-
     // const startConversation = (order)=>{
     //    const conversation =  context.openConversationHandler({},{user:order.client,other:order.deliverer});
     //    props.navigation.navigate("conversation",{conversation,orders:true})
     // }
-   
+            
 
     const checkStep = (item) => {
         setCheckedStep(item)
@@ -102,15 +99,16 @@ export default function  BusinessOrders (props) {
 
 
     return (
-        <View style={styles.container}>
-            <View style={styles.menu}>
-                <TouchableOpacity style={styles.leftArrowContainer}>
-                    <View >
-                        <Icon color={"#2474F1"} style={{ flex: 1, padding: 0 }} name="menu" onPress={openDrawer} />
-                    </View>
-                </TouchableOpacity>
-                <View style={styles.titleContainer}>
-                    <Text style={styles.Title}>Commande</Text>
+        <View style={context.darkMode ? styles.containerDark : styles.container}>
+                          <View style={context.darkMode ? styles.menuDark : styles.menu}>
+                        <View style={styles.leftArrowContainer} >
+                        <TouchableOpacity onPress={openDrawer} style={{height:30,width:30}}>
+                        <Image source={context.darkMode ?  require("../../assets/menu_dark.png"):require("../../assets/menu.png")} style={{height:"100%",width:"100%",resizeMode:"cover"}}/>
+                        </TouchableOpacity>
+                        </View>
+                    <View style={styles.titleContainer}>
+
+                    <Text style={context.darkMode ? styles.TitleDark : styles.Title}>Orders</Text>
                 </View>
 
             </View>
@@ -119,9 +117,9 @@ export default function  BusinessOrders (props) {
                     data={order_pipeline}
                     numColumns={2}
                     renderItem={({ item }) =>
-                        <TouchableOpacity style={checkedStep && item._id == checkedStep._id ? styles.stepChecked : styles.step} onPress={() => checkStep(item)}>
+                        <TouchableOpacity style={checkedStep && item._id == checkedStep._id ? styles.stepChecked : (context.darkMode ? styles.stepDark : styles.step)} onPress={() => checkStep(item)}>
                             <View style={{ width: "100%", height: "100%", flexDirection: "column", justifyContent: "center", alignItems: "center", }}>
-                                <Text style={checkedStep && item._id == checkedStep._id ? { color: "white", fontSize: 15, textAlign: "center" } : { color: "black", fontSize: 15, textAlign: "center" }}>{item.step}</Text>
+                                <Text style={checkedStep && item._id == checkedStep._id ? { color: "white", fontSize: 15, textAlign: "center" } : (context.darkMode ? { color: "white", fontSize: 15, textAlign: "center" } : { color: "black", fontSize: 15, textAlign: "center" })}>{item.step}</Text>
                             </View>
                         </TouchableOpacity>
 
@@ -139,13 +137,13 @@ export default function  BusinessOrders (props) {
                     data={orderToPrepare? orderstoPrepare : preparedOrder ? preparedOrders : deliveredOrder ? deliveredOrders : null}
                     renderItem={({ item }) =>
                     <TouchableOpacity>
-                        <View style={styles.delivery} >
+                        <View style={context.darkMode ? styles.deliveryDark : styles.delivery} >
                             <View style={styles.clientImageContainer}>
-                                <Image style={{ width: "80%", height: "80%", resizeMode: "contain" }} source={require("../../assets/mootaz.jpg")} />
+                                <Image style={{ width: "80%", height: "80%", resizeMode: "contain" }} source={require("../../assets/user_image.png")} />
                             </View>
                             <View style={styles.deliveryInfo}>
-                                <Text style={styles.info}>Nom de Livreur: {item.nomLivreur} </Text>
-                                <Text style={styles.info}>Date: {item.Date}</Text>
+                                <Text style={context.darkMode ? styles.infoDark : styles.info}>Nom de Livreur: {item.nomLivreur} </Text>
+                                <Text  style={context.darkMode ? styles.infoDark : styles.info}>Date: {item.Date}</Text>
                             </View>
                             {
                                 orderToPrepare || deliveredOrder ? 
@@ -193,6 +191,11 @@ const styles = StyleSheet.create({
         fontSize: 12,
         fontWeight: "600"
     },
+    infoDark: {
+        fontSize: Dimensions.get("window").width*0.038,
+        fontWeight: "600",
+        color: "white"
+    },
     clientImageContainer: {
         width: "15%",
         height: "100%",
@@ -217,6 +220,20 @@ const styles = StyleSheet.create({
 
 
     },
+    deliveryDark: {
+        backgroundColor: "#292929",
+        width: "100%",
+        height: 80,
+        shadowColor: "grey",
+        shadowOffset: { width: 1, height: 1 },
+        shadowOpacity: 0.1,
+        flexDirection: "row",
+        flexWrap: 'wrap',
+        justifyContent: "flex-start",
+        borderRadius: 12,
+        marginVertical: 6,
+
+    },
     crud: {
         width: "60%",
         height: "100%",
@@ -235,6 +252,13 @@ const styles = StyleSheet.create({
         backgroundColor: "#fcfcfc",
         margin: 6
     },
+    stepDark: {
+        backgroundColor: "#292929",
+        width: "45%",
+        height: 40,
+        borderRadius: 14,
+        margin: 6
+    },
     stepChecked: {
         width: "45%",
         height: 40,
@@ -242,7 +266,12 @@ const styles = StyleSheet.create({
         backgroundColor: "#2474F1",
         margin: 6
     },
-
+    containerDark: {
+        backgroundColor: "#121212",
+        width: "100%",
+        height: "100%",
+        flexDirection: "column",
+    },
     container: {
         backgroundColor: "white",
         width: "100%",
@@ -251,6 +280,7 @@ const styles = StyleSheet.create({
 
     },
     menu: {
+        marginTop:10,
         width: "100%",
         height: "8%",
         backgroundColor: "white",
@@ -263,6 +293,16 @@ const styles = StyleSheet.create({
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center"
+    },
+    menuDark: {
+        width: "100%",
+        height: "8%",
+        backgroundColor: "#121212",
+        flexDirection: "row",
+        marginBottom: 8,
+        marginTop:10
+
+
     },
     leftArrow: {
         width: 30,
@@ -279,6 +319,12 @@ const styles = StyleSheet.create({
     Title: {
         fontWeight: "700",
         fontSize: Dimensions.get("window").width * 0.07,
+    },
+    TitleDark: {
+        fontWeight: "700",
+        fontSize: 28,
+        color: "white"
+
     },
     headerElements: {
         width: "94%",

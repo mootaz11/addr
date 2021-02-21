@@ -58,6 +58,18 @@ export const rateProduct = (productId,body)=>{
 
 
 
+export const updateProductState=(productId,active)=>{
+    return new Promise((resolve,reject)=>{
+        axios.patch(`/product/activity/${productId}`,{newActivity:active}).then(res=>{
+            if(res.status===200){
+                resolve(res.data.message)
+            }
+            
+        })
+        .catch(err=>{reject(err)})
+    })
+}
+
 
 export const getPartnerProducts =(partnerId)=>{
     return new Promise((resolve,reject)=>{

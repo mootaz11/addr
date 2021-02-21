@@ -31,7 +31,7 @@ export default function SingleBrand(props) {
             if(isMounted)
             {   
                 setPartner(partner);
-                if(partner.services.serviceName.toLowerCase()=='food'){
+                if(partner.services.isFood){
                     setCategories(partner.categories);
                 }
                 else {
@@ -64,9 +64,11 @@ export default function SingleBrand(props) {
     }
 
     const showallTopTrends =()=>{
+        props.navigation.navigate("products", { last_screen: "topTrends" ,topTrends:topTrends})
+
     }
     const checkCategory = (item) => {
-        if(partner.services.serviceName.toLowerCase()!='wear'){
+        if(partner.services.isFood){
             props.navigation.navigate("products", {category:item,last_screen:"food",gender:''});
         }
         else {
@@ -95,9 +97,9 @@ export default function SingleBrand(props) {
             <SafeAreaView>
             <View style={styles.headerImageContainer}>
 
-                <Image style={styles.headerImage} source={require("../assets/zarashop.jpg")} />
+                <Image style={styles.headerImage} blurRadius={0.5}  source={partner && partner.services.isFood?partner.backgroundImage ?{uri:partner.backgroundImage}: require("../assets/fast_food.jpg"):require("../assets/fast_food.jpg")} />
                 <View style={styles.titleContainer}>
-                    <Text numberOfLines={2} style={styles.title}>Make Yourself Comfortable</Text>
+                    <Text numberOfLines={2} style={styles.title}>{partner && partner.description ? partner.description :"Make Yourself Comfortable"}</Text>
 
                 </View>
                 <Text style={styles.description}>The customer has always driven the business model</Text>
@@ -141,14 +143,15 @@ export default function SingleBrand(props) {
                     <View style={{ marginLeft: 5 }}>
                         <Text style={context.darkMode ?{ fontSize: 24, color: "white", fontWeight: "500" } : { fontSize: 24, color: "black", fontWeight: "500" }}>New Arrivals</Text>
                     </View>
-                    <TouchableOpacity>
+                   
+                   { newArrivals&&<TouchableOpacity  onPress={()=>{showallNewArrivals()}} >
                         <View style={{ flexDirection: "row", alignItems: "center", alignContent: "center", justifyContent: "space-between", marginRight: 5 }}>
                             <Text style={context.darkMode ?{ fontSize: 15, color: "white" } : { fontSize: 15, color: "black" }}>show all</Text>
-                            <FontAwesome color={context.darkMode ?"white" : "black"} style={{ marginHorizontal: 3, fontSize: 15 }} name="caret-right" onPress={showallNewArrivals} />
+                            <FontAwesome color={context.darkMode ?"white" : "black"} style={{ marginHorizontal: 3, fontSize: 15 }} name="caret-right" />
 
 
                         </View>
-                    </TouchableOpacity>
+                    </TouchableOpacity>}
                 </View>
                 <View style={styles.newArrivalsBody}>
                     {newArrivals ? <FlatList
@@ -172,7 +175,7 @@ export default function SingleBrand(props) {
                     </FlatList>
                         :
                         <View style={{ justifyContent: "center", flex: 1 }}>
-                            <Text style={{ textAlign: "center", color: "white", fontSize: 16 }}>no new Arrivals yet</Text>
+                            <Text style={context.darkMode  ? { textAlign: "center", color: "white", fontSize: 16 }: { textAlign: "center", color: "black", fontSize: 16 }}>no new Arrivals yet</Text>
 
                         </View>}
                 </View>
@@ -182,14 +185,15 @@ export default function SingleBrand(props) {
                     <View style={{ marginLeft: 5 }}>
                         <Text style={context.darkMode ?{ fontSize: 24, color: "white", fontWeight: "500" } : { fontSize: 24, color: "black", fontWeight: "500" }}>Top Trends</Text>
                     </View>
-                    <TouchableOpacity>
+               {   topTrends&&  <TouchableOpacity onPress={()=>{showallTopTrends()}}>
                         <View style={{ flexDirection: "row", alignItems: "center", alignContent: "center", justifyContent: "space-between", marginRight: 5 }}>
                             <Text style={context.darkMode ?{ fontSize: 15, color: "white" } : { fontSize: 15, color: "black" }}>show all</Text>
-                            <FontAwesome color={context.darkMode ?"white" : "black"} style={{ marginHorizontal: 3, fontSize: 15 }} name="caret-right" onPress={showallTopTrends} />
+                            <FontAwesome color={context.darkMode ?"white" : "black"} style={{ marginHorizontal: 3, fontSize: 15 }} name="caret-right"  />
 
 
                         </View>
                     </TouchableOpacity>
+}
                 </View>
                 <View style={styles.newArrivalsBody}>
                     {topTrends ?
@@ -210,7 +214,7 @@ export default function SingleBrand(props) {
                         </FlatList>
                         :
                         <View style={{ justifyContent: "center", flex: 1 }}>
-                            <Text style={{ textAlign: "center", color: "white", fontSize: 16 }}>no Top Trends yet</Text>
+                            <Text style={context.darkMode  ? { textAlign: "center", color: "white", fontSize: 16 }: { textAlign: "center", color: "black", fontSize: 16 }}>no Trends yet</Text>
 
                         </View>
                     }
@@ -249,11 +253,7 @@ const styles = StyleSheet.create({
         left: "2%",
         zIndex: 50,
         elevation: 10,
-
-
-
     },
-
 
     headerImageContainer: {
         width: "100%",
@@ -274,6 +274,10 @@ const styles = StyleSheet.create({
         color: "white",
         fontSize: Dimensions.get("window").width*0.09,
         fontWeight: "600",
+        textShadowColor:"black",
+        textShadowOffset:{width:1,height:1},
+        textShadowRadius: 0.26,
+        elevation:8
 
     },
     description: {
@@ -282,8 +286,11 @@ const styles = StyleSheet.create({
         fontWeight: "300",
         position: "absolute",
         top: "80%",
-        zIndex: 50,
-        elevation: 10
+        textShadowColor:"black",
+        textShadowOffset:{width:1,height:1},
+        textShadowRadius: 0.26,
+        elevation:8
+
 
     },
     categories: {

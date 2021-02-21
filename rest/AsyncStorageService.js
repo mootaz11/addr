@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-community/async-storage'
 const getToken = async (item) => {
   let token = '';
   try {
-    token = await AsyncStorage.getItem(item) || 'none';
+    token = await AsyncStorage.getItem(item) || null;
   } catch (error) {
     console.log(error.message);
   }
@@ -20,42 +20,34 @@ const getToken = async (item) => {
         }
         return _service
     }
-    async  function _setToken(tokenObj) {
-      await  AsyncStorage.setItem('access_token', tokenObj.accessToken);
-      await  AsyncStorage.setItem('refresh_token', tokenObj.refreshToken);
-      // localStorage.setItem('access_token',tokenObj.accessToken)
-      // localStorage.setItem('refresh_token', tokenObj.refreshToken);
-      
+    async  function _setToken(accessToken) {
+      await  AsyncStorage.setItem('access_token',accessToken);
     }
-
+    async function _clearAll(){
+        await AsyncStorage.clear()
+    }
     
-      function _getAccessToken() {
-      return   getToken('access_token')
+       function _getAccessToken() {
+      return    getToken('access_token')
    
     }
-     function _getRefreshToken() {
-      
-      return  getToken('refresh_token')
-    }
+    
 
-  async     function _clearToken() {
+  async  function _clearToken() {
        await AsyncStorage.removeItem('access_token');
-        await AsyncStorage.removeItem('refresh_token');
-          //  localStorage.removeItem('access_token');
-          //  localStorage.removeItem('refresh_token');
+      
       }
 
         async function _setAccessToken(accessToken) {
-        //  localStorage.setItem('access_token',accessToken)
-        await AsyncStorage.setItem('access_token', accessToken);
+          await AsyncStorage.setItem('access_token', accessToken);
     }
 
     return {
+        clearAll:_clearAll,
         getService: _getService,
         setToken: _setToken,
         setAccessToken: _setAccessToken,
         getAccessToken: _getAccessToken,
-        getRefreshToken: _getRefreshToken,
         clearToken: _clearToken,
     }
 })();

@@ -1,30 +1,56 @@
-import React, { useReducer, useCallback, useState, useRef } from 'react';
-import { View, StyleSheet, ScrollView, Dimensions, Keyboard, Alert, Platformn, Text, Image, Modal, TouchableOpacity } from 'react-native';
+import React, { useReducer, useCallback, useState } from 'react';
+import { View, StyleSheet, ScrollView, Dimensions, Keyboard, Alert,Text,Image,Modal,TouchableOpacity } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import * as Permissions from 'expo-permissions';
-import { signup } from '../rest/userApi'
+import { signup } from '../rest/userApi';
 import Input from '../common/Input';
 import SubmitButton from '../common/SubmitButton';
+const FORM_RESET = 'FORM_RESET';
+
+const blankForm = {
+    inputValues: {
+        username: '',
+        email:'',
+        password: '',
+        repeatPassword: '',
+        phone: '',
+        firstName:'',
+        lastName:'',
+        floor:'',
+        door:'',
+    }, 
+    inputValidities: {
+        username: false,
+        email: false,
+        firstName:false,
+        lastName:false,
+        password: false,
+        repeatPassword: false,
+        phone: false,
+    }, 
+    formIsValid: false
+  }
+
 
 const FORM_INPUT_UPDATE = 'FORM_INPUT_UPDATE';
 
 const formReducer = (state, action) => {
 
-    if (action.type === FORM_INPUT_UPDATE) {
+    if(action.type === FORM_INPUT_UPDATE){
         const updatedValues = {
             ...state.inputValues,
-            [action.input]: action.value
+            [action.input] : action.value
         };
 
         const updatedValidities = {
             ...state.inputValidities,
-            [action.input]: action.isValid
+            [action.input] : action.isValid
         };
 
         let updatedFormIsValid = true;
 
-        for (const key in updatedValidities) {
+        for(const key in updatedValidities) {
             updatedFormIsValid = updatedFormIsValid && updatedValidities[key];
         }
         return {
@@ -34,39 +60,25 @@ const formReducer = (state, action) => {
             formIsValid: updatedFormIsValid
         };
     }
-    return state;
+    else if (action.type === FORM_RESET) {
+        return {
+            ...blankForm,
+            inputValues: {...blankForm.inputValues},
+            inputValidities: {...blankForm.inputValidities},
+        };
+    }
+    else {
+        return state;
+    }
 };
 
 const SignUpForm = (props) => {
     const [password, setPassword] = useState('');
     const [inHome, setInHome] = useState(false);
+    const [inBuilding, setInbuilding] = useState(false);
     const [openModal, setOpenModal] = useState(false);
     const [location, setLocation] = useState(null)
-    const [formState, dispatchFormState] = useReducer(formReducer, {
-        inputValues: {
-            username: '',
-            firstName: '',
-            lastName: '',
-            username: '',
-            email: '',
-            password: '',
-            repeatPassword: '',
-            phone: '',
-            address: ''
-        },
-        inputValidities: {
-            username: false,
-            lastName: false,
-            firstName: false,
-            email: false,
-            password: false,
-            repeatPassword: false,
-            phone: false,
-
-            address: false
-        },
-        formIsValid: false
-    });
+    const [formState, dispatchFormState] = useReducer(formReducer,blankForm);
 
     const handleUserAdress = async () => {
         setInHome(inHome => !inHome);
@@ -79,7 +91,6 @@ const SignUpForm = (props) => {
         else {
             const _location = await Location.getCurrentPositionAsync({});
             if (_location) {
-                console.log(_location);
                 setLocation({
                     latitude: _location.coords.latitude,
                     longitude: _location.coords.longitude
@@ -121,19 +132,16 @@ const SignUpForm = (props) => {
             return;
         }
         Keyboard.dismiss();
-        signup({ ...formState.inputValues, location: { longitude: location ? location.longitude : null, latitude: location ? location.latitude : null }, locationState: location ? true : false }).then(
-            message => {
-                Alert.alert('Signup', message, [{ text: 'Okay' }])
-            }).catch(err => { });
+        signup({ ...formState.inputValues,location: { longitude: location ? location.longitude : null, latitude: location ? location.latitude : null }, locationState: location ? true : false }).then(
+             message => {
+                 Alert.alert('', "you have successfully signed up", [{ text: "OK" }],{cancelable:false})
+            }).catch(err => { alert("error during signup")});
     };
-
-
+    
     return (
         <View style={styles.formSignupContainerAll}>
             <View style={styles.formContainerSignup}>
                 <ScrollView
-
-
                     style={styles.FormSignupListContainer}>
                     <View style={styles.listItem}>
                         <Input
@@ -226,32 +234,69 @@ const SignUpForm = (props) => {
                         />
                     </View>
                     <View style={styles.listItem}>
-                        <Input
-                            inputId="address"
+                        <View style={{ width: "90%", height: 40, flexDirection:"row"}}>
+                            <View style={styles.question}>
+                                <Text style={{ fontSize: 15,color:"#2474f1",textAlign: "center" }}>you live in a Building ? </Text>
+                            </View>
+                            <View style={styles.answer}>
+                                <Text style={{color:"#2474f1"}}>yes</Text>
+                                <TouchableOpacity onPress={() => {setInbuilding(!inBuilding)}}>
+                                    <Image style={{ width: 20, height: 20, resizeMode: "cover", marginHorizontal: 6 }} source={inBuilding ? require("../assets/radio_checked.png") : require("../assets/radio_unchecked.png")} />
+                                </TouchableOpacity>
+                                <Text style={{color:"#2474f1"}}>no</Text>
+                                <TouchableOpacity onPress={() => { setInbuilding(!inBuilding) }}>
+                                    <Image style={{ width: 20, height: 20, resizeMode: "cover", marginHorizontal: 6 }} source={inBuilding ? require("../assets/radio_unchecked.png") : require("../assets/radio_checked.png")} />
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </View>
+                    
+                    <View style={styles.listItem}>
+                    {
+  inBuilding&&
+  <Input
+                            inputId="door"
                             style={styles.input}
                             imageSrc={require("../assets/images/home.png")}
-                            placeholder="Specify the address if you live in builder"
+                            placeholder="specify the door number"
                             errorText="please enter your address"
                             onInputChange={inputChangeHandler}
-                            required
-                        />
-                    </View>
+                            keyboardType="number-pad"
+
+/>
+}
+
+</View>
+
+                    <View style={styles.listItem}>
+ {
+inBuilding&&  
+  <Input
+                            inputId="floor"
+                            style={styles.input}
+                            imageSrc={require("../assets/images/home.png")}
+                            placeholder="specify the floor number"
+                            errorText="please enter your address"
+                            onInputChange={inputChangeHandler}
+                            keyboardType="number-pad"/>
+ }
+                            </View>
 
                     <View style={styles.listItem}>
                         <View style={styles.homeCheck}>
                             <View style={styles.question}>
-                                <Text style={{ fontSize: 15, textAlign: "center" }}>are you at home ? </Text>
+                                <Text style={{ fontSize: 15,color:"#2474f1" ,textAlign: "center" }}>are you at home ? </Text>
 
                             </View>
                             <View style={styles.answer}>
 
-                                <Text>yes</Text>
+                                <Text style={{color:"#2474f1"}}>yes</Text>
                                 <TouchableOpacity onPress={handleUserAdress}>
                                     <Image style={{ width: 20, height: 20, resizeMode: "cover", marginHorizontal: 6 }} source={inHome ? require("../assets/radio_checked.png") : require("../assets/radio_unchecked.png")} />
 
                                 </TouchableOpacity>
 
-                                <Text>no</Text>
+                                <Text style={{color:"#2474f1"}}>no</Text>
                                 <TouchableOpacity onPress={() => { setInHome(inHome => !inHome) }}>
                                     <Image style={{ width: 20, height: 20, resizeMode: "cover", marginHorizontal: 6 }} source={inHome ? require("../assets/radio_unchecked.png") : require("../assets/radio_checked.png")} />
 
@@ -281,7 +326,9 @@ const SignUpForm = (props) => {
                                 initialRegion={{
                                     latitude: location ? Number(location.latitude) : 0,
                                     longitude: location ? Number(location.longitude) : 0
-
+                                    ,latitudeDelta: 0.5,
+                                    longitudeDelta: 0.5// * (Dimensions.get("window").width / Dimensions.get("window").height )
+                          
 
                                 }}
 
@@ -320,7 +367,7 @@ const SignUpForm = (props) => {
 
                         </View>
                         <View style={{ width: "100%", height: "20%", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
-                            <TouchableOpacity style={{width: "50%", height: 50,}} onPress={()=>{saveAdress()}}>
+                            <TouchableOpacity style={{ width: "50%", height: 50, }} onPress={() => { saveAdress() }}>
 
                                 <View style={{ width: "100%", height: 50, backgroundColor: "#2474F1", borderRadius: 24, flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
                                     <Text style={{ color: "white", fontSize: Dimensions.get("window").width * 0.05 }}>save Address</Text>
@@ -366,6 +413,12 @@ const styles = StyleSheet.create({
     },
     homeCheck: {
         height: "100%",
+        width: "100%",
+        flexDirection: "row"
+
+    },
+    BuildingCheck: {
+        height: "60%",
         width: "100%",
         flexDirection: "row"
 

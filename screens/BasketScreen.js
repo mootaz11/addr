@@ -40,7 +40,9 @@ export default function Basket(props){
                     <Text style={context.darkMode ? styles.TitleDark : styles.Title}>Basket</Text>
                 </View>
             </View>
-            <View style={styles.bagContainer}>
+            {
+                baskets&&baskets.length>0 ? 
+                <View style={styles.bagContainer}>
                 <Text style={context.darkMode ? { fontSize:Dimensions.get("screen").width*0.05, fontWeight: "500",color:"white" }:{ fontSize:Dimensions.get("screen").width*0.05, fontWeight: "500" }}>Basket({baskets.length})</Text>
                 <FlatList
                     data={baskets}
@@ -84,8 +86,12 @@ export default function Basket(props){
 
                 </FlatList>
             </View>
-
-
+        :
+        <View style={{flexDirection:"column",justifyContent:"center",alignItems:"center"}}>
+            <Image source={require("../assets/empty_basket.png")} style={{ width:"50%",height:"50%"}}/>
+            <Text style={context.darkMode ? {fontSize:20,color:"white",textAlign:"center"}:{fontSize:20,color:"black",textAlign:"center"}}>Basket is Empty</Text>
+        </View>
+                }
         </View>
         </SafeAreaView>
     )
@@ -191,12 +197,14 @@ const styles = StyleSheet.create({
         height: "8%",
         backgroundColor: "white",
         flexDirection: "row",
+        marginTop:15
     },
     menuDark: {
         width: "100%",
         height: "8%",
         backgroundColor: "#121212",
         flexDirection: "row",
+        marginTop:15
 
     },
     leftArrowContainer: {
@@ -209,6 +217,8 @@ const styles = StyleSheet.create({
     leftArrow: {
         width: 30,
         height: 30
+        ,marginTop:10
+
     },
 
     titleContainer: {
@@ -221,6 +231,7 @@ const styles = StyleSheet.create({
     Title: {
         fontWeight: "700",
         fontSize: Dimensions.get("window").width * 0.07,
+        color:"black"
     },
     TitleDark: {
         fontWeight: "700",

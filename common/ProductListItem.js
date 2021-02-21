@@ -1,15 +1,18 @@
 import React, {useEffect, useState} from 'react';
-import {StyleSheet, View, Text, Image, Switch} from 'react-native';
+import {StyleSheet, View, Text, Image, Switch,Alert} from 'react-native';
+import {updateProductState} from '../rest/productApi';
 
 import Colors from '../constants/Colors';
 
 const ProductListItem = (props) => {
-    const [switchValue, setSwitchValue] = useState(false);
-    // useEffect(()=>{
-    //     setDark(props.dark);
-    // },[props.dark])
+    const [switchValue, setSwitchValue] = useState(props.isActive);
     const toggleSwitch = (value) => {
-        setSwitchValue(value);
+        updateProductState(props.id,value).then(message=>{
+            setSwitchValue(value);
+            Alert.alert('',message, [{ text: "OK" }],{cancelable:false})
+        }).catch(err=>{
+            alert("error occured")
+        })
       };
     
     return (
@@ -26,7 +29,7 @@ const ProductListItem = (props) => {
             </View>
             <View style={styles.textStyle1}>
                 <View style={styles.textContainerTitle}>
-                <Text style={props.dark ?  {color:"white"}:{color:"black"}}>{props.title}</Text>
+                <Text style={props.dark ?  {color:"white"}:{color:"black"}}>{props.title ? props.title.length<=20 ?props.title:props.title.substring(0,20)+"...":""}</Text>
                 </View>
                 <View style={styles.textContainerStock}>
                 <Text style={props.dark ?  {color:"white"}:{color:"black"}}>stock:</Text>
@@ -62,6 +65,7 @@ const ProductListItem = (props) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        height:100,
         alignItems: 'center',
         justifyContent: 'center',
         //backgroundColor: 'yellow',

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react'
-import { Dimensions, StyleSheet, View, TouchableOpacity, Image, Text,ActivityIndicator } from 'react-native'
+import { Dimensions, StyleSheet, View, TouchableOpacity, Image,Alert, Text,ActivityIndicator ,SafeAreaView} from 'react-native'
 import { FlatList } from 'react-native-gesture-handler';
 import AuthContext from '../navigation/AuthContext';
 import {getOrder,placeOrder,getDeliveryOptions} from '../rest/ordersApi';
@@ -8,29 +8,43 @@ import {getOrder,placeOrder,getDeliveryOptions} from '../rest/ordersApi';
 export default function orderReview(props) {
     const  context = useContext(AuthContext);
     const [orderReview,setOrderReview]=useState(null);
-    const [deliveryOptions,setDeliveryOptions] = useState(null);
     useEffect(()=>{
-            getOrder(props.route.params.order).then(order=>{
+            getOrder(props.route.params.order._id).then(order=>{
                 setOrderReview(order);
             })
             .catch(err=>{
-                alert("getting order error");
+                alert("network error");
             })       
     },[props.route.params])
     
+    const goBack = ()=> {
+        props.navigation.goBack();
+    }
 
     const goToDeliveryAdress = ()=>{
-                placeOrder(orderReview,orderReview._id).then()
-                
-//        props.navigation.navigate("deliveryAdress")
-
+                placeOrder(orderReview._id,{orderDestination:props.route.params.location,
+                    deliveryPartnerId:props.route.params.deliveryPartnerId?
+                    props.route.params.deliveryPartnerId
+                    :orderReview.partner._id,phone:props.route.params.phone}).then(message=>{
+                    Alert.alert(
+                        "",
+                        "order placed succefully!",
+                        [
+                          { text: "OK" ,onPress:()=>{
+                            props.navigation.navigate("Home",{orderplaced:true});
+                          }}
+                        ],
+                        { cancelable: false }
+                      );
+                })
+                .catch(err=>{console.log(err)})
     }
     if(orderReview){
     return (
+        <SafeAreaView>
         <View style={context.darkMode ? styles.containerDark : styles.container}>
-
             <View style={context.darkMode ? styles.menuDark : styles.menu}>
-                <TouchableOpacity style={styles.leftArrowContainer} onPress={()=>{goToDeliveryAdress()}}>
+                <TouchableOpacity style={styles.leftArrowContainer} onPress={()=>{goBack()}}>
                     <View >
                         <Image style={styles.leftArrow} source={ context.darkMode ? require("../assets/left-arrow-dark.png") : require("../assets/left-arrow.png")} />
                     </View>
@@ -38,7 +52,6 @@ export default function orderReview(props) {
                 <View style={styles.titleContainer}>
                     <Text style={context.darkMode ? styles.TitleDark : styles.Title}>Review your order</Text>
                 </View>
-
             </View>
             <View style={styles.orderInfo}>
                 <View style={styles.orderInfoContainer}>
@@ -47,20 +60,12 @@ export default function orderReview(props) {
                             <Text style={context.darkMode ? {fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500",color:"white"}: {fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500"}}>{orderReview.client.firstName+" "+orderReview.client.lastName}</Text>
                         </View>
                         <View style={styles.info}>
-                            <Text style={context.darkMode ? {fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500",color:"white"}:{fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500"}}>Client code: {orderReview.client.locationCode}</Text>
+                            <Text style={context.darkMode ? {fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500",color:"white"}:{fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500"}}>Client code: {context.user.location.locationCode}</Text>
                         </View>
-                        <View style={styles.info}>
-                            <Text style={context.darkMode ? {fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500",color:"white"}:{fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500"}}>kssar hellel,</Text>
-                        </View>
-                        <View style={styles.info}>
-                            <Text style={context.darkMode ? {fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500",color:"white"} : {fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500"}}>Monastir</Text>
-                        </View>
-                       
                     </View>
                     <View style={styles.orderPaymentInfo}>
-
                     <View style={styles.info}>
-                            <Text style={context.darkMode ? {fontSize:Dimensions.get("screen").width*0.035,fontWeight:"500",color:"white"} : {fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500"}}>phone number : 28896426</Text>
+                            <Text style={context.darkMode ? {fontSize:Dimensions.get("screen").width*0.035,fontWeight:"500",color:"white"} : {fontSize:Dimensions.get("screen").width*0.0305,fontWeight:"500"}}>phone number : {props.route.params.phone.length>0 ?props.route.params.phone:orderReview.client.phone}</Text>
                         </View>
                         <View style={styles.info}>
                             <Text style={{fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500",color: "#2474F1"}}>payment method</Text>
@@ -79,8 +84,7 @@ export default function orderReview(props) {
                         ({ item }) =>
                         <View style={context.darkMode ? styles.productContainerDark : styles.productContainer}>
                         <View style={styles.productImageContainer}>
-                            <Image style={styles.productImage} source={item.product.mainImage} />
-
+                            <Image style={styles.productImage}  source={{uri:item.product.mainImage}} />
                         </View>
                         <View style={styles.productInfoContainer}>
                             <View style={{ width: "92%", height: "20%", marginVertical: 4, alignSelf: "center" }}>
@@ -93,8 +97,8 @@ export default function orderReview(props) {
                                 <Text style={context.darkMode ? { fontSize: 20, fontWeight: "700",color:"white" } :{ fontSize: 20, fontWeight: "700" }}>{item.product.basePrice} TND</Text>
                             </View>
                             <View style={{ width: "92%", height: "15%", marginVertical: 4, alignSelf: "center" }}>
-                                {/* <Text style={dark ?{ fontSize: 14 ,color:"white"} :{ fontSize: 14 }}>{item.color}</Text>
-                                <Text style={dark ?{ fontSize: 14,color:"white" }:{ fontSize: 14 }}>{item.size}</Text> */}
+                                {/* <Text style={context.dark ? { fontSize: 14 ,color:"white"} :{ fontSize: 14 }}>{item.color}</Text>
+                                <Text style={context.context.dark ?  { fontSize: 14,color:"white" }:{ fontSize: 14 }}>{item.size}</Text> */}
                             </View>
                             <View style={{ width: "92%", height: "18%", marginVertical: 4, alignSelf: "center", flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
                   
@@ -122,7 +126,7 @@ export default function orderReview(props) {
                
                 <View style={styles.orderOverview}>
                     <View >
-                        <Text style={dark ?{ fontSize: 20,color:"white"}:{ fontSize: 20}}>Items Total</Text>
+                        <Text style={context.darkMode ?  { fontSize: 20,color:"white"}:{ fontSize: 20}}>Items Total</Text>
                     </View>
                     <View >
                         <Text style={context.darkMode ? { fontSize: 20 ,color:"white"}: { fontSize: 20 }}>{orderReview.price} TND</Text>
@@ -130,10 +134,10 @@ export default function orderReview(props) {
                 </View>
                 <View style={styles.orderOverview}>
                     <View >
-                        <Text style={context.darkMode ? { fontSize: 20 ,color:"white"} :{ fontSize: 20}}>Delivery</Text>
+                        <Text style={context.darkMode ? { fontSize: 20 ,color:"white"} :{ fontSize: 20}}>Delivery Price:</Text>
                     </View>
                     <View >
-                        <Text style={context.darkMode ? { fontSize: 20,color:"white" }:{ fontSize: 20 }}>{orderReview.price}</Text>
+                        <Text style={context.darkMode ? { fontSize: 20,color:"white" }:{ fontSize: 20 }}>{orderReview.partner.deliveryPrice} TND</Text>
                     </View>
                 </View>
                 <View style={styles.orderOverview}>
@@ -141,7 +145,7 @@ export default function orderReview(props) {
                         <Text style={context.darkMode ? { fontSize: 20, fontWeight: "600" ,color:"white"}:{ fontSize: 20, fontWeight: "600" }}>Total</Text>
                     </View>
                     <View >
-                        <Text style={context.darkMode ? { fontSize: 20, fontWeight: "600",color:"white" } : {  fontSize: 20, fontWeight: "600" }}>129,99TND</Text>
+                        <Text style={context.darkMode ? { fontSize: 20, fontWeight: "600",color:"white" } : {  fontSize: 20, fontWeight: "600" }}>{orderReview.price+orderReview.partner.deliveryPrice} TND</Text>
                     </View>
                 </View>
 
@@ -156,6 +160,7 @@ export default function orderReview(props) {
          </View>
 
         </View>
+        </SafeAreaView>
     )}
     else {
         return (<View style={{ flex: 1, justifyContent: "center", flexDirection: "column", alignItems: "center" }}>
@@ -237,7 +242,7 @@ const styles = StyleSheet.create({
     },
     bagContainer: {
         width: "100%",
-        height: "48%",
+        height: "45%",
         flexDirection: "column",
         justifyContent: "center",
     },
@@ -287,6 +292,7 @@ const styles = StyleSheet.create({
         height: "8%",
         backgroundColor: "#121212",
         flexDirection: "row",
+        marginTop:10,
 
     },
     menu: {
@@ -294,6 +300,7 @@ const styles = StyleSheet.create({
         height: "8%",
         backgroundColor: "white",
         flexDirection: "row",
+        marginTop:10,
     },
     leftArrowContainer: {
         width: "10%",
@@ -301,10 +308,13 @@ const styles = StyleSheet.create({
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center"
+
     },
     leftArrow: {
         width: 30,
-        height: 30
+        height: 30,
+        marginTop:10,
+
     },
 
     titleContainer: {

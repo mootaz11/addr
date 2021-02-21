@@ -6,11 +6,10 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
 
-    
     "splash": {
-      "image": "./assets/logo.png",
+      "image": "./assets/logo_white.png",
       "resizeMode": "contain",
-      "backgroundColor": "#1db5db"
+      "backgroundColor": "#2474f1"
     },
     "updates": {
       "fallbackToCacheTimeout": 0
@@ -20,18 +19,46 @@
     ],
     "ios": {
       "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "This app uses the camera to let user put a photo in his profile page.",
+        "NSPhotoLibraryUsageDescription": "This app requires access to the photo library.",
+        "NSLocationWhenInUseUsageDescription": "Your location is required for xyz benefits for you",
+        "NSLocationAlwaysAndWhenInUseUsageDescription ": "Your location is required for xyz benefits for you",
+        "NSLocationAlwaysUsageDescription": "Your location is required for xyz benefits for you",
+        "NSMicrophoneUsageDescription": "This app does not require access to the microphone.",
+        "CFBundleAllowMixedLocalizations": true,
+        "UIBackgroundModes": [
+          "location",
+          "fetch"
+        ]
+      },
       "bundleIdentifier": "com.addressti.addressti",
       "config": {
         "googleMapsApiKey": "AIzaSyAxCgj947FZABl1m_AmOa65BZarGxVs_yA"
       }
-    
     },
     "android": {
       "package": "com.addressti.addressti",
       "config": {
-        "googleMaps": { "apiKey": "AIzaSyAl9tTiWc9OJAwuT25o6SLRr9EBimgxdTQ" }   
-     }
-  
+        "googleMaps": {
+          "apiKey": "AIzaSyAl9tTiWc9OJAwuT25o6SLRr9EBimgxdTQ"
+        }
+      },
+      "useNextNotificationsApi": true,
+      "permissions": [
+        "CAMERA",
+        "WRITE_EXTERNAL_STORAGE",
+        "CAMERA_ROLL",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "READ_EXTERNAL_STORAGE",
+        "NOTIFICATIONS",
+        "USER_FACING_NOTIFICATIONS",
+        "LOCATION",
+        "MEDIA_LIBRARY",
+        "READ_EXTERNAL_STORAGE",
+        "READ_PHONE_STATE"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"

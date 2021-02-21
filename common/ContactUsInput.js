@@ -60,9 +60,9 @@ const ContactUsInput = (props) => {
         <View style={styles.formControle}>
              <TextInput 
                     {...props}
-                    style={styles.inputStyle} 
+                    style={props.dark ? styles.inputStyleDark : styles.inputStyle} 
                     placeholder={props.placeholder}
-                    placeholderTextColor={'black'}
+                    placeholderTextColor={props.dark ? 'white':'black'}
                     value={inputState.value}
                     onChangeText={textChangeHandler}
                     onBlur={lostFocusHandler}
@@ -86,6 +86,12 @@ const styles = StyleSheet.create({
         borderBottomColor:'black',
         borderBottomWidth: 2,
         fontWeight:'bold',
+    },
+    inputStyleDark:{
+        height:Dimensions.get('window').height * 0.045, //35
+        borderBottomColor:'white',
+        borderBottomWidth: 2,
+        fontWeight:'bold',        
     },
     errorContainer:{
         //backgroundColor:'brown',

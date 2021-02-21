@@ -18,15 +18,12 @@ const DeliveryDashboardScreen = (props) => {
     useEffect(() => {
         getDelivererDashboard(context.partner._id).then(_dashboard=>{
             setDashboard(_dashboard)
-
         }).catch(err=>{
             alert("error has been occured")
         })      
-        return () => {
-            
-        }
-    }, [])
-
+        return () => {}
+    }, [props.route.params])
+    
     const formatData = (data) => {
         const numberOfFullRows = Math.floor(data.length / 2);
 
@@ -273,11 +270,13 @@ const styles = StyleSheet.create({
     },
     textStyleTitre: {
         color: 'white',
-        fontSize: 30,
+        fontSize: Dimensions.get("screen").width*0.06,
         fontWeight: 'bold'
     },
     textStyleTitle: {
-        color: 'white'
+        color: 'white',
+        fontSize: Dimensions.get("screen").width*0.03,
+
     },
     imageContainer: {
         //backgroundColor:'purple',

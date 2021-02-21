@@ -21,7 +21,7 @@ const deliverers = [
             latitude: 35.7778,
             longitude: 10.8313
             },
-            image:require("../../assets/mootaz.jpg")
+            image:require("../../assets/user_image.png")
         },
         {name:"julia ",location:{
             latitude: 35.7778,
@@ -35,7 +35,7 @@ const deliverers = [
             longitude: 10.7113
 
           },
-            image:require("../../assets/mootaz.jpg")
+            image:require("../../assets/user_image.png")
         },
         
 ]

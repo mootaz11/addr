@@ -28,13 +28,13 @@ const DeliveryListItem = (props) => {
                     <Text style={dark ? {color:"white"}:{color:"black"}}>{props.time}</Text>
                 </View>
                 <View style={styles.buttonsContainer}>
-                    <Switch 
-                    trackColor={{ false: "#767577", true: Colors.primary }}
-                    thumbColor={switchValue ? "white" : "#f4f3f4"}
-                    onValueChange={toggleSwitch}
-                    value={switchValue}
-                    />
-                    <TouchableOpacity onPress={props.deleteDeliverer.bind(this,props.deliverer)}>
+                <TouchableOpacity onPress={props.startConversation.bind(this,props.deliverer)}> 
+                        <Image
+                        style={styles.imageButton}
+                        source={dark ? require("../assets/speech-bubble.png") : require("../assets/images/speech.png")}
+                        />
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={props.deleteDeliverer.bind(this,props.deliverer._id)}>
                         <Image 
                         style={styles.imageButton}
                         source={dark ? require('../assets/images/trashDark.png') : require('../assets/images/trash.png')}

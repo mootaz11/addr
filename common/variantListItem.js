@@ -1,4 +1,5 @@
 import React, {useState} from 'react';
+import { Platform } from 'react-native';
 import {StyleSheet, View, Text, Image, TouchableOpacity, Dimensions} from 'react-native';
 import { FlatList } from 'react-native-gesture-handler';
 
@@ -69,7 +70,7 @@ const styles = StyleSheet.create({
     itemContainer:{
         //backgroundColor:'red',
         //flex:1,
-        height:Dimensions.get('window').height*0.155, //120
+        height:Platform.OS=='android' ?  Dimensions.get('window').height*0.205:Dimensions.get('window').height*0.25, //120
         marginVertical:5
     },
     variantHeader:{

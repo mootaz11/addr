@@ -5,44 +5,78 @@ import AuthContext from '../../navigation/AuthContext';
 
 
 
-export default function Partners(props){
+export default function Partners(props){    
     const context = useContext(AuthContext);
     const [background,setBackground] =useState(context.user.isPartner  ? context.user.partners[0].backgroundImage:context.user.workPlaces[0].backgroundImage);
-    
-    
+    const [business,setBusiness]=useState(null);
+    const [slide,setSlide]=useState(0);
+
+
+    useEffect(()=>{
+        if(context.user.isVendor&&context.user.isPartner)
+    {
+        setBusiness( [...context.user.partners,...context.user.workPlaces]);
+        setBackground([...context.user.partners,...context.user.workPlaces][0].backgroundImage)
+    }   
+    if(context.user.isVendor&&!context.user.isPartner){
+        setBusiness( [...context.user.workPlaces]);
+        setBackground([...context.user.workPlaces][0].backgroundImage)
+    }
+    if(context.user.isPartner&&!context.user.isVendor){
+        setBusiness( [...context.user.partners]);
+        setBackground([...context.user.partners][0].backgroundImage)
+
+    }
+    },[])
+    const changeBackground = ({ nativeEvent }) => {
+        const _slide = Math.ceil(nativeEvent.contentOffset.x / nativeEvent.layoutMeasurement.width)
+        if(_slide==0){
+            setBackground(business[_slide].backgroundImage)
+
+        }
+        else {
+            setBackground(business[_slide-1].backgroundImage)
+        }
+       
+            
+        
+    }
+
     const checkPartner = (partner)=>{
         context.setPartner(partner);
-        if(context.user.isPartner){
-        props.navigation.navigate("businessDash")
-        }
-        if(context.user.isVendor){
-            props.navigation.navigate("deliveryDash")
+        if(partner.deliverers.findIndex(del=>{return del===context.user._id})>=0){
+            props.navigation.navigate("deliveryDash")       
+         }
+        else 
+        {
+            props.navigation.navigate("businessDash")
+
         }
     }
 
 
 return(
 <View style={{width:"100%",height:"100%"}}>
-<ImageBackground style={{width:"100%",height:"100%",resizeMode:"cover"}} blurRadius={3}   source={background ? {uri:background }:require("../../assets/zarashop.jpg")}/>
+<ImageBackground style={{width:"100%",height:"100%",resizeMode:"cover"}} blurRadius={3}   source={background ? {uri:background }:require("../../assets/coverNotfound.jpg")}/>
 
      <View style={{height:"30%",width:"100%",position:"absolute",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
-        <Text style={{fontSize:Dimensions.get("window").width*0.09,textAlign:"center",color:"white"}}>{context.user.isPartner ? "choose your partner":"choose your workplace"}</Text>
+        <Text style={{fontSize:Dimensions.get("window").width*0.09,textAlign:"center",color:"white"}}>{context.user.isPartner&&context.user.isVendor ? "choose a business":context.user.isPartner?"choose your partner":context.user.isVendor?"choose your workplace":""}</Text>
     </View>
 <View style={{height:"70%",width:"100%",position:"absolute",top:"30%",justifyContent:"center",alignItems:"center",flexDirection:"column"}}>
-    <View style={{justifyContent:"center",alignItems:"center",flexDirection:"column",height:"30%",width:"100%"}}>
+    <View style={{justifyContent:"center",alignItems:"center",flexDirection:"column",height:"30%",width:140}}>
 
 <FlatList
     horizontal
-    data={context.user.isPartner ? context.user.partners: context.user.isVendor ? context.user.workPlaces:[]}
+    onScroll={changeBackground}
+    data={business?business:[]}
     renderItem={({item})=>
-<TouchableOpacity onLongPress={()=>setBackground(item.backgroundImage)} onPress={()=>{checkPartner(item)}}>
+<TouchableOpacity  onPress={()=>{checkPartner(item)}}>
 
 <View style={  styles.product}>
-    <Image style={styles.productImage} source={item.profileImage ? { uri: item.profileImage } : require("../../assets/imagenotyet.jpg")} />
+    <Image style={styles.productImage} source={item.profileImage ? { uri: item.profileImage } : require("../../assets/shop.png")} />
     <View style={{flex:1,flexDirection:"column",alignItems:"center",justifyContent:"center"}}><Text style={styles.productTitle}>{item.partnerName}</Text></View>
 </View>
 </TouchableOpacity>    
-
 }
 keyExtractor={item=>item._id}
 >

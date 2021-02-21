@@ -27,7 +27,7 @@ export default function CustomDrawer(props) {
                     <View style={styles.drawerContent}>
                         <TouchableOpacity onPress={() => { props.navigation.navigate("Settings") }}>
                             <View style={styles.logoAppSection}>
-                                <Image style={styles.LogoApp} source={context.user.photo ? { uri: context.user.photo }: require('../assets/user_image.png')} />
+                                <Image style={styles.LogoApp} source={context.user ? context.user.photo ? { uri: context.user.photo }: require('../assets/user_image.png'):require('../assets/user_image.png')} />
                                 <Title style={styles.title}>{context.user.firstName + " " + context.user.lastName}</Title>
                             </View>
                         </TouchableOpacity>
@@ -35,38 +35,44 @@ export default function CustomDrawer(props) {
          {context.user.isPartner || context.user.isVendor ?
                     <Drawer.Section style={styles.drawerSection} >
                         <DrawerItem icon={({ color, size }) => (
-                            <Icon
-                                name="dashboard"
-                                color={"white"}
-                                size={size}
-                            />
-                        )}
-                            labelStyle={{ color: "white" }}
+                            <Image source={require("../assets/menu/dashboard.png")} style={{width:size,height:size}}/>
 
+                        )}
+                            labelStyle={{ color: "white"}}
                             label="Dashboard"
-                            onPress={() => { context.user.isVendor ?  props.navigation.navigate("deliveryDash"):props.navigation.navigate("businessDash") }}
+                            onPress={() => {props.navigation.navigate("partners")}}
                         />
                         {   context.user.isPartner ? 
                                 <DrawerItem  
+                                icon={({ color, size }) => (
+                                    <Image source={require("../assets/menu/next.png")} style={{marginLeft:20,width:size,height:size}}/>
+        
+                                )}
                                 labelStyle={{ color: "white" }}
     
                                 label="products"
                                 onPress={() => { props.navigation.navigate("listProducts") }}
                             />
-                            :null
-                        }
-                        
+                            :null}
                           <DrawerItem  
-                            labelStyle={{ color: "white" }}
+                                icon={({ color, size }) => (
+                                    <Image source={require("../assets/menu/next.png")} style={{marginLeft:20,width:size,height:size}}/>
+        
+                                )}
 
-                            label="follow packages"
+labelStyle={{ color: "white" }}
+                                label="follow packages"
                             onPress={() => { props.navigation.navigate("followPackages") }}
                         />
                         {
                             context.user.isPartner ? 
                                   <DrawerItem  
                                   labelStyle={{ color: "white" }}
-      
+                                  icon={({ color, size }) => (
+                                    <Image source={require("../assets/menu/next.png")} style={{marginLeft:20,width:size,height:size}}/>
+        
+                                )}
+
                                   label="add location"
                                   onPress={() => { props.navigation.navigate("addLocation") }}
                               />
@@ -80,7 +86,7 @@ export default function CustomDrawer(props) {
                    
                     <Drawer.Section style={styles.drawerSection} >
                         <DrawerItem icon={({ color, size }) => (
-                            <FontAwesome color={"white"} style={{ padding: 0, fontSize: 30, }} name="home" />
+                            <Image source={require("../assets/menu/home.png")} style={{width:size,height:size}}/>
 
                         )}
                             labelStyle={{ color: "white" }}
@@ -96,7 +102,7 @@ export default function CustomDrawer(props) {
                     
                     <Drawer.Section style={styles.drawerSection} >
                         <DrawerItem icon={({ color, size }) => (
-                            <FontAwesome color={"white"} style={{ padding: 0, fontSize: 30, }} name="comments" />
+                            <Image source={require("../assets/menu/chat.png")} style={{width:size,height:size}}/>
 
                         )}
                             labelStyle={{ color: "white" }}
@@ -105,9 +111,11 @@ export default function CustomDrawer(props) {
                         />
 
                     </Drawer.Section>
+                    {
+                    (context.user.isVendor || context.user.isPartner )&&
                     <Drawer.Section style={styles.drawerSection} >
                         <DrawerItem icon={({ color, size }) => (
-                            <FontAwesome color={"white"} style={{ padding: 0, fontSize: 30, }} name="truck" />
+                            <Image source={require("../assets/menu/delivery.png")} style={{width:size,height:size}}/>
 
                         )} labelStyle={{ color: "white" }}
 
@@ -116,9 +124,10 @@ export default function CustomDrawer(props) {
                         />
 
                     </Drawer.Section>
+    }
                     <Drawer.Section style={styles.drawerSection} >
                         <DrawerItem icon={({ color, size }) => (
-                            <FontAwesome color={"white"} style={{ padding: 0, fontSize: 30, }} name="truck" />
+                            <Image source={require("../assets/menu/package.png")} style={{width:size,height:size}}/>
 
                         )} labelStyle={{ color: "white" }}
                             label={"Orders"}
@@ -142,6 +151,10 @@ export default function CustomDrawer(props) {
                     </Drawer.Section>
                     <Drawer.Section style={styles.drawerSection} >
                         <DrawerItem  labelStyle={{ color: "white" }}
+                        icon={({ color, size }) => (
+                            <Image source={require("../assets/menu/at.png")} style={{width:size,height:size}}/>
+
+                        )}
                             label={"Contact us"}
                           onPress={() => {  props.navigation.navigate("contact")  }} />
                    
@@ -152,6 +165,7 @@ export default function CustomDrawer(props) {
                         <Icon
                             name="exit-to-app"
                             color={"white"}
+                        
                             size={size}
                         />
                     )}

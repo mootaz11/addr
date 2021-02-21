@@ -51,10 +51,12 @@ export  const getUserConversations=()=>{
 }
 
 
-export const markAsreadConversation=(convId)=>{
+export const markAsreadConversationApi=(convId)=>{
     return new Promise((resolve,reject)=>{
         axios.patch(`/chat/read/${convId}`,{}).then(res=>{
-            resolve(res.data.conversation);
+            if(res.status===200){
+                resolve(res.data.message);
+            }
         })
         .catch(err=>{reject(err)});
     })

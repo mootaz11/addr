@@ -13,12 +13,48 @@ export const updateLocationState =()=>{
     })
 
 }
+export const setNotifToken =(id,token)=>{
+    return new Promise((resolve,reject)=>{
+        axios.patch(`/user/${id}/update-notificationtoken`,{notificationToken:token}).then(res=>{
+            if(res.status===200){
+                resolve(res.data.user);
+            }
+
+        }).catch(err=>{reject(err)})
+    })
+}
+
 export const updateInfo = (info)=>{
     return new Promise((resolve,reject)=>{
-        axios.patch("/user/",info).then(res=>{
+        axios.patch("/user/phone",info).then(res=>{
             resolve(res);
         })
         .catch(err=>{reject(err)})
+    })
+}
+
+export const userLogout = (token)=>{
+    return new Promise((resolve,reject)=>{
+        axios.post("/user/logout",token).then(res=>{
+            if(res.status===200){
+            resolve(res.data.message);
+            }
+        })
+        .catch(err=>{reject(err)})
+    })
+}
+
+
+export const sendContact =(data)=>{
+    return new Promise((resolve,reject)=>{
+        axios.post("/user/contact",{data}).then(res=>{
+            if(res.status===200){
+                resolve(res.data.message);
+            }
+        })
+        .catch(err=>{
+            reject(err)
+        })
     })
 }
 
@@ -67,7 +103,6 @@ export const login =(credentials)=>{
         axios.post("/user/login",credentials).then(res=>{
             resolve(res);
         }).catch(err=>{
-            console.log(err)
             reject(err);
         })
     })

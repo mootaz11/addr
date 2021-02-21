@@ -27,21 +27,22 @@ export default function bag(props) {
                 else {
                     order.foodItems.map(item => {
                         var p = 0;
+                        var _variants = []
                         item.ingredients.map(e => {
                             if (item.product.pricing.findIndex(pricing => { return pricing._id == e }) >= 0) {
                                 let pricing = { ...item.product.pricing[item.product.pricing.findIndex(pricing => { return pricing._id == e })] };
                                 item.product.variants.map(variant => {
-                                    if (variant.options.findIndex(option => { return option._id === pricing.variantOptions[0] }) >= 0) {
-                                        setIngredients([...ingredients, variant.options[variant.options.findIndex(option => { return option._id === pricing.variantOptions[0] })]])
+                                    if (variant.options.findIndex(option => { return option._id === pricing.variantOptions[0] }) >= 0) {                                    
+                                        let _variant  = {...variant.options[variant.options.findIndex(option => { return option._id === pricing.variantOptions[0] })]}
+                                        console.log(_variant)
+                                        _variants.push(_variant);
                                     }
                                 })
-
-
-
                                 p += pricing.price;
                             }
                         })
                         item.product.basePrice = p;
+                        setIngredients(_variants);
                         item.product.total = item.product.basePrice * item.quantity
                     })
                     setProducts(order.foodItems);
@@ -50,7 +51,7 @@ export default function bag(props) {
             })
         }
 
-        return () => { mounted = false; setProducts([]); setPreOrder(null) }
+        return () => { mounted = false; setProducts([]); setPreOrder(null);setIngredients([]); }
 
 
     }, [props.route.params])
@@ -131,7 +132,7 @@ export default function bag(props) {
                                             <Text style={context.darkMode ? { fontSize: 17, fontWeight: "700", color: "white" } : { fontSize: 17, fontWeight: "700" }}>{item.product.name}</Text>
                                         </View>
                                         <TouchableOpacity style={{ width: "92%", height: "8%" }} onPress={() => { removeProduct(item) }}>
-                                            <View style={{ width: "100%", height: "100%", margin: 1, alignSelf: "center" }}>
+                                            <View style={{ width: "100%", height: "100%", marginLeft:7, alignSelf: "center" }}>
                                                 <Text style={{ fontSize: 16, fontWeight: "500", color: "grey" }}>Remove</Text>
                                             </View>
                                         </TouchableOpacity>
@@ -141,27 +142,26 @@ export default function bag(props) {
                                         <View style={{ width: "92%", height: "10%", marginVertical: 4, alignSelf: "center" }}>
                                             <Text style={context.darkMode ? { fontSize: 20, fontWeight: "700", color: "white" } : { fontSize: 20, fontWeight: "700" }}>{item.product.total ? item.product.total.toString() : item.product.basePrice.toString()} TND</Text>
                                         </View>
-                                        <View style={{ width: "92%", height: "15%", marginVertical: 4, alignSelf: "center" }}>
+                                        <View style={{ flex:1, marginVertical: 4,marginLeft:6 }}>
                                             {
                                                 ingredients && ingredients.length > 0 && ingredients.map(ingredient => (
                                                     <View key={ingredient._id}>
-                                                        <Text style={context.darkMode ? { fontSize: 14, color: "white" } : { fontSize: 14 }}>ssss</Text>
+                                                        <Text style={context.darkMode ? { fontSize: 14, color: "white" } : { fontSize: 14,color:"black" }}>{ingredient.name}</Text>
                                                     </View>
 
                                                 ))
                                             }
 
                                         </View>
-                                        <View style={{ width: "92%", height: "18%", marginVertical: 4, alignSelf: "center", flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
+                                        <View style={{ width: "92%",flex:1, marginVertical: 4, alignSelf: "center", flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
                                             <TouchableOpacity onPress={() => increaseQuantity(item)}>
                                                 <FontAwesome color={context.darkMode ? "white" : "black"} style={{ padding: 0, fontSize: 26, fontWeight: "700" }} name="plus" />
 
                                             </TouchableOpacity>
 
-                                            <View style={{ width: "30%", height: "100%", marginHorizontal: 6, borderWidth: 3, borderColor: "#bfbfbf", borderRadius: 12, alignItems: "center", justifyContent: "center", flexDirection: "column" }}>
-                                                <Text style={context.darkMode ? { fontSize: 20, fontWeight: "400", color: "white" } : { fontSize: 20, fontWeight: "400" }}>{item.quantity}</Text>
+                                            <View style={{ width: "25%", height: "80%", marginHorizontal: 6, borderWidth: 3, borderColor: "#bfbfbf", borderRadius: 12, alignItems: "center", justifyContent: "center", flexDirection: "column" }}>
+                                                <Text style={context.darkMode ? { fontSize: 20, fontWeight: "400", color: "white" } : { fontSize: 20, fontWeight: "400",color:"black" }}>{item.quantity}</Text>
                                             </View>
-
                                             <TouchableOpacity onPress={() => decreaseQuantity(item)}>
                                                 <FontAwesome color={context.darkMode ? "white" : "black"} style={{ padding: 0, fontSize: 26, fontWeight: "700" }} name="minus" />
                                             </TouchableOpacity>
@@ -251,7 +251,7 @@ const styles = StyleSheet.create({
     },
     productContainer: {
         width: "90%",
-        height: 250,
+        flex:1,
         alignSelf: "center",
         marginVertical: 10,
         flexDirection: "row",
@@ -263,7 +263,7 @@ const styles = StyleSheet.create({
     },
     productContainerDark: {
         width: "90%",
-        height: 250,
+        flex:1,
         alignSelf: "center",
         marginVertical: 10,
         flexDirection: "row",
@@ -349,7 +349,7 @@ const styles = StyleSheet.create({
     },
     productInfoContainer: {
         width: "50%",
-        height: "100%",
+        height:"100%",
         flexDirection: "column",
     },
 

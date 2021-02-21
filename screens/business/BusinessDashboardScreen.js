@@ -9,10 +9,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { getPartnerDashboard, deleteDeliverer, deleteManager } from '../../rest/partnerApi'
 import AuthContext from '../../navigation/AuthContext';
 
- // const startConversation = (order)=>{
-     //    const conversation =  context.openConversationHandler({},{user:order.client,other:order.deliverer});
-     //    props.navigation.navigate("conversation",{conversation,orders:true})
-     // }
 
 const BusinessDashboardScreen = (props) => {
     const context = useContext(AuthContext);
@@ -31,8 +27,8 @@ const BusinessDashboardScreen = (props) => {
 
     const deleteManagerHandler = (user) => {
 
-
         deleteManager(context.partner._id, user).then(message => {
+            
             Alert.alert(
                 "deleting manager",
                 message,
@@ -49,16 +45,28 @@ const BusinessDashboardScreen = (props) => {
 
         })
     }
+
+    const startManagerConversationHandler = (manager)=>{
+        const conversation =  context.openConversationHandler({},{user:context.user,other:manager},"personal");
+        props.navigation.navigate("conversation",{conversation,orders:true})
+    }
+
+    const startDelivererConversationHandler = (deliverer)=>{
+        const conversation =  context.openConversationHandler({},{user:context.user,other:deliverer},"personal");
+        props.navigation.navigate("conversation",{conversation,orders:true})
+    }
+
     const renderListManagersItem = (itemData) => {
         return (
             <ManagerListItem
-
-                image={require("../../assets/images/avatar.jpg")}
+                image={itemData.item.user.photo ? {uri:itemData.item.user.photo} :require("../../assets/images/avatar.jpg")}
                 name={itemData.item.user.firstName}
                 title={itemData.item.user.phone}
                 user={itemData.item.user._id}
+                manager={itemData.item.user}
+                startConversation={startManagerConversationHandler}
                 deleteManager={deleteManagerHandler}
-                dark ={dark}
+                dark ={context.darkMode}
             />
         );
     };
@@ -81,33 +89,31 @@ const BusinessDashboardScreen = (props) => {
                     },
                 ])
             setDeliverers(deliverers.filter(_deliverer => _deliverer._id != deliverer));
-
-
         })
     }
     const renderListDeliverysItem = (itemData) => {
         return (
             <DeliveryListItem
-                image={require("../../assets/images/avatar.jpg")}
+                image={itemData.item.photo ? {uri:itemData.item.photo} :require("../../assets/images/avatar.jpg")}
                 name={itemData.item.firstName}
                 time={itemData.item.phone}
-                deliverer={itemData.item._id}
+                deliverer={itemData.item}
                 deleteDeliverer={deleteDelivererHandler}
-                dark={dark}
-
+                startConversation={startDelivererConversationHandler}
+                dark={context.darkMode}
             />
+
         );
     };
 
     return (
         <SafeAreaView style={{ flex: 1 }}>
             <View style={context.darkMode ?  styles.menuDark: styles.menu}>
-                <View style={styles.leftArrowContainer}>
-                    <TouchableOpacity style={styles.leftArrow}>
-                        <Icon color={context.darkMode ? "white" :"black"} style={{ padding: 4, alignSelf: "center", justifyContent: "center" }} name="menu" onPress={openDrawer} />
-
-                    </TouchableOpacity>
-                </View>
+            <View style={styles.leftArrowContainer} >
+                     <TouchableOpacity onPress={openDrawer} style={{height:30,width:30}}>
+                        <Image source={context.darkMode ?  require("../../assets/menu_dark.png"):require("../../assets/menu.png")} style={{height:"100%",width:"100%",resizeMode:"cover"}}/>
+                        </TouchableOpacity>
+                     </View>
                 <View style={styles.titleContainer}>
                     <Text style={context.darkMode ? styles.TitleDark : styles.Title}>Business Dashboard</Text>
                 </View>
@@ -131,20 +137,14 @@ const BusinessDashboardScreen = (props) => {
                             </View>
                             <View style={styles.imageContainer}>
                                 <View style={styles.imageHead}>
-                                    <Image
+                                <Image
                                         style={{ width: "100%", height: "100%", resizeMode: 'contain', }}
-                                        source={require("../../assets/images/head.png")}
+                                        source={require("../../assets/RoseMan.png")}
                                     />
                                 </View>
 
-                                <Image
-                                    style={styles.image}
-                                    source={require("../../assets/images/body.png")}
-                                />
-                                <Image
-                                    style={styles.image}
-                                    source={require("../../assets/images/legs.png")}
-                                />
+                              
+                                
                             </View>
                         </LinearGradient>
 
@@ -210,6 +210,7 @@ const BusinessDashboardScreen = (props) => {
                                     end={[1, 1]}
                                     style={styles.cardValueContainer}
                                 >
+
                                     <Text style={styles.textCard}>
                                         {dashboard.statisticData.totalViews}
                                     </Text>
@@ -409,15 +410,25 @@ const styles = StyleSheet.create({
 
     },
     imageHead: {
-        width: '50%',
-        height: '50%',
+        width: '80%',
+        height: '80%',
         // backgroundColor:'orange',
         position: 'absolute',
-        top: '-30%',
+        top: '-1%',
 
     },
-    image: {
+    imageBody: {
         width: '70%',
+        height: '33%',
+        position:'absolute',
+        top:"20%",
+        resizeMode: 'contain',
+        //backgroundColor:'green'
+    },
+    imageLegs: {
+        width: '70%',
+        position:'absolute',
+        top:"43%",
         height: '33%',
         resizeMode: 'contain',
         //backgroundColor:'green'
