@@ -157,7 +157,7 @@ export default function Orders(props) {
                 <View style={context.darkMode ? styles.menuDark : styles.menu}>
                         <View style={styles.leftArrowContainer} >
                         <TouchableOpacity onPress={openDrawer} style={{height:30,width:30}}>
-                        <Image source={context.darkMode ?  require("../assets/menu_dark.png"):require("../assets/menu.png")} style={{height:"100%",width:"100%",resizeMode:"cover"}}/>
+                        <Image source={context.darkMode ?  require("../assets/menu_dark.png"):require("../assets/menu.png")} style={{height:"100%",width:"100%",resizeMode:"cover",marginHorizontal: 4}}/>
                         </TouchableOpacity>
                         </View>
                     <View style={styles.titleContainer}>

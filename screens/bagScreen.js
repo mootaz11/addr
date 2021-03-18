@@ -17,43 +17,39 @@ export default function bag(props) {
         if (mounted) {
             getOrder(props.route.params.order._id).then(order => {
                 setPreOrder(order);
+
                 if (order.type != 'food') {
                     order.items.map(item => {
                         item.product.total = item.product.basePrice * item.quantity
-
                     })
                     setProducts(order.items);
                 }
                 else {
+                    var _variants = []
                     order.foodItems.map(item => {
                         var p = 0;
-                        var _variants = []
                         item.ingredients.map(e => {
                             if (item.product.pricing.findIndex(pricing => { return pricing._id == e }) >= 0) {
                                 let pricing = { ...item.product.pricing[item.product.pricing.findIndex(pricing => { return pricing._id == e })] };
                                 item.product.variants.map(variant => {
                                     if (variant.options.findIndex(option => { return option._id === pricing.variantOptions[0] }) >= 0) {                                    
                                         let _variant  = {...variant.options[variant.options.findIndex(option => { return option._id === pricing.variantOptions[0] })]}
-                                        console.log(_variant)
-                                        _variants.push(_variant);
+                                        _variants.push({variant : _variant,_id:item._id});
                                     }
                                 })
                                 p += pricing.price;
                             }
                         })
                         item.product.basePrice = p;
-                        setIngredients(_variants);
                         item.product.total = item.product.basePrice * item.quantity
                     })
+                    setIngredients(_variants);
+                    
                     setProducts(order.foodItems);
-
                 }
             })
         }
-
         return () => { mounted = false; setProducts([]); setPreOrder(null);setIngredients([]); }
-
-
     }, [props.route.params])
 
     const goBack = () => {
@@ -128,7 +124,7 @@ export default function bag(props) {
                                         <Image style={styles.productImage} source={{ uri: item.product.mainImage }} />
                                     </View>
                                     <View style={styles.productInfoContainer}>
-                                        <View style={{ width: "92%", height: "20%", marginVertical: 4, alignSelf: "center" }}>
+                                        <View style={{ width: "92%",flex:1, marginVertical: 4, alignSelf: "center" }}>
                                             <Text style={context.darkMode ? { fontSize: 17, fontWeight: "700", color: "white" } : { fontSize: 17, fontWeight: "700" }}>{item.product.name}</Text>
                                         </View>
                                         <TouchableOpacity style={{ width: "92%", height: "8%" }} onPress={() => { removeProduct(item) }}>
@@ -145,8 +141,11 @@ export default function bag(props) {
                                         <View style={{ flex:1, marginVertical: 4,marginLeft:6 }}>
                                             {
                                                 ingredients && ingredients.length > 0 && ingredients.map(ingredient => (
-                                                    <View key={ingredient._id}>
-                                                        <Text style={context.darkMode ? { fontSize: 14, color: "white" } : { fontSize: 14,color:"black" }}>{ingredient.name}</Text>
+
+                                                    ingredient._id==item._id
+                                                    &&
+                                                    <View key={ingredient.variant._id}>
+                                                        <Text style={context.darkMode ? { fontSize: 14, color: "white" } : { fontSize: 14,color:"black" }}>{ingredient.variant.name}</Text>
                                                     </View>
 
                                                 ))
@@ -167,7 +166,7 @@ export default function bag(props) {
                                             </TouchableOpacity>
 
                                         </View>
-                                    </View>
+                                        </View>
                                 </View>
                         }
                         keyExtractor={item => item._id}
@@ -197,8 +196,21 @@ export default function bag(props) {
     }
     else {
         return (
-            <View style={{ flex: 1, justifyContent: "center", flexDirection: "column", alignItems: "center" }}>
-                <ActivityIndicator size="large" />
+            <View style={context.darkMode ? styles.containerDark : styles.container}>
+            <View style={context.darkMode ? styles.menuDark : styles.menu}>
+                <TouchableOpacity style={styles.leftArrowContainer} onPress={goBack}>
+                    <View >
+                        <Image style={styles.leftArrow} source={context.darkMode ? require("../assets/left-arrow-dark.png") : require("../assets/left-arrow.png")} />
+                    </View>
+                </TouchableOpacity>
+                <View style={styles.titleContainer}>
+                    <Text style={context.darkMode ? styles.TitleDark : styles.Title}>Bag</Text>
+                </View>
+            </View>
+            <View
+            style={{ flex: 1, justifyContent: "center", flexDirection: "column", alignItems: "center" }}>
+                <ActivityIndicator size="large" color={"#2474F1"} />
+            </View>
             </View>
         )
     }

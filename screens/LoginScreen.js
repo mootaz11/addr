@@ -58,16 +58,9 @@ export default function Login(props) {
     useEffect(() => {
 
         if (!context.isloading&&context.user) {
-            
-            if(!context.user.isPartner&&!context.user.isVendor){
-                props.navigation.navigate("Home");
-            }
-                
-            else{
-                props.navigation.navigate("partners");}
+            props.navigation.navigate("Home");
         }
-        else{
-        }
+
     },[context.isloading,context.user])
 
 

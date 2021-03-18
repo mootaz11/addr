@@ -217,6 +217,8 @@ const styles = StyleSheet.create({
     leftArrow: {
         width: 30,
         height: 30
+        ,marginLeft:10
+        
         ,marginTop:10
 
     },

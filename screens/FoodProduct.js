@@ -4,6 +4,7 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import {getProduct} from '../rest/productApi';
 import { createOrder } from '../rest/ordersApi';
 import AuthContext from '../navigation/AuthContext';
+import { setIn } from 'formik';
 
 
 
@@ -14,18 +15,24 @@ export default function foodProduct(props) {
     const [choice, setChoice] = useState(null);
     const [supplements, setSupplements] = useState([]);
     const [ingredients, setIngredients] = useState([]);
-    const [food_data,setFoodData]=useState(null)
+    const [food_data,setFoodData]=useState(null);
+
     useEffect(() => {
         if (props.route.params.product) {
             getProduct(props.route.params.product._id).then(product=>{
                 let _food_data=[];
-                 product.variants.map(variant=>{
+               let _ingredients =[ ];
+                product.variants.map(variant=>{
                     let data = variant.options.map(option=>{
                        let index_pricing = product.pricing.findIndex(pricing=>{
                            return pricing.variantOptions.findIndex(Pricing_option=>{return Pricing_option._id==option._id})>=0
                        });
                        return {title:variant.name,choix:option.name,price:product.pricing[index_pricing].price,_id:product.pricing[index_pricing]._id}
                     })
+                    if(variant.name=='ingredient'){
+                        setIngredients(data);
+                        }
+                
                     _food_data.push({data,title:variant.name})
                  })
                 
@@ -64,8 +71,8 @@ export default function foodProduct(props) {
     }
 
     const addIngredients = (item) => {
-        
         if (ingredients.findIndex(i => { return i._id == item._id }) >= 0) {
+
             setIngredients(ingredients.filter(i => i._id != item._id))
             let _product ={...product};
             _product.total-=item.price
@@ -83,6 +90,7 @@ export default function foodProduct(props) {
     }
 
     const addSupplements = (item) => {
+
         if (supplements.length > 26) {
             alert("you must choose only 16");
         }
@@ -127,30 +135,25 @@ export default function foodProduct(props) {
                     "",
                     "food order created done !",
                     [
-                      
                       { text: "OK" }
                     ],
                     { cancelable: false }
-
-
                   );
-
             }
         })
         .catch(err=>{
             alert("error occured")
-        })
-    
-    }
+        })}
+       
         else {
             alert("please choose at least one option")
         }
     }
 const checkBag =()=>{
-    props.navigation.navigate("basket",{last_screen:"product food"});
-
+    props.navigation.navigate("basket",{last_screen:"food"});
 }
-    const goBack = () => {
+
+const goBack = () => {
         props.navigation.goBack();
     }
     if (product) {
@@ -171,7 +174,6 @@ const checkBag =()=>{
                             <View style={styles.itemContainer}>
                                 <View style={styles.itemInfo}>
                                     {
-
                                         item.title == "CHOIX" ?
                                             <TouchableOpacity key={item.choix} onPress={() => addChoice(item)}>
                                                 <View style={styles.RadioButton}>
@@ -179,19 +181,15 @@ const checkBag =()=>{
                                                 </View>
                                             </TouchableOpacity>
                                             :
-                                            <TouchableOpacity key={item.choix} onPress={() => item.title == "INGREDIENTS" ? addIngredients(item) : addSupplements(item)}>
+                                            <TouchableOpacity key={item.choix} onPress={() => item.title == "ingredient" ? addIngredients(item) : addSupplements(item)}>
                                                 <View style={styles.RadioButton}>
-                                                    <Image style={{ width: "90%", height: "90%", resizeMode: "cover" }} source={item.title == "INGREDIENTS" ? ingredients.findIndex(i => { return i == item }) >= 0 ? require("../assets/checkbox_checked.png") : require("../assets/checkbox_unchecked.png") : supplements.findIndex(i => { return i == item }) >= 0 ? require("../assets/checkbox_checked.png") : require("../assets/checkbox_unchecked.png")} />
+                                                    <Image style={{ width: "90%", height: "90%", resizeMode: "cover" }} source={item.title == "ingredient" ? ingredients.findIndex(i => { return i == item }) >= 0 ? require("../assets/checkbox_checked.png") : require("../assets/checkbox_unchecked.png") : supplements.findIndex(i => { return i == item }) >= 0 ? require("../assets/checkbox_checked.png") : require("../assets/checkbox_unchecked.png")} />
                                                 </View>
                                             </TouchableOpacity> 
-
                                     }
-
                                     <Text style={context.darkMode ?{ fontSize: 17 ,color:"white"} : { fontSize: 17,color:"black" }}>{item.choix}</Text>
-
                                 </View >
                                 <Text style={context.darkMode ?{ fontSize: 17 ,color:"white"} : { fontSize: 17 }}>{item.price} dt</Text>
-
                             </View>}
                         renderSectionHeader={({ section: { title } }) => (
                             <View style={context.darkMode ? styles.headerSectionDark : styles.headerSection}>

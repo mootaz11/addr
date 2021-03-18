@@ -35,7 +35,7 @@ export default function SingleBrand(props) {
                     setCategories(partner.categories);
                 }
                 else {
-                    setCategories(_categories)
+                    setCategories(partner.categories)
                 }
                 if(partner.lastProducts.length>0){
                     setNewArrivals(partner.lastProducts)       }
@@ -97,7 +97,7 @@ export default function SingleBrand(props) {
             <SafeAreaView>
             <View style={styles.headerImageContainer}>
 
-                <Image style={styles.headerImage} blurRadius={0.5}  source={partner && partner.services.isFood?partner.backgroundImage ?{uri:partner.backgroundImage}: require("../assets/fast_food.jpg"):require("../assets/fast_food.jpg")} />
+                <Image style={styles.headerImage} blurRadius={0.5}  source={partner && partner.services.isFood?partner.backgroundImage ?{uri:partner.backgroundImage}: require("../assets/fast_food.jpg"):partner &&partner.backgroundImage ?{uri:partner.backgroundImage}: require("../assets/shop.jpg")} />
                 <View style={styles.titleContainer}>
                     <Text numberOfLines={2} style={styles.title}>{partner && partner.description ? partner.description :"Make Yourself Comfortable"}</Text>
 

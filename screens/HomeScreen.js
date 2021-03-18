@@ -1,19 +1,27 @@
 import React, { useState, useContext, useEffect } from 'react'
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-
 import { StyleSheet, Dimensions, View, Image, Platform, Text, Clipboard, Modal, Alert,Share, Linking, TouchableOpacity,Keyboard  } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import { Icon, SearchBar} from 'react-native-elements';
-import { FlatList } from 'react-native-gesture-handler';
+import { FlatList, ScrollView } from 'react-native-gesture-handler';
 import _ from 'lodash';
+import { useActionSheet } from '@expo/react-native-action-sheet';
+
 import AuthContext from '../navigation/AuthContext';
 import * as Location from 'expo-location';
 import * as Permissions from 'expo-permissions';
 import MapViewDirections from 'react-native-maps-directions';
 import { getCities,getService } from '../rest/geoLocationApi'
 import {getPartner} from '../rest/partnerApi';
+import {getDelivererOrders} from '../rest/ordersApi'
+import Swipeable from 'react-native-gesture-handler/Swipeable';
+import Animated from 'react-native-reanimated';
 
 const api_directions_key = "AIzaSyDcbXzRxlL0q_tM54tnAWHMlGdmPByFAfE";
+const partnersList = [
+  {name:"mixmax",id:"1",image:require("../assets/mixmax.jpg")},
+  {name:"bershka",id:"2",image:require("../assets/bershkadark.jpg")},
+];
 
 const services_init = [
   {_id:'1',serviceName:"taxi",icon:require("../assets/taxi-dark.png")},
@@ -21,15 +29,14 @@ const services_init = [
   {_id:'3',serviceName:"building",icon:require("../assets/builder-dark.png")},
   {_id:'4',serviceName:"food",icon:require("../assets/fast-food-dark.png")},
   {_id:'5',serviceName:"emergency",icon:require("../assets/ambulance-dark.png")}
+
 ]
 
 
-export default function Home(props) {
-
+export default function Home(props){
+  const { showActionSheetWithOptions } = useActionSheet();
   const context = useContext(AuthContext);
   const [dropDown, setdropDown] = useState(false);
-  const [location, setLocation] = useState(context.location);
-  const [temporaryLocation, setTemporaryLocation] = useState(false);
   const [partners, setPartners] = useState(null);
   const [seviceChosen, setServiceChosen] = useState(false);
   const [domain, setDomain] = useState("");
@@ -39,9 +46,68 @@ export default function Home(props) {
   const [cities, setCities] = useState([]);
   const [services,setServices]=useState([]);
   const [regions, setRegions] = useState([]);
+  const [profiles, setProfiles] = useState([]);
   const [initServices,setInitServices]=useState();
+  const [profileChecked,setProfileChecked]=useState(false);
+
+  const [alignement] = useState(new Animated.Value(0));
+
+
+  const bringDownActionsheet = ()=>{
+    Animated.timing(alignement,{
+      toValue:1,
+      duration:500
+    }).start();
+  };
+  const bringUpActionSheet = ()=>{
+    Animated.timing(alignement,{
+      toValue:0,
+      duration:500
+    }).start();
+  };
+
+
+
+
+  const actionSheetInterpolate=alignement.interpolate({
+      inputRange:[0,1],
+      outputRange:[-Dimensions.get("screen").height/2.4+50,0]})
+  
+
+  const actionSheetStyle = {
+    bottom:actionSheetInterpolate
+  }
+
+  const gestureHandler =(e)=>{
+    if(e.nativeEvent.contentOffset.y<Dimensions.get("window").height){
+      bringDownActionsheet();
+
+    }
+    else {
+      bringUpActionSheet();
+    }
+  }
+
+  const getLocation = async ()=>{
+    let gpsServiceStatus = await Location.hasServicesEnabledAsync();
+    if (gpsServiceStatus) {
+      let location = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
+      if(context.user.isVendor){
+        getDelivererOrders(context.partner._id).then(orders=>{
+          orders.map(order=>{
+            context.sendLocalisation(order.client._id,context.partner,order._id,location);
+          })
+        })
+      }
+    }
+    else {
+      alert("Enable Location services"); //or any code to handle if location service is disabled otherwise
+    }
+  }
+    getLocation();
 
   useEffect(() => {
+
 
     setServices(services_init);
     setPartners(null);
@@ -73,7 +139,6 @@ export default function Home(props) {
                Alert.alert('Permission to access location was denied');}
                else {
                const _location =await Location.getCurrentPositionAsync({});
-
                const location= {
                        latitude:_location.coords.latitude,
                         longitude:_location.coords.longitude  
@@ -113,20 +178,7 @@ export default function Home(props) {
    }, [context.user])
 
 
-useEffect(()=>{
-  if(context.location){
-    if(context.location.temperarlyLocation){
-  if (context.location.temperarlyLocation.latitude!=null&&context.location.temperarlyLocation.longitude!=null) 
-  {
-    setTemporaryLocation(true);
-  }
-  else {
-    setTemporaryLocation(false);
 
-  }
-}
-}
-},[context.location])
 
   const filtreList = (text) => {
     setSearch(text)
@@ -137,10 +189,45 @@ useEffect(()=>{
     setSearchResult(citiesResult)
   }
 
+  const checkAccount = (item)=>{
+    if(!item.firstName){
+      context.setPartner(item);
+      if(item.deliverers.findIndex(del=>{return del===context.user._id})>=0){
+        props.navigation.navigate("deliveryDash")       
+     }
+    else 
+    {
+        props.navigation.navigate("businessDash")
+
+    }
+}
+else {
+  props.navigation.navigate("Settings")
+}  
+}
+    
+  
   
 
   const checkProfile = () => {
-    props.navigation.navigate("Settings")
+      let _profiles =[];
+
+     if(context.user.isVendor){
+       _profiles=context.user.workPlaces;
+
+       
+     }
+     if(context.user.isPartner){
+    _profiles=context.user.partners;
+     }
+     if(_profiles.findIndex(p=>{return p._id==context.user._id})==-1){
+      _profiles.push(context.user);
+
+     }
+     setProfiles(_profiles);
+
+    // setProfiles([context.user,...profiles]);
+     setProfileChecked(!profileChecked);
   }
 
 const handleServicePartners= (service)=>{
@@ -155,14 +242,15 @@ const handleServicePartners= (service)=>{
       else {partners_ids.push(_partner)}
     })
   })
+  
   partners_ids.map(_id=>{
-      getPartner(_id).then(data=>{
-         let index = _partners.findIndex(partner=>{return partner._id == data.partner._id})
+      getPartner(_id).then(partnerData=>{
+         let index = _partners.findIndex(partner=>{return partner._id == partnerData._id})
          if(index==-1){
            if(_partners.length<4)
            {
-          _partners.push(data.partner);
-          if(_partners.length==3 || partners_ids.length<3){
+          _partners.push(partnerData);
+          if(_partners.length==3 && partners_ids.length<3){
             _partners.push({partnerName:"see Others",_id:55,serviceName:service.serviceName})
           }
           setPartners(_partners);
@@ -210,7 +298,6 @@ const shareCode=async()=>{
   }
 }
     const _pressCall = (partner) => {
-      console.log(partner.phones[0])
     let phoneNumber = "";
 if (Platform.OS !== 'android') {
       phoneNumber = `telprompt:${partner.phones[0]}`;
@@ -322,7 +409,7 @@ const checkPartner=(value)=>{
           </TouchableOpacity>
         </View>
 
-        <Text style={styles.smartCode}>Smart Code:{context.user.location.locationCode}</Text>
+        <Text style={styles.smartCode}>Smart Code:{context.user.locationCode}</Text>
       </View>
 
       <View style={styles.menu}>
@@ -330,19 +417,54 @@ const checkPartner=(value)=>{
           <Image source={context.darkMode ?  require("../assets/menu_dark.png"):require("../assets/menu.png")} style={{height:30,width:30,resizeMode:"cover"}}/>
         </TouchableOpacity>
       </View>
-      <TouchableOpacity style={{ position: "absolute",marginTop: Platform.OS == 'ios' ? 40 : 30, right: "50%" }} onPress={checkBasket}>
+      <TouchableOpacity style={{ alignSelf:"center",marginTop: Platform.OS == 'ios' ? 40 : 30, position:"absolute" }} onPress={checkBasket}>
                         <FontAwesome color={context.darkMode ? "white":"black"} style={{ padding: 0, fontSize: 24}} name="shopping-bag" />
 
                     </TouchableOpacity>
 
 
       <View style={styles.imageContainer}>
-        <TouchableOpacity onPress={checkProfile}>
+        <TouchableOpacity onPress={()=>{checkProfile()}}>
           <Image style={styles.imageUser} source={context.user.photo ? { uri: context.user.photo } : require('../assets/user_image.png')} />
         </TouchableOpacity>
-
       </View>
+      {profileChecked && <Animated.View style={{...styles.listPartners,actionSheetStyle}}>
+  <View style={{width:"100%",height:"80%"}}>
+  <FlatList
+          data={profiles}
+            renderItem={({item})=>
+                (
+                  <TouchableOpacity onPress={()=>{checkAccount(item)}}>
+                <View style={{flexDirection:"row",width:"100%",height:30}}>
+                  <View style={{width:"20%",height:"100%",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
+                    <Image style={{width:20,height:20,borderRadius:20}} source={require("../assets/bershkadark.jpg")}/>
+                  </View>
+                  <View style={{width:"80%",height:"100%",flexDirection:"column",justifyContent:"center"}}>
+                  <Text style={{fontSize:15}}>{item.firstName ? item.firstName +" "+item.lastName :item.partnerName}</Text>
+                  </View>
 
+                </View>
+                </TouchableOpacity>
+                
+                )
+            }
+            keyExtractor={item=>item.id}
+          >
+
+          </FlatList>
+          
+  </View>
+  
+  <View style={{width:"100%",height:"20%",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
+  <TouchableOpacity onPress={()=>{setProfileChecked(!profileChecked)}}>
+  <Image style={{width:25,height:20}} source={require("../assets/minus.png")}/>
+        </TouchableOpacity>
+       </View>
+      
+      </Animated.View> 
+}
+
+          
       {dropDown ?
         <View style={styles.geoInfo}>
           <View style={styles.coordinatesSettings}>
@@ -368,7 +490,7 @@ const checkPartner=(value)=>{
       }
     { searchResult.length>0 && cities.length>0&& <View style={seviceChosen && partners ?  styles.searchBarAfterSetService:styles.searchBar}>
         <Icon name="search" size={Dimensions.get("window").width*0.08} color={"#2474F1"} />
-        <TouchableOpacity onPress={() => { setShowmodal(true) }}>
+        <TouchableOpacity onPress={() => { setShowmodal(true); }}>
         <Text   style={context.darkMode ? styles.searchInputDark : styles.searchInput} >{ searchResult.length>0 && cities.length>0?"Rechercher votre ville":"il ya pas de services encore"}</Text>
         </TouchableOpacity>
 
@@ -484,7 +606,8 @@ const checkPartner=(value)=>{
                     </TouchableOpacity>
                   }
                   keyExtractor={item => item._id}
-                />
+                >
+                </FlatList>
               </View>
               <View style={{ width: "100%", height: "15%", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
                 <TouchableOpacity  onPress={()=>
@@ -595,6 +718,21 @@ const styles = StyleSheet.create({
 
 
   },
+  listPartners:{
+    position: "absolute",
+    alignSelf: 'center',
+    marginTop: Platform.OS == 'ios' ? 30 : 20,
+    elevation: 10,
+    top:0,
+    backgroundColor:"white",
+    width:"98%",
+    height:150,
+    borderBottomLeftRadius:12,
+    borderBottomRightRadius:12,
+//flex:1,
+    shadowOpacity: 0.5,
+  }
+  ,
   Mycode: {
     position: "absolute",
     top: "11%",

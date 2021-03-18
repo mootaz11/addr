@@ -147,7 +147,7 @@ return()=>{
                     </TouchableOpacity>
                     <View style={context.darkMode ? styles.phoneNumberContainerDark : styles.phoneNumberContainer}>
                         <Image style={{ width: "20%", height: "50%", resizeMode: "contain" }} source={require("../assets/phone_delivery.png")} />
-                        <TextInput keyboardType="number-pad" placeholder={"PHONE NUMBER"} value={phone} onChangeText={(text)=>{setPhone(text)}} placeholderTextColor={context.darkMode ? "white" : "#bfbfbf"} style={context.darkMode ? { width: "80%", height: "50%", borderBottomColor: "#121212" } : { width: "80%", height: "50%", borderBottomColor: "#bfbfbf", }} />
+                        <TextInput  placeholder={"PHONE NUMBER"} value={phone} onChangeText={(text)=>{setPhone(text)}} placeholderTextColor={context.darkMode ? "white" : "#bfbfbf"} style={context.darkMode ? { width: "80%", height: "50%", borderBottomColor: "#121212" } : { width: "80%", height: "50%", borderBottomColor: "#bfbfbf", }} />
                     </View>
 
 

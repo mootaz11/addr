@@ -42,8 +42,6 @@ const deliverers = [
 
 export default function followPackages(props) {
     const context = useContext(AuthContext)
-    const [user, setUser] = useState(context.user)
-    const [dark, setDark] = useState(false);
     
     const openDrawer = () => {
         props.navigation.openDrawer();

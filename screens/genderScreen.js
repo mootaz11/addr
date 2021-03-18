@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState,useContext } from 'react'
 import {View,Text, StyleSheet,Dimensions,Image,TouchableOpacity} from 'react-native'
 import { FlatList } from 'react-native-gesture-handler';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import AuthContext from '../navigation/AuthContext';
 
 export default function genderCategory(props){
-    const [dark,setDark] = useState(true);
+    const context = useContext(AuthContext);
     const [categories,setCategories]=useState(null)
     const [gender,setGender]=useState("")
     
@@ -16,6 +17,8 @@ export default function genderCategory(props){
         }
 
     },[props.route.params.gender,props.route.params.categories])
+
+    
     const goBack= ()=>{
         props.navigation.goBack()
     }
@@ -25,19 +28,19 @@ export default function genderCategory(props){
     }
 
     return(
-        <View style={dark ? styles.containerDark : styles.container}>
-                <View style={dark ? styles.menuDark : styles.menu}>
+        <View style={context.darkMode ?  styles.containerDark : styles.container}>
+                <View style={context.darkMode ?  styles.menuDark : styles.menu}>
                     <View style={styles.leftArrowContainer}>
                         <TouchableOpacity style={styles.leftArrow} onPress={goBack}>
-                        <Image style={{width:"100%", height:"100%"}}  source={dark ? require("../assets/left-arrow-dark.png"):require("../assets/left-arrow.png")}/>
+                        <Image style={{width:"100%", height:"100%"}}  source={context.darkMode ?  require("../assets/left-arrow-dark.png"):require("../assets/left-arrow.png")}/>
 
                         </TouchableOpacity>
                     </View>
                  <View style={styles.titleContainer}>
-                 <Text style={dark ? styles.TitleDark : styles.Title}>{props.route.params.gender}</Text>
+                 <Text style={context.darkMode ?  styles.TitleDark : styles.Title}>{props.route.params.gender}</Text>
                 </View>   
                 <View style={styles.searchContainer}>
-                <FontAwesome color={dark ? "white" : "black"} style={{ padding: 0, fontSize: 24 }} name="search"  />
+                <FontAwesome color={context.darkMode ?  "white" : "black"} style={{ padding: 0, fontSize: 24 }} name="search"  />
 
                 </View>
             
@@ -52,10 +55,10 @@ export default function genderCategory(props){
                    <TouchableOpacity onPress={()=>{checkCategory(item)}}>
                    <View style={styles.category}>
                        <View style={{marginLeft:8}}>
-                           <Text style={dark ? {fontSize:20,fontWeight:"400",color:"white"}:{fontSize:20,fontWeight:"400"}}>{item.name}</Text>
+                           <Text style={context.darkMode ?  {fontSize:20,fontWeight:"400",color:"white"}:{fontSize:20,fontWeight:"400"}}>{item.name}</Text>
                        </View>
                        <View style={{width:30, height:"80%",justifyContent:"center",alignItems:"center" ,marginRight:8}}>
-                        <Image style={styles.arrowright} source={dark ? require("../assets/right-arrow-dark.png"):require("../assets/right-arrow.png")}/>
+                        <Image style={styles.arrowright} source={context.darkMode ?  require("../assets/right-arrow-dark.png"):require("../assets/right-arrow.png")}/>
                        </View>
                    </View>
                    </TouchableOpacity>

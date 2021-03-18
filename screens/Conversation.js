@@ -22,6 +22,8 @@ export default function Conversation(props) {
     const [conversationId,setConversationId]=useState("");
 
 
+    console.log(props.route.params.conversation.users)
+
 
     useEffect(() => {
         let mounted=true;
@@ -115,10 +117,30 @@ export default function Conversation(props) {
                 <FontAwesome color={"white"} style={{ padding: 0, fontSize: 30 }} name="arrow-left" onPress={goBack} />
                 <Image style={styles.friendImage} source={
                        props.route.params.conversation.type=="personal"?
-
-                       props.route.params.conversation.users[props.route.params.conversation.users.findIndex(u=>{return u._id != context.user._id})].photo ? 
+                       props.route.params.conversation.users[props.route.params.conversation.users.findIndex(u=>{return u._id != context.user._id})].photo 
+                       ? 
                        
-                       {uri:props.route.params.conversation.users[props.route.params.conversation.users.findIndex(u=>{return u._id != context.user._id})].photo} :{uri:props.route.params.conversation.image}:
+                       {uri:props.route.params.conversation.users[props.route.params.conversation.users.findIndex(u=>{return u._id != context.user._id})].photo} :
+                       require("../assets/user_image.png")
+                       :
+                       context.partner ? 
+
+                       props.route.params.conversation.users.findIndex(u=> {
+                           return context.partner.managers.findIndex(manager=>{return u._id ==manager.user})==-1 
+                           && context.partner.deliverers.findIndex(deliverer=>{return u._id ==deliverer})==-1
+                            && context.partner.owner !== u._id })>=0?
+
+
+                       
+                            props.route.params.conversation.users[props.route.params.conversation.users.findIndex(u => { return context.partner.managers.findIndex(manager => { return u._id == manager.user }) == -1 && context.partner.deliverers.findIndex(deliverer => { return u._id === deliverer }) == -1 && context.partner.owner !== u._id })].photo
+                       ?
+                       {
+                           uri: props.route.params.conversation.users[props.route.params.conversation.users.findIndex(u => { return context.partner.managers.findIndex(manager => { return u._id === manager.user }) == -1 && context.partner.deliverers.findIndex(deliverer => { return u._id === deliverer }) == -1 && context.partner.owner !== u._id })].photo}
+                           :
+                           require("../assets/user_image.png")
+                           :
+                           {uri:item.image} 
+                           :
                            props.route.params.conversation.image ?  {uri:props.route.params.conversation.image} : require("../assets/user_image.png")
                 } />
                 <Text style={styles.Title}>{
@@ -126,7 +148,12 @@ export default function Conversation(props) {
                     props.route.params.conversation.other ? 
                             props.route.params.conversation.other :props.route.params.conversation.users.filter(user => user._id != context.user._id)[0].firstName + " " + props.route.params.conversation.users.filter(user => user._id != context.user._id)[0].lastName 
                             : 
-                         props.route.params.conversation.title? props.route.params.conversation.title :""}</Text>
+
+                            context.partner ?
+                            props.route.params.conversation.users.findIndex(u => { return context.partner.managers.findIndex(manager => { return u._id === manager.user }) == -1 && context.partner.deliverers.findIndex(deliverer => { return u._id === deliverer }) == -1 && context.partner.owner !== u._id }) >= 0 ?
+                            props.route.params.conversation.users[ props.route.params.conversation.users.findIndex(u => { return context.partner.managers.findIndex(manager => { return u._id === manager.user }) == -1 && context.partner.deliverers.findIndex(deliverer => { return u._id === deliverer }) == -1 && context.partner.owner !== u._id })].firstName
+                                + " " +  props.route.params.conversation.users[ props.route.params.conversation.users.findIndex(u => { return context.partner.managers.findIndex(manager => { return u._id === manager.user }) == -1 && context.partner.deliverers.findIndex(deliverer => { return u._id === deliverer }) == -1 && context.partner.owner !== u._id })].lastName
+                                :  props.route.params.conversation.title :  props.route.params.conversation.title}</Text>
             </View>
             <ScrollView  ref={scrollViewRef}
                 onContentSizeChange={() => scrollViewRef.current.scrollToEnd({ animated: true })}

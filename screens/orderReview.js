@@ -8,9 +8,44 @@ import {getOrder,placeOrder,getDeliveryOptions} from '../rest/ordersApi';
 export default function orderReview(props) {
     const  context = useContext(AuthContext);
     const [orderReview,setOrderReview]=useState(null);
+    const [ingredients, setIngredients] = useState([]);
+    const [products, setProducts] = useState([]);
+
+
     useEffect(()=>{
             getOrder(props.route.params.order._id).then(order=>{
                 setOrderReview(order);
+
+
+                if (order.type != 'food') {
+                    order.items.map(item => {
+                        item.product.total = item.product.basePrice * item.quantity
+                    })
+                    setProducts(order.items);
+                }
+                else {
+                    var _variants = []
+                    order.foodItems.map(item => {
+                        var p = 0;
+                        item.ingredients.map(e => {
+                            if (item.product.pricing.findIndex(pricing => { return pricing._id == e }) >= 0) {
+                                let pricing = { ...item.product.pricing[item.product.pricing.findIndex(pricing => { return pricing._id == e })] };
+                                item.product.variants.map(variant => {
+                                    if (variant.options.findIndex(option => { return option._id === pricing.variantOptions[0] }) >= 0) {                                    
+                                        let _variant  = {...variant.options[variant.options.findIndex(option => { return option._id === pricing.variantOptions[0] })]}
+                                        _variants.push({variant : _variant,_id:item._id});
+                                    }
+                                })
+                                p += pricing.price;
+                            }
+                        })
+                        item.product.basePrice = p;
+                        item.product.total = item.product.basePrice * item.quantity
+                    })
+                    setIngredients(_variants);
+                    
+                    setProducts(order.foodItems);
+                }
             })
             .catch(err=>{
                 alert("network error");
@@ -22,13 +57,14 @@ export default function orderReview(props) {
     }
 
     const goToDeliveryAdress = ()=>{
+     
                 placeOrder(orderReview._id,{orderDestination:props.route.params.location,
                     deliveryPartnerId:props.route.params.deliveryPartnerId?
                     props.route.params.deliveryPartnerId
                     :orderReview.partner._id,phone:props.route.params.phone}).then(message=>{
                     Alert.alert(
                         "",
-                        "order placed succefully!",
+                        "order placed successfully!",
                         [
                           { text: "OK" ,onPress:()=>{
                             props.navigation.navigate("Home",{orderplaced:true});

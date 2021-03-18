@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react'
 import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions, Alert, KeyboardAvoidingView, ScrollView, Switch, Modal } from 'react-native'
-import { Icon } from 'react-native-elements';
 import { TextInput } from 'react-native-paper';
 import AuthContext from '../navigation/AuthContext';
 import * as ImagePicker from 'expo-image-picker';
@@ -24,6 +23,7 @@ export default function Settings({ navigation }) {
     
     const context = React.useContext(AuthContext);
     const [editUsername, setEditUsername] = useState(false);
+    const [profile,setProfile]=useState();
     const [editPassword, setEditPassword] = useState(false);
     const [editFloor, setEditFloor] = useState(false);
     const [editDoor, setEditDoor] = useState(false);
@@ -35,7 +35,11 @@ export default function Settings({ navigation }) {
     const [newpassword, setNewPassword] = useState("");
     const [isEnabled, setIsEnabled] = useState(false);
     const [openModal, setOpenModal] = useState(false);
-    console.log(context.user)
+
+    useEffect(()=>{
+        setProfile(context.user);
+    },[context.user])
+
     const toggleSwitch = () => {
         setOpenModal(true);
         setIsEnabled(previousState => !previousState);
@@ -61,7 +65,7 @@ export default function Settings({ navigation }) {
     if (!editDoor) { setEditDoor(true); }
     else {
 
-        updateInfo({ building: context.user.building }).then(res => {
+        updateInfo({ building: profile.building }).then(res => {
             Alert.alert(
                 "",
                 res.data.message,
@@ -75,13 +79,14 @@ export default function Settings({ navigation }) {
             );
         }).catch(err => { alert("update failed") })
         setEditDoor(false)
+
     }
    }
 
    const changeTextInputFloor=()=>{
     if (!editFloor) { setEditFloor(true); }
     else {
-        updateInfo({ building: context.user.building }).then(res => {
+        updateInfo({ building: profile.building }).then(res => {
             Alert.alert(
                 "",
                 res.data.message,
@@ -96,6 +101,7 @@ export default function Settings({ navigation }) {
         }).catch(err => { alert("update failed") })
 
         setEditFloor(false)
+
     }
 
 
@@ -106,7 +112,7 @@ export default function Settings({ navigation }) {
     const changeTextInputPhone = () => {
         if (!editPhoneNumber) { setEditPhoneNumber(true); }
         else {
-            updateInfo({ phone: context.user.phone }).then(res => {
+            updateInfo({ phone:profile.phone }).then(res => {
                 Alert.alert(
                     "",
                     res.data.message,
@@ -121,13 +127,14 @@ export default function Settings({ navigation }) {
             }).catch(err => { alert("update failed") })
 
             setEditPhoneNumber(false)
+
         }
 
     }
     const changeTextInputLastName = () => {
         if (!editLastName) { setEditLastName(true); }
         else {
-            updateInfo({ lastName: context.user.lastName }).then(res => {
+            updateInfo({ lastName:profile.lastName }).then(res => {
                 Alert.alert(
                     "",
                     res.data.message,
@@ -142,15 +149,16 @@ export default function Settings({ navigation }) {
 
 
             }).catch(err => { alert("update failed") })
-
             setEditLastName(false)
+            context.setUser(profile);
+
         }
     }
 
     const changetoTextInputFirstName = () => {
         if (!editFirstName) { setEditFirstName(true); }
         else {
-            updateInfo({ firstName: context.user.firstName }).then(res => {
+            updateInfo({ firstName: profile.firstName }).then(res => {
                 Alert.alert(
                     "",
                     res.data.message,
@@ -166,14 +174,15 @@ export default function Settings({ navigation }) {
 
             }).catch(err => { alert("update failed") })
 
-            setEditFirstName(false)
+            setEditFirstName(false);
+            context.setUser(profile);
         }
     }
 
     const changetoTextInputUsername = () => {
         if (!editUsername) { setEditUsername(true); }
         else {
-            updateInfo({ username: context.user.username }).then(res => {
+            updateInfo({ username: profile.username }).then(res => {
                 Alert.alert(
                     "",
                     res.data.message,
@@ -311,15 +320,13 @@ export default function Settings({ navigation }) {
             default:
                 break;
         }
-
     };
-
     return (
         <SafeAreaView style={{ flex: 1, marginTop: 35 }}>
             <View style={context.darkMode ? styles.containerdark : styles.Container}>
                 <View style={styles.menuContainer}>
-                    <TouchableOpacity onPress={() => { openDrawer() }} style={{ height: 30, width: 30 }}>
-                        <Image source={context.darkMode ? require("../assets/menu_dark.png") : require("../assets/menu.png")} style={{ height: "100%", width: "100%", resizeMode: "cover" }} />
+                    <TouchableOpacity onPress={() => { openDrawer() }} style={{ height: 30, width: 30,marginLeft:2}}>
+                        <Image source={context.darkMode ? require("../assets/menu_dark.png") : require("../assets/menu.png")} style={{ height: "100%", width: "100%", resizeMode: "cover",marginHorizontal:4 }} />
                     </TouchableOpacity>
 
                     <Text style={context.darkMode ? styles.TitleDark : styles.Title}>My Account</Text>
@@ -329,13 +336,10 @@ export default function Settings({ navigation }) {
                         <TouchableOpacity disabled={context.user.photo} onPress={changePicture}>
                             <Image style={context.user.photo ? styles.addImage : {}} source={context.user.photo ? { uri: context.user.photo } : require("../assets/add-image.png")} />
                         </TouchableOpacity>
-
                         <TouchableOpacity style={{ position: 'absolute', bottom: "0%", right: "0%", }} onPress={changePicture}>
                             {context.user.photo && <Image style={styles.editImage} source={require("../assets/pencil.png")} />}
                         </TouchableOpacity>
                     </View>
-
-
                     <View style={{ marginTop: 5 }}>
                         <Text style={{ fontSize: Dimensions.get("window").width * 0.09, color: "#828282", textAlign: "center" }}>{context.user.lastName && context.user.firstName ? context.user.lastName[0].toUpperCase() + context.user.lastName.slice(1) + " " + context.user.firstName : ""}</Text>
                         <Text style={{ textAlign: "center", color: "#828282" }}>joined: {new Date(context.user.joined).toLocaleString().split(':')[0] + ":" + new Date(context.user.joined).toLocaleString().split(':')[1]}</Text>
@@ -344,43 +348,54 @@ export default function Settings({ navigation }) {
 
                 <ScrollView style={styles.infosContainer}>
                     <Text style={context.darkMode ? { fontSize: Dimensions.get("window").width * 0.06, marginLeft: 10, color: "white" } : { fontSize: Dimensions.get("window").width * 0.06, marginLeft: 10, color: "#828282" }}>Username :</Text>
+                    
                     <View style={context.darkMode ? styles.infoDark : styles.info}>
                         <Image style={styles.infoImage} source={require("../assets/loginProfile.png")} />
-                        {!editUsername && <Text style={context.darkMode ? styles.userInfoDark : styles.userInfo}>{context.user.username}</Text>}
-                        {editUsername && <TextInput style={context.darkMode ? styles.userInfoInputDark : styles.userInfoInput} value={context.user.username} onChangeText={(text) => context.setUser({ ...context.user, username: text })} />}
+                        {!editUsername && <Text style={context.darkMode ? styles.userInfoDark : styles.userInfo}>{profile ? profile.username:""}</Text>}
+                        {editUsername && <TextInput style={context.darkMode ? styles.userInfoInputDark : styles.userInfoInput} value={profile.username} onChangeText={(text) => setProfile({ ...profile, username: text })} />}
                         <TouchableOpacity style={styles.buttonEdit} onPress={changetoTextInputUsername}>
                             {!editUsername && <Image style={styles.edit} source={require("../assets/edit.png")} />}
                             {editUsername && <Image style={styles.edit} source={require("../assets/done.png")} />}
                         </TouchableOpacity>
                     </View>
+
+
                     <Text style={context.darkMode ? { fontSize: Dimensions.get("window").width * 0.06, marginLeft: 10, color: "white" } : { fontSize: Dimensions.get("window").width * 0.06, marginLeft: 10, color: "#828282" }}>First Name :</Text>
+                   
+                   
                     <View style={context.darkMode ? styles.infoDark : styles.info}>
                         <Image style={styles.infoImage} source={require("../assets/loginProfile.png")} />
-                        {!editFirstName && <Text style={context.darkMode ? styles.userInfoDark : styles.userInfo}>{context.user.firstName}</Text>}
-                        {editFirstName && <TextInput style={context.darkMode ? styles.userInfoInputDark : styles.userInfoInput} value={context.user.firstName} onChangeText={(text) => context.setUser({ ...context.user, firstName: text })} />}
+                        {!editFirstName && <Text style={context.darkMode ? styles.userInfoDark : styles.userInfo}>{profile ? profile.firstName:""}</Text>}
+                        {editFirstName && <TextInput style={context.darkMode ? styles.userInfoInputDark : styles.userInfoInput} value={profile.firstName} onChangeText={(text) => setProfile({ ...profile, firstName: text })} />}
                         <TouchableOpacity style={styles.buttonEdit} onPress={changetoTextInputFirstName}>
                             {!editFirstName && <Image style={styles.edit} source={require("../assets/edit.png")} />}
                             {editFirstName && <Image style={styles.edit} source={require("../assets/done.png")} />}
                         </TouchableOpacity>
                     </View>
+
+
+
+
                     <Text style={context.darkMode ? { fontSize: Dimensions.get("window").width * 0.06, marginLeft: 10, color: "white" } : { fontSize: Dimensions.get("window").width * 0.06, marginLeft: 10, color: "#828282" }}>Last Name :</Text>
 
                     <View style={context.darkMode ? styles.infoDark : styles.info}>
                         <Image style={styles.infoImage} source={require("../assets/loginProfile.png")} />
-                        {!editLastName && <Text style={context.darkMode ? styles.userInfoDark : styles.userInfo}>{context.user.lastName}</Text>}
-                        {editLastName && <TextInput style={context.darkMode ? styles.userInfoInputDark : styles.userInfoInput} value={context.user.lastName} onChangeText={(text) => context.setUser({ ...context.user, lastName: text })} />}
+                        {!editLastName && <Text style={context.darkMode ? styles.userInfoDark : styles.userInfo}>{profile ? profile.lastName:""}</Text>}
+                        {editLastName && <TextInput style={context.darkMode ? styles.userInfoInputDark : styles.userInfoInput} value={profile.lastName} onChangeText={(text) => setProfile({ ...profile, lastName: text })} />}
                         <TouchableOpacity style={styles.buttonEdit} onPress={changeTextInputLastName}>
                             {!editLastName && <Image style={styles.edit} source={require("../assets/edit.png")} />}
                             {editLastName && <Image style={styles.edit} source={require("../assets/done.png")} />}
                         </TouchableOpacity>
                     </View>
 
+
+
                     <Text style={context.darkMode ? { fontSize: Dimensions.get("window").width * 0.06, marginLeft: 10, color: "white" } : { fontSize: Dimensions.get("window").width * 0.06, marginLeft: 10, color: "#828282" }}>Phone Number :</Text>
 
                     <View style={context.darkMode ? styles.infoDark : styles.info}>
                         <Image style={styles.infoImage} source={require("../assets/phone_profile.png")} />
-                        {!editPhoneNumber && <Text style={context.darkMode ? styles.userInfoDark : styles.userInfo}>{context.user.phone}</Text>}
-                        {editPhoneNumber && <TextInput style={context.darkMode ? styles.userInfoInputDark : styles.userInfoInput} value={context.user.phone} onChangeText={(text) => context.setUser({ ...context.user, phone: text })} />}
+                        {!editPhoneNumber && <Text style={context.darkMode ? styles.userInfoDark : styles.userInfo}>{profile ? profile.phone:""}</Text>}
+                        {editPhoneNumber && <TextInput style={context.darkMode ? styles.userInfoInputDark : styles.userInfoInput} value={profile.phone} onChangeText={(text) => setProfile({ ...profile, phone: text })} />}
                         <TouchableOpacity style={styles.buttonEdit} onPress={changeTextInputPhone}>
                             {!editPhoneNumber && <Image style={styles.edit} source={require("../assets/edit.png")} />}
                             {editPhoneNumber && <Image style={styles.edit} source={require("../assets/done.png")} />}
@@ -397,6 +412,7 @@ export default function Settings({ navigation }) {
                     </View>
                     <Text style={context.darkMode ? { fontSize: Dimensions.get("window").width * 0.06, marginLeft: 10, color: "white" } : { fontSize: Dimensions.get("window").width * 0.06, marginLeft: 10, color: "#828282" }}>Password :</Text>
 
+
                     <View style={context.darkMode ? styles.infoDark : styles.info}>
                         <Image style={styles.infoImage} source={require("../assets/passwordProfile.png")} />
                         {!editPassword && <Text style={context.darkMode ? styles.userInfoDark : styles.userInfo}>*********</Text>}
@@ -406,18 +422,15 @@ export default function Settings({ navigation }) {
                             {editPassword && <Image style={styles.edit} source={require("../assets/done.png")} />}
                         </TouchableOpacity>
                     </View>
-        
-        
-            
-            
             {
-            context.user.building.floor.length>0 &&
+
+            context.user&&context.user.building&&context.user.building.floor.length>0 &&
 <View>
             <Text style={context.darkMode ? { fontSize: Dimensions.get("window").width * 0.06, marginLeft: 10, color: "white" } : { fontSize: Dimensions.get("window").width * 0.06, marginLeft: 10, color: "#828282" }}>Floor :</Text>
                     <View style={context.darkMode ? styles.infoDark : styles.info}>
                         <Image style={styles.infoImage} source={require("../assets/floor.png")} />
-                        {!editFloor && <Text style={context.darkMode ? styles.userInfoDark : styles.userInfo}>{context.user.building.floor}</Text>}
-                        {editFloor && <TextInput style={context.darkMode ? styles.userInfoInputDark : styles.userInfoInput} value={context.user.building.floor} onChangeText={(text) => context.setUser({ ...context.user,building:{floor:text,door:context.user.building.door}})} />}
+                        {!editFloor && <Text style={context.darkMode ? styles.userInfoDark : styles.userInfo}>{profile ? profile.building.floor:""}</Text>}
+                        {editFloor && <TextInput style={context.darkMode ? styles.userInfoInputDark : styles.userInfoInput} value={profile.building.floor} onChangeText={(text) => setProfile({ ...profile,building:{floor:text,door:context.user.building.door}})} />}
                         <TouchableOpacity style={styles.buttonEdit} onPress={changeTextInputFloor}>
                             {!editFloor && <Image style={styles.edit} source={require("../assets/edit.png")} />}
                             {editFloor && <Image style={styles.edit} source={require("../assets/done.png")} />}
@@ -426,28 +439,25 @@ export default function Settings({ navigation }) {
                     </View>
 }
  {  
- context.user.building.door.length>0&&
+context.user && context.user.building && context.user.building.door.length>0&&
  <View>
                     <Text style={context.darkMode ? { fontSize: Dimensions.get("window").width * 0.06, marginLeft: 10, color: "white" } : { fontSize: Dimensions.get("window").width * 0.06, marginLeft: 10, color: "#828282" }}>Door :</Text>
 
                     <View style={context.darkMode ? styles.infoDark : styles.info}>
                         <Image style={styles.infoImage} source={require("../assets/door.png")} />
-                        {!editDoor && <Text style={context.darkMode ? styles.userInfoDark : styles.userInfo}>{context.user.building.door}</Text>}
-                        {editDoor && <TextInput style={context.darkMode ? styles.userInfoInputDark : styles.userInfoInput} value={context.user.building.door} onChangeText={(text) => context.setUser({ ...context.user,building:{floor:context.user.building.floor,door:text}})}/>}
+                        {!editDoor && <Text style={context.darkMode ? styles.userInfoDark : styles.userInfo}>{profile ? profile.building.door:""}</Text>}
+                        {editDoor && <TextInput style={context.darkMode ? styles.userInfoInputDark : styles.userInfoInput} value={profile.building.door} onChangeText={(text) =>setProfile({ ...profile,building:{floor:context.user.building.floor,door:text}})}/>}
                         <TouchableOpacity style={styles.buttonEdit} onPress={changeTextInputDoor}>
                             {!editDoor && <Image style={styles.edit} source={require("../assets/edit.png")} />}
                             {editDoor && <Image style={styles.edit} source={require("../assets/done.png")} />}
                         </TouchableOpacity>
                     </View>
-                    </View>
-            }                       
+                    </View>}                       
 
                     <Text style={context.darkMode ? { fontSize: Dimensions.get("window").width * 0.06, marginLeft: 10, color: "white" } : { fontSize: Dimensions.get("window").width * 0.06, marginLeft: 10, color: "#828282" }}>Refresh Location :</Text>
                     <View style={context.darkMode ? styles.infoDark : styles.info}>
                         <Image style={styles.infoImage} source={require("../assets/location_profile.png")} />
-                        {!editlocation && <Text style={context.darkMode ? styles.userInfoDark : styles.userInfo}>{context.user.address}</Text>}
-                        {editlocation && <TextInput style={context.darkMode ? styles.userInfoInputDark : styles.userInfoInput} value={context.user.address} onChangeText={(text) => context.setUser({ ...context.user, address: text })} />}
-
+                         <Text style={context.darkMode ? styles.userInfoDark : styles.userInfo}>{context.user.location.location.longitude+','+context.user.location.location.latitude}</Text>
                         <Switch
                             trackColor={{ false: "#2474F1", true: "#2474F1" }}
                             thumbColor={isEnabled ? "white" : "#2474F1"}
@@ -561,11 +571,12 @@ const styles = StyleSheet.create({
     },
     Title: {
         fontSize: 22,
+        
         color: "black",
         fontWeight: "600",
         letterSpacing: 1,
         justifyContent: "center",
-        marginHorizontal: 5
+        marginHorizontal: 8
     },
     TitleDark: {
         fontSize: 22,
@@ -573,7 +584,8 @@ const styles = StyleSheet.create({
         fontWeight: "600",
         letterSpacing: 1,
         justifyContent: "center",
-        marginHorizontal: 5
+        marginHorizontal: 8
+            
     }
     ,
     imageContainer: {
@@ -725,331 +737,12 @@ const styles = StyleSheet.create({
 
 
 
-    /*userInfo:{
-        width:"74%",
-        height:"90%",
-        margin:"2%",
-        fontSize:15,
-        textAlign:"center",
-        color:"grey",
-        alignContent:"center",
-        alignSelf:"center"
-
-    },
-    userInfoDark:{
-        width:"74%",
-        height:"90%",
-        margin:"2%",
-        fontSize:15,
-        textAlign:"center",
-        color:"white",
-        alignContent:"center",
-        alignSelf:"center"
-
-    },
-
-    userInfoInput:{
-        width:"72%",
-        height:"90%",
-        margin:"2%",
-        color:"grey",
-        backgroundColor:"white"
-    },
-    userInfoInputDark:{
-        width:"72%",
-        height:"90%",
-        margin:"2%",
-        color:"grey",
-        backgroundColor:"#1F1F1F"
-    },
-
-
-
-
-
-    buttonEdit:{
-        alignItems:"stretch",
-        width:"10%",
-        height:"90%",
-        margin:"2%",
-
-
-    },
-    edit:{
-        width:"100%",
-        height:"90%",
-        resizeMode:"contain",
-    },
-    infoImage:{
-        width:"10%",
-        height:"90%",
-        resizeMode:"contain",
-        margin:"2%",
-    },
-    
-    info:{
-        width:"96%",
-        height:"10%",
-        backgroundColor:"white",
-        borderRadius:15,
-        marginVertical:"5%",
-        flexDirection:"row",
-        alignItems:"center",
-        justifyContent:"center",
-        padding:"2%",
-        shadowOffset:{  width: 1,  height: 1,  },
-        shadowColor: "grey",
-        shadowOpacity: 1.0,    
-    },
-    infoDark:{
-        width:"96%",
-        height:"10%",
-        backgroundColor:"#1F1F1F",
-        borderRadius:15,
-        marginVertical:"5%",
-        flexDirection:"row",
-        alignItems:"center",
-        justifyContent:"center",
-        padding:"2%",
-        shadowOffset:{  width: 1,  height: 1,  },
-        shadowColor: "#1F1F1F",
-        shadowOpacity: 1.0,    
-    },
-
-
-
-
-
-
-    generalInfo:{
-        width:"100%",
-        height:"60%",
-        position:"absolute",
-        top:"40%",
-        elevation: 10,
-        flexDirection:"column",
-        alignItems:"center"
-        
-
-
-    },
-container:{
-    flex:1,
-    backgroundColor:"white"
-},
-containerdark:{
-    flex:1,
-    backgroundColor:"#121212"
-
-},
-
-
-addImageContainer:{
-    width:"100%",
-    height:"30%",   
-    position:"absolute",
-    top:"10%",
-    elevation: 10,
-    flexDirection:"column",
-    justifyContent:"center",
-    alignItems:"center",
-
-
-
-},
-addImage:{
-    flexDirection:"column",
-    justifyContent:"center",
-    alignItems:"center",
-    width:"32%",
-
-
-},
-
-image:{
-    width:85,
-    height:85,
-    resizeMode:"stretch",
-    borderRadius:85,
-    shadowOffset:{width:1,height:1},
-    shadowColor:"white",
-},
-imageDark:{
-    width:85,
-    height:85,
-    resizeMode:"stretch",
-    borderRadius:85,
-    shadowOffset:{width:1,height:1},
-    shadowColor:"#1F1F1F",
-
-},
-
-
-
-
-menu: {
-
-    position: "absolute",
-    marginTop: Platform.OS == 'ios' ? 30 : 20,
-    flexDirection: "row",
-    alignSelf: "flex-start",
-    alignContent:"space-between",
-    padding: 10,
-    shadowOpacity: 0.5,
-    elevation: 10,
-    alignItems:"center"
-
-  },
-  Title:{
-      fontSize:22,
-      color:"#2474F1",
-      fontWeight:"600",
-      letterSpacing:1,
-      justifyContent:"center",
-      marginHorizontal:5
-    },
-    TitleDark:{
-        fontSize:22,
-        color:"white",
-        fontWeight:"600",
-        letterSpacing:1,
-        justifyContent:"center",
-        marginHorizontal:5
-      },
-
-
-    imageTitle:{
-        fontWeight:"500",
-        color:"black",
-        margin:3
-    },
-    
-    imageTitleDark:{
-        fontWeight:"500",
-        color:"white",
-        margin:3
-
-    }*/
 
 })
 
 
 
-/*<View style={context.darkMode ? styles.containerdark :styles.container}>
 
-    <View style={context.darkMode ? styles.menu: styles.menu}>
-        <Icon color={ context.darkMode ? "white": "#2474F1"} style={{ flex: 1, padding: 0 }} name="menu" onPress={openDrawer} />
-        <Text style={context.darkMode ? styles.TitleDark : styles.Title}>My Account</Text>
-     </View>
-    
-     <View style={styles.addImageContainer}>
-         <View style={styles.addImage} >
-         <Image style={context.darkMode ? styles.imageDark :styles.image}   source={ user.photo ? {uri:user.photo}  : require("../assets/add-image.png")}/>
- 
-         <TouchableOpacity style={{position:"absolute",top:"84%",left:"64%"}} onPress={changePicture}>
-             <Image style={{width:20,height:20,resizeMode:"cover"}} source={require("../assets/edit_image.png")}/>
-         </TouchableOpacity>
-       
-         </View>
-       
-    </View>
-    <View style={styles.generalInfo}>
-        <View style={context.darkMode ? styles.infoDark :styles.info}>
-            <Image style={styles.infoImage} source={require("../assets/loginProfile.png")}/>
-       
-
-
-       { !editUsername &&<Text style={context.darkMode ? styles.userInfoDark :styles.userInfo}>{user.username}</Text>}
-         {editUsername && <TextInput  style={context.darkMode ? styles.userInfoInputDark :styles.userInfoInput} value={user.username} onChangeText={(text)=>context.setUser({...user,username:text})} />} 
-        <TouchableOpacity style={styles.buttonEdit} onPress={changetoTextInputUsername}>
-           { !editUsername && <Image style={styles.edit}  source={require("../assets/edit.png") }/>}
-           { editUsername && <Image style={styles.edit}  source={require("../assets/done.png") }/>}
-        </TouchableOpacity> 
-           
-
-        </View>
-
-        <View style={context.darkMode ? styles.infoDark :styles.info}>
-            <Image style={styles.infoImage} source={require("../assets/loginProfile.png")}/>
-       
-
-
-       { !editUsername &&<Text style={context.darkMode ? styles.userInfoDark :styles.userInfo}>{user.username}</Text>}
-         {editUsername && <TextInput  style={context.darkMode ? styles.userInfoInputDark :styles.userInfoInput} value={user.username} onChangeText={(text)=>context.setUser({...user,username:text})} />} 
-        <TouchableOpacity style={styles.buttonEdit} onPress={changetoTextInputUsername}>
-           { !editUsername && <Image style={styles.edit}  source={require("../assets/edit.png") }/>}
-           { editUsername && <Image style={styles.edit}  source={require("../assets/done.png") }/>}
-        </TouchableOpacity> 
-           
-
-        </View>
-
-        <View style={context.darkMode ? styles.infoDark :styles.info}>
-            <Image style={styles.infoImage} source={require("../assets/loginProfile.png")}/>
-       
-
-
-       { !editUsername &&<Text style={context.darkMode ? styles.userInfoDark :styles.userInfo}>{user.username}</Text>}
-         {editUsername && <TextInput  style={context.darkMode ? styles.userInfoInputDark :styles.userInfoInput} value={user.username} onChangeText={(text)=>context.setUser({...user,username:text})} />} 
-        <TouchableOpacity style={styles.buttonEdit} onPress={changetoTextInputUsername}>
-           { !editUsername && <Image style={styles.edit}  source={require("../assets/edit.png") }/>}
-           { editUsername && <Image style={styles.edit}  source={require("../assets/done.png") }/>}
-        </TouchableOpacity> 
-           
-
-        </View>
-
-
-
-
-
-        <View style={context.darkMode ? styles.infoDark :styles.info}>
-        <Image style={styles.infoImage} source={require("../assets/emailProfile.png")}/>
-        
-        { !editEmail && <Text style={context.darkMode ? styles.userInfoDark :styles.userInfo}>{user.email}</Text> }
-        {editEmail && <TextInput style={context.darkMode ? styles.userInfoInputDark :styles.userInfoInput} value={user.email}  onChangeText={(text)=>context.setUser({...user,email:text})}  />} 
-        <TouchableOpacity style={styles.buttonEdit} onPress={changetoTextInputEmail}>
-        { !editEmail && <Image style={styles.edit}  source={require("../assets/edit.png") }/>}
-           { editEmail && <Image style={styles.edit}  source={require("../assets/done.png") }/>}
-        </TouchableOpacity> 
-        </View>
-
-
-
-        
-        
-        <View style={context.darkMode ? styles.infoDark :styles.info}>
-        <Image style={styles.infoImage} source={require("../assets/passwordProfile.png")}/>
-        {!editPassword&&<Text style={context.darkMode ? styles.userInfoDark :styles.userInfo}>*********</Text>}
-        {editPassword && <TextInput secureTextEntry={true} style={context.darkMode ? styles.userInfoInputDark :styles.userInfoInput} value={newpassword}  onChangeText={(text)=>setNewPassword(text)}  />} 
-        <TouchableOpacity style={styles.buttonEdit} onPress={changetoTextInputPassword}>
-        { !editPassword && <Image style={styles.edit}  source={require("../assets/edit.png") }/>}
-           { editPassword && <Image style={styles.edit}  source={require("../assets/done.png") }/>}
-        </TouchableOpacity> 
-        </View>
-        
-
-        <View style={context.darkMode ? styles.infoDark :styles.info}>
-        <Image style={styles.infoImage} source={require("../assets/locationProfile.png")}/>
-        {!editlocation &&<Text style={context.darkMode ? styles.userInfoDark :styles.userInfo}>{user.address}</Text>}
-        {editlocation && <TextInput  style={context.darkMode ? styles.userInfoInputDark :styles.userInfoInput} value={user.address} onChangeText={(text)=>setUser({...user,address:text})}  />} 
-        <TouchableOpacity style={styles.buttonEdit} onPress={changetoTextInputLocation}>
-        { !editlocation && <Image style={styles.edit}  source={require("../assets/edit.png") }/>}
-           { editlocation && <Image style={styles.edit}  source={require("../assets/done.png") }/>}
-        </TouchableOpacity> 
-
-        
-        </View>
-        
-        
-        
-        <View style={context.darkMode ? styles.infoDark :styles.info}>
-
-        </View>
-
-    </View>
- 
-</View>*/
 
 
 const darkStyle = [

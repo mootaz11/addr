@@ -29,7 +29,7 @@ export default function  BusinessOrders (props) {
 
 
     useEffect(()=>{
-        getPartnerOrders(context.user._id).then(orders=>{
+        getPartnerOrders(context.partner._id).then(orders=>{
             let _ordersToPrepare =[]
             let _preparedOrders =[]
             let _deliveredOrders=[]
@@ -150,7 +150,7 @@ export default function  BusinessOrders (props) {
                                     <View style={{ width: "25%", height: "100%", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
 
                                         <TouchableOpacity onPress={() => { orderToPrepare ? prepareOrderHandler(item):null }}>
-                                            <FontAwesome color={Done ? "#4BB543" : "#cccccc"} style={{ padding: 0, fontSize: 30, }} name="check" />
+                                            <FontAwesome color={"#4BB543" } style={{ padding: 0, fontSize: 30, }} name="check" />
                                         </TouchableOpacity>
 
                                     </View>

@@ -4,14 +4,9 @@ import { FlatList } from 'react-native-gesture-handler';
 import AuthContext from '../navigation/AuthContext';
 
 
-
 export default function Chat({ navigation }) {
     const context = useContext(AuthContext);
-    const [convs,setConvs]=useState([]);
    
-    
-
-
     const checkConversation = (conversation) => {
         navigation.navigate("conversation", { conversation, chat: true })
     }
@@ -30,7 +25,6 @@ export default function Chat({ navigation }) {
             </View>
 
             <View style={styles.friends}>
-
                 {context.conversations && context.conversations.length > 0 &&
                     <FlatList
                         horizontal
@@ -42,16 +36,34 @@ export default function Chat({ navigation }) {
                                         <Image style={styles.headUserImage} source={
                                             item.type == "personal" ?
                                                 item.users[item.users.findIndex(u => { return u._id != context.user._id })].photo?
-                                                    { uri: item.users[item.users.findIndex(u => { return u._id != context.user._id })].photo }:require('../assets/user_image.png'):
-                                                    context.partner ? 
 
-                                                    item.users.findIndex(u=>{return context.partner.managers.findIndex(manager=>{return u._id ===manager._id})==-1 && context.partner.deliverers.findIndex(deliverer=>{return u._id ===deliverer._id})==-1 && context.partner.owner !== u._id })>=0?
-                                                item.users[item.users.findIndex(u => { return context.partner.managers.findIndex(manager => { return u._id === manager._id }) == -1 && context.partner.deliverers.findIndex(deliverer => { return u._id === deliverer._id }) == -1 && context.partner.owner !== u._id })].photo
+                                                    { uri: item.users[item.users.findIndex(u => { return u._id != context.user._id })].photo }
+                                                    :require('../assets/user_image.png')
+                                                    
+                                                    
+                                                    :
+                                                    context.partner ? 
+                                                    item.users.findIndex(u=> {
+                                                        return context.partner.managers.findIndex(manager=>{return u._id ==manager.user})==-1 
+                                                        && context.partner.deliverers.findIndex(deliverer=>{return u._id ==deliverer})==-1
+                                                         && context.partner.owner !== u._id })>=0?
+
+
+                                                    
+                                                item.users[item.users.findIndex(u => { return context.partner.managers.findIndex(manager => { return u._id == manager.user }) == -1 && context.partner.deliverers.findIndex(deliverer => { return u._id === deliverer }) == -1 && context.partner.owner !== u._id })].photo
                                                     ?
                                                     {
-                                                        uri: item.users[item.users.findIndex(u => { return context.partner.managers.findIndex(manager => { return u._id === manager._id }) == -1 && context.partner.deliverers.findIndex(deliverer => { return u._id === deliverer._id }) == -1 && context.partner.owner !== u._id })].photo}:require("../assets/user_image.png"):
-                                                    {uri:item.image} 
-                                                    :{uri:item.image} 
+                                                        uri: item.users[item.users.findIndex(u => { return context.partner.managers.findIndex(manager => { return u._id === manager.user }) == -1 && context.partner.deliverers.findIndex(deliverer => { return u._id === deliverer }) == -1 && context.partner.owner !== u._id })].photo}
+                                                        :
+                                                        require("../assets/user_image.png")
+                                                        :
+                                                  
+                                                  
+                                                        {uri:item.image} 
+                                                        :
+                                                        {uri:item.image} 
+
+                                                    
                                         }
                                         />
 
@@ -61,8 +73,9 @@ export default function Chat({ navigation }) {
                                                 item.users[item.users.findIndex(u => { return u._id != context.user._id })].firstName ?
                                                     item.users[item.users.findIndex(u => { return u._id != context.user._id })].firstName : "" :
                                                 context.partner ? 
-                                                item.users.findIndex(u=>{return context.partner.managers.findIndex(manager=>{return u._id ===manager._id})==-1 && context.partner.deliverers.findIndex(deliverer=>{return u._id ===deliverer._id})==-1 && context.partner.owner !== u._id })>=0  ?
-                                                item.users[item.users.findIndex(u => { return context.partner.managers.findIndex(manager => { return u._id === manager._id }) == -1 && context.partner.deliverers.findIndex(deliverer => { return u._id === deliverer._id }) == -1 && context.partner.owner !== u._id })].firstName
+
+                                                item.users.findIndex(u=>{return context.partner.managers.findIndex(manager=>{return u._id ===manager.user})==-1 && context.partner.deliverers.findIndex(deliverer=>{return u._id ===deliverer})==-1 && context.partner.owner !== u._id })>=0  ?
+                                                item.users[item.users.findIndex(u => { return context.partner.managers.findIndex(manager => { return u._id === manager.user }) == -1 && context.partner.deliverers.findIndex(deliverer => { return u._id === deliverer }) == -1 && context.partner.owner !== u._id })].firstName
                                                 : item.title:item.title} </Text>
 
                                         <Text numberOfLines={1} style={styles.friendHeadName}>{
@@ -73,15 +86,17 @@ export default function Chat({ navigation }) {
                                                     :
                                                     item.users[item.users.findIndex(u => { return u._id != context.user._id })].lastName
                                                 :
+
                                                 context.partner ? 
-                                                item.users.findIndex(u=>{return context.partner.managers.findIndex(manager=>{return u._id ===manager._id})==-1 && context.partner.deliverers.findIndex(deliverer=>{return u._id ===deliverer._id})==-1 && context.partner.owner !== u._id })>=0  ? 
+                                                 
+                                                item.users.findIndex(u=>{return context.partner.managers.findIndex(manager=>{return u._id ===manager.user})==-1 && context.partner.deliverers.findIndex(deliverer=>{return u._id ===deliverer})==-1 && context.partner.owner !== u._id })>=0  ? 
                                                 
-                                                item.users[item.users.findIndex(u => { return context.partner.managers.findIndex(manager => { return u._id === manager._id }) == -1 && context.partner.deliverers.findIndex(deliverer => { return u._id === deliverer._id }) == -1 && context.partner.owner !== u._id })].lastName.length > 8
+                                                item.users[item.users.findIndex(u => { return context.partner.managers.findIndex(manager => { return u._id === manager.user }) == -1 && context.partner.deliverers.findIndex(deliverer => { return u._id === deliverer }) == -1 && context.partner.owner !== u._id })].lastName.length > 8
                                                     ?
-                                                    item.users[item.users.findIndex(u => { return context.partner.managers.findIndex(manager => { return u._id === manager._id }) == -1 && context.partner.deliverers.findIndex(deliverer => { return u._id === deliverer._id }) == -1 && context.partner.owner !== u._id })].lastName.substring(0, 8) + ".."
+                                                    item.users[item.users.findIndex(u => { return context.partner.managers.findIndex(manager => { return u._id === manager.user }) == -1 && context.partner.deliverers.findIndex(deliverer => { return u._id === deliverer }) == -1 && context.partner.owner !== u._id })].lastName.substring(0, 8) + ".."
                                                     :
-                                                    item.users[item.users.findIndex(u => { return context.partner.managers.findIndex(manager => { return u._id === manager._id }) == -1 && context.partner.deliverers.findIndex(deliverer => { return u._id === deliverer._id }) == -1 && context.partner.owner !== u._id })].lastName
-                                                    : "" : ""
+                                                    item.users[item.users.findIndex(u => { return context.partner.managers.findIndex(manager => { return u._id === manager.user }) == -1 && context.partner.deliverers.findIndex(deliverer => { return u._id === deliverer }) == -1 && context.partner.owner !== u._id })].lastName
+                                                    : ""  :""
 
                                         }</Text>
 
@@ -102,7 +117,7 @@ export default function Chat({ navigation }) {
 
             <View style={context.darkMode ? styles.conversationsDark : styles.conversations}>
                 <View style={styles.convContainer} >
-                    {context.conversations ?
+                    {context.conversations &&context.conversations.length>0?
                         <FlatList
                             data={context.conversations}
                             renderItem={({ item }) =>
@@ -117,14 +132,14 @@ export default function Chat({ navigation }) {
                                                         { uri: item.users[item.users.findIndex(u => { return u._id != context.user._id })].photo } : require('../assets/user_image.png')
                                                     :
                                                     context.partner ? 
-                                                    item.users.findIndex(u => { return context.partner.managers.findIndex(manager => { return u._id === manager._id }) == -1 && context.partner.deliverers.findIndex(deliverer => { return u._id === deliverer._id }) == -1 && context.partner.owner !== u._id }) >= 0 ?
-                                                        item.users[item.users.findIndex(u => { return context.partner.managers.findIndex(manager => { return u._id === manager._id }) == -1 && context.partner.deliverers.findIndex(deliverer => { return u._id === deliverer._id }) == -1 && context.partner.owner !== u._id })].photo
+                                                    item.users.findIndex(u => { return context.partner.managers.findIndex(manager => { return u._id === manager.user }) == -1 && context.partner.deliverers.findIndex(deliverer => { return u._id === deliverer }) == -1 && context.partner.owner !== u._id }) >= 0 ?
+                                                        item.users[item.users.findIndex(u => { return context.partner.managers.findIndex(manager => { return u._id === manager.user }) == -1 && context.partner.deliverers.findIndex(deliverer => { return u._id === deliverer }) == -1 && context.partner.owner !== u._id })].photo
                                                             ?
                                                             {
-                                                                uri: item.users[item.users.findIndex(u => { return context.partner.managers.findIndex(manager => { return u._id === manager._id }) == -1 && context.partner.deliverers.findIndex(deliverer => { return u._id === deliverer._id }) == -1 && context.partner.owner !== u._id })].photo
+                                                                uri: item.users[item.users.findIndex(u => { return context.partner.managers.findIndex(manager => { return u._id === manager.user }) == -1 && context.partner.deliverers.findIndex(deliverer => { return u._id === deliverer }) == -1 && context.partner.owner !== u._id })].photo
                                                             }
                                                             : require("../assets/user_image.png")
-                                                        : item.image ? { uri: item.image } : "" : {uri:item.image}
+                                                        : item.image ? { uri: item.image } : "":{ uri: item.image }
 
                                             }
                                             />
@@ -135,9 +150,9 @@ export default function Chat({ navigation }) {
                                                     item.users[item.users.findIndex(u => { return u._id != context.user._id })].firstName != null && item.users[item.users.findIndex(u => { return u._id != context.user._id })].lastName != null ?
                                                         item.users[item.users.findIndex(u => { return u._id != context.user._id })].firstName + " " + item.users[item.users.findIndex(u => { return u._id != context.user._id })].lastName : "" :
                                                    context.partner ?
-                                                        item.users.findIndex(u => { return context.partner.managers.findIndex(manager => { return u._id === manager._id }) == -1 && context.partner.deliverers.findIndex(deliverer => { return u._id === deliverer._id }) == -1 && context.partner.owner !== u._id }) >= 0 ?
-                                                            item.users[item.users.findIndex(u => { return context.partner.managers.findIndex(manager => { return u._id === manager._id }) == -1 && context.partner.deliverers.findIndex(deliverer => { return u._id === deliverer._id }) == -1 && context.partner.owner !== u._id })].firstName
-                                                            + " " + item.users[item.users.findIndex(u => { return context.partner.managers.findIndex(manager => { return u._id === manager._id }) == -1 && context.partner.deliverers.findIndex(deliverer => { return u._id === deliverer._id }) == -1 && context.partner.owner !== u._id })].lastName
+                                                        item.users.findIndex(u => { return context.partner.managers.findIndex(manager => { return u._id === manager.user }) == -1 && context.partner.deliverers.findIndex(deliverer => { return u._id === deliverer }) == -1 && context.partner.owner !== u._id }) >= 0 ?
+                                                            item.users[item.users.findIndex(u => { return context.partner.managers.findIndex(manager => { return u._id === manager.user }) == -1 && context.partner.deliverers.findIndex(deliverer => { return u._id === deliverer }) == -1 && context.partner.owner !== u._id })].firstName
+                                                            + " " + item.users[item.users.findIndex(u => { return context.partner.managers.findIndex(manager => { return u._id === manager.user }) == -1 && context.partner.deliverers.findIndex(deliverer => { return u._id === deliverer }) == -1 && context.partner.owner !== u._id })].lastName
                                                             : item.title : item.title
 
                                             }</Text>

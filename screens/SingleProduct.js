@@ -146,7 +146,7 @@ export default function SingleProduct(props) {
                     <TouchableOpacity style={styles.leftArrow} onPress={goBack}>
                         <Image style={{ width: "100%", height: "100%" }} source={require("../assets/left-arrow.png")} />
                     </TouchableOpacity>
-                    <TouchableOpacity style={{ position: "absolute", top: "5%", right: "2%" }} onPress={checkBasket}>
+                    <TouchableOpacity style={{ position: "absolute", top: "5%", right: "2%" }} onPress={()=>{checkBasket()}}>
                         <FontAwesome color={"black"} style={{ padding: 0, fontSize: 24, position: "absolute", top: "5%", right: "2%" }} name="shopping-bag" />
 
                     </TouchableOpacity>

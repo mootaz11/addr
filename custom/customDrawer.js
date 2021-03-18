@@ -28,21 +28,34 @@ export default function CustomDrawer(props) {
                         <TouchableOpacity onPress={() => { props.navigation.navigate("Settings") }}>
                             <View style={styles.logoAppSection}>
                                 <Image style={styles.LogoApp} source={context.user ? context.user.photo ? { uri: context.user.photo }: require('../assets/user_image.png'):require('../assets/user_image.png')} />
-                                <Title style={styles.title}>{context.user.firstName + " " + context.user.lastName}</Title>
+                                <Title style={styles.title}>{context.partner ? context.partner.name :  context.user.firstName + " " + context.user.lastName}</Title>
                             </View>
                         </TouchableOpacity>
                     </View>
-         {context.user.isPartner || context.user.isVendor ?
+         {(context.user.isPartner || context.user.isVendor )&&context.partner ?
                     <Drawer.Section style={styles.drawerSection} >
                         <DrawerItem icon={({ color, size }) => (
                             <Image source={require("../assets/menu/dashboard.png")} style={{width:size,height:size}}/>
-
                         )}
                             labelStyle={{ color: "white"}}
                             label="Dashboard"
-                            onPress={() => {props.navigation.navigate("partners")}}
+                            onPress={() => {
+                                if(context.partner.deliverers.findIndex(del=>{return del===context.user._id})>=0){
+                                    props.navigation.navigate("deliveryDash")       
+                                 }
+                                else 
+                                {
+                                    props.navigation.navigate("businessDash")
+                            
+                                }
+
+
+                                }}
                         />
-                        {   context.user.isPartner ? 
+
+
+
+                        {   context.user.isPartner && context.partner ? 
                                 <DrawerItem  
                                 icon={({ color, size }) => (
                                     <Image source={require("../assets/menu/next.png")} style={{marginLeft:20,width:size,height:size}}/>
@@ -54,6 +67,9 @@ export default function CustomDrawer(props) {
                                 onPress={() => { props.navigation.navigate("listProducts") }}
                             />
                             :null}
+
+{   context.user.isPartner  ? 
+
                           <DrawerItem  
                                 icon={({ color, size }) => (
                                     <Image source={require("../assets/menu/next.png")} style={{marginLeft:20,width:size,height:size}}/>
@@ -64,43 +80,49 @@ labelStyle={{ color: "white" }}
                                 label="follow packages"
                             onPress={() => { props.navigation.navigate("followPackages") }}
                         />
-                        {
-                            context.user.isPartner ? 
-                                  <DrawerItem  
-                                  labelStyle={{ color: "white" }}
-                                  icon={({ color, size }) => (
-                                    <Image source={require("../assets/menu/next.png")} style={{marginLeft:20,width:size,height:size}}/>
-        
-                                )}
+                                :null}
+                                {   context.user.isPartner  ? 
 
-                                  label="add location"
-                                  onPress={() => { props.navigation.navigate("addLocation") }}
-                              />
-                              :null
-                        }
+<DrawerItem  
+      icon={({ color, size }) => (
+          <Image source={require("../assets/menu/next.png")} style={{marginLeft:20,width:size,height:size}}/>
+
+      )}
+
+labelStyle={{ color: "white" }}
+      label="partner orders"
+  onPress={() => { props.navigation.navigate("businessorders") }}
+/>
+      :null}
+                        
                         
                     </Drawer.Section>:
                     null
     }         
                    
                    
+                   
                     <Drawer.Section style={styles.drawerSection} >
-                        <DrawerItem icon={({ color, size }) => (
-                            <Image source={require("../assets/menu/home.png")} style={{width:size,height:size}}/>
-
-                        )}
-                            labelStyle={{ color: "white" }}
-
-                            label="Home"
-                            onPress={() => { 
-                                props.navigation.navigate("Home",{activation:"activation"}) 
-                            }}
-                        />
+                        
+                            <DrawerItem  icon={({ color, size }) => (
+                                <Image source={require("../assets/menu/home.png")} style={{width:size,height:size}}/>
+    
+                            )}
+                                labelStyle={{ color: "white" }}
+    
+                                label="Home"
+                                onPress={() => { 
+                                    props.navigation.navigate("Home",{activation:"activation"}) 
+                                }}
+                            />
+                      
                         
 
                     </Drawer.Section>
-                    
-                    <Drawer.Section style={styles.drawerSection} >
+               
+{
+    !context.partner ? 
+<Drawer.Section style={styles.drawerSection} >
                         <DrawerItem icon={({ color, size }) => (
                             <Image source={require("../assets/menu/chat.png")} style={{width:size,height:size}}/>
 
@@ -110,9 +132,12 @@ labelStyle={{ color: "white" }}
                             onPress={() => { props.navigation.navigate("chat") }}
                         />
 
-                    </Drawer.Section>
+                    </Drawer.Section>:null
+}
+                    
+
                     {
-                    (context.user.isVendor || context.user.isPartner )&&
+                    (context.user.isVendor && !context.partner   )&&
                     <Drawer.Section style={styles.drawerSection} >
                         <DrawerItem icon={({ color, size }) => (
                             <Image source={require("../assets/menu/delivery.png")} style={{width:size,height:size}}/>
@@ -125,15 +150,20 @@ labelStyle={{ color: "white" }}
 
                     </Drawer.Section>
     }
+    {
+
+        
+        (!context.partner)&&
                     <Drawer.Section style={styles.drawerSection} >
                         <DrawerItem icon={({ color, size }) => (
                             <Image source={require("../assets/menu/package.png")} style={{width:size,height:size}}/>
 
                         )} labelStyle={{ color: "white" }}
                             label={"Orders"}
-                          onPress={() => { context.user.isPartner ? props.navigation.navigate("businessorders") : props.navigation.navigate("orders") }} />
-                   
-                    </Drawer.Section>
+                          onPress={() => {  props.navigation.navigate("orders") }} />
+            
+                    </Drawer.Section>}
+
                     <Drawer.Section style={styles.drawerSection} >
                         <DrawerItem
                             label="Dark mode"
@@ -148,6 +178,16 @@ labelStyle={{ color: "white" }}
                                 />)}
 
                         />
+                    </Drawer.Section>
+                    <Drawer.Section style={styles.drawerSection} >
+                        <DrawerItem  labelStyle={{ color: "white" }}
+                        icon={({ color, size }) => (
+                            <Image source={require("../assets/menu/qr-code.png")} style={{width:size,height:size}}/>
+
+                        )}
+                            label={"Qr Scanner"}
+                          onPress={() => {  props.navigation.navigate("qrscanner")  }} />
+                   
                     </Drawer.Section>
                     <Drawer.Section style={styles.drawerSection} >
                         <DrawerItem  labelStyle={{ color: "white" }}

@@ -48,7 +48,7 @@ const BusinessDashboardScreen = (props) => {
 
     const startManagerConversationHandler = (manager)=>{
         const conversation =  context.openConversationHandler({},{user:context.user,other:manager},"personal");
-        props.navigation.navigate("conversation",{conversation,orders:true})
+         props.navigation.navigate("conversation",{conversation,orders:true})
     }
 
     const startDelivererConversationHandler = (deliverer)=>{

@@ -9,6 +9,7 @@ import Loading from '../screens/Loading';
 import * as Permissions from 'expo-permissions';
 import { Notifications } from 'expo';
 import Constants from 'expo-constants';
+
 export default function AppContext(props) {
 
     const [socket, setSocket] = useState(io('https://addresti-back-end.herokuapp.com'));
@@ -20,7 +21,6 @@ export default function AppContext(props) {
     const [partner, setPartner] = useState(null);
     const [bag, setBag] = useState(bag);
     const [loggedIn,setLoggedIn]=useState(false);
-
 
 
 
@@ -46,7 +46,6 @@ export default function AppContext(props) {
         } else {
             alert('Must use physical device for Push Notifications');
         }
-
         if (Platform.OS === 'android') {
             Notifications.createChannelAndroidAsync('default', {
                 name: 'default',
@@ -54,17 +53,8 @@ export default function AppContext(props) {
                 priority: 'max',
                 vibrate: [0, 250, 250, 250],
             });
-        }
+        }       
     };
-
-
-
-
-
-
-
-
-
     useEffect(() => {
         AsyncStorageService.getAccessToken().then(token => {
             if (token) {
@@ -74,10 +64,14 @@ export default function AppContext(props) {
                         setLocation(location);
                         setDarkMode(false);
                         setUser(res.data.connectedUser);
+                        async function fetchData() {
+                            await registerForPushNotificationsAsync();
+                          }
+                          fetchData();
+                                
                         const t = await AsyncStorageService.getAccessToken();
                         socket.emit('connectuser', t);
                     }).catch(err => { alert("error occured while setting Location") })
-
                 }).catch(err => {
                     setIsloading(false);
                     setLoggedIn(false);
@@ -90,14 +84,9 @@ export default function AppContext(props) {
             }
         })
     }, [loggedIn])
-    // useEffect( ()=>{
-    //     if(user){
-    //         async function fetchData() {
-    //             await registerForPushNotificationsAsync();
-    //           }
-    //           fetchData();
-    //                 }
-    // },[])
+
+
+   
 
     useEffect(() => {
         if (user) {
@@ -112,13 +101,11 @@ export default function AppContext(props) {
                     })
                     conv.notSeen = notSeenSum;
                     conv.last = conv.messages[conv.messages.length - 1].date;
-
                 })
-
+                
                 let _convs = [..._conversations];
                 const _convSorted = _convs.sort((a, b) => a.last - b.last);
                 setConversations(_convSorted);
-
                 setIsloading(false);
                 setLoggedIn(true);
 
@@ -128,12 +115,19 @@ export default function AppContext(props) {
 
 
 
+
+    const sendLocalisation = (id_user,partner,order,position)=>{
+        socket.emit('localisation',{id_user,partner,order,position});
+    };
+
+    
     useEffect(() => {
         socket.off('send-message');
         socket.off('create-conversation');
         if (conversations) {
             socket.on('send-message', (message) => {
                 const _conversations = [...conversations];
+
                 const conv_index = _conversations.findIndex(conv => { return conv._id == message.conversation });
                 let notSeenSum = 0
                 if (conv_index >= 0) {
@@ -179,6 +173,7 @@ export default function AppContext(props) {
     }
 
     const markAsReadConversation = (conv_id) => {
+        if(conv_id){
         markAsreadConversationApi(conv_id).then(_conv => {
             let _conversations = [...conversations];
             const index = _conversations.findIndex(conversation => { return conversation._id == _conv._id })
@@ -192,6 +187,7 @@ export default function AppContext(props) {
             }
         }).catch(err => { alert("network or server error ") });
     }
+}
     const startNewConversation = (data) => {
         return new Promise((resolve, reject) => {
             createConversation(data).then(data => {
@@ -206,9 +202,9 @@ export default function AppContext(props) {
                 let conversation_found = null;
                 conversations.map(conversation => {
                     if (conversation.users.findIndex(user => { return user._id == Users.other._id }) >= 0
-                        && conversation.users.findIndex(user => { return user._id == Users.user._id }) >= 0) {
+                        && conversation.users.findIndex(user => { return user._id == Users.user._id }) >= 0&&conversation.users.length==2) {
                             conversation_found = conversations[conversations.findIndex(conv => { return conv == conversation })];}
-                })
+                        })
                 if (conversation_found) {
                     conversation_found.other = Users.other.firstName + " " + Users.other.lastName;
                     return conversation_found;
@@ -274,6 +270,7 @@ export default function AppContext(props) {
 
         }
     }
+    
     const send_message = (message) => {
         sendMessage(message).then(message => {
             let _conversations = [...conversations];
@@ -286,6 +283,26 @@ export default function AppContext(props) {
                 _conversations.splice(index, 1)
                 let _newConversations = [_conv, ..._conversations]
                 setConversations(_newConversations);
+
+                _conv.users.map(_user=>{
+                    if(_user._id!=user._id&&_user.NotificationToken!=""){
+                       let response = fetch('https://exp.host/--/api/v2/push/send', {
+                            method: 'POST',
+                            headers: {
+                              Accept: 'application/json',
+                              'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                              to: _user.NotificationToken,
+                              sound: 'default',
+                              title: 'Notification',
+                              body: `New Message from ${user.firstName}`
+                            })
+                          });
+                    }
+                })
+                   
+
             }
 
         }).catch(err => { alert(err) })
@@ -300,6 +317,7 @@ export default function AppContext(props) {
     }
 
     const LoginHandler = async ({ user, token }) => {
+        console.log("token : ",token)
         await AsyncStorageService.setToken(token);
         setUser(user);
         setLoggedIn(true);
@@ -308,11 +326,13 @@ export default function AppContext(props) {
 
     const logoutHandler =  () => {
         AsyncStorageService.getAccessToken().then(t=>{
-            userLogout({ token: t }).then( (res) => {
+            userLogout({ token: t }).then( async (res) => {
                 if (res) {
-                            AsyncStorageService.clearToken();
+                    
+                         await  AsyncStorageService.clearToken();
                             setConversations(null);
                             setLoggedIn(false);     
+
                 }
             }).catch(err => {
                 alert("error occured while logout")
@@ -365,6 +385,7 @@ export default function AppContext(props) {
             setLocation: setLocation,
             setPartner: setPartner,
             LoginHandler: LoginHandler,
+            sendLocalisation:sendLocalisation,
             openConversationHandler: openConversationHandler,
             logoutHandler: logoutHandler,
             modifyDarkModeHandler: modifyDarkModeHandler,
