@@ -68,7 +68,7 @@ export default function CustomDrawer(props) {
                             />
                             :null}
 
-{   context.user.isPartner  ? 
+{   context.partner ? 
 
                           <DrawerItem  
                                 icon={({ color, size }) => (
@@ -77,11 +77,27 @@ export default function CustomDrawer(props) {
                                 )}
 
 labelStyle={{ color: "white" }}
-                                label="follow packages"
-                            onPress={() => { props.navigation.navigate("followPackages") }}
-                        />
+                                label= {context.user.isPartner  ?"follow packages":"circuit"}
+                            onPress={() => {context.user.isVendor ?  props.navigation.navigate("followPackages",{user:"partner"}):props.navigation.navigate("followPackages",{user:"deliverer"}) }}/>
                                 :null}
+
+            {
+                context.user.isVendor && context.partner &&
+ <DrawerItem     icon={({ color, size }) => (
+    <Image source={require("../assets/menu/next.png")} style={{marginLeft:20,width:size,height:size}}/>
+
+)} labelStyle={{ color: "white" }}
+
+    label="livraisons"
+    onPress={() => { props.navigation.navigate("deliveries") }}
+/>
+            }           
+
+
+
                                 {   context.user.isPartner  ? 
+
+
 
 <DrawerItem  
       icon={({ color, size }) => (
@@ -98,7 +114,10 @@ labelStyle={{ color: "white" }}
                         
                     </Drawer.Section>:
                     null
-    }         
+  
+  
+  
+  }         
                    
                    
                    
@@ -136,20 +155,7 @@ labelStyle={{ color: "white" }}
 }
                     
 
-                    {
-                    (context.user.isVendor && !context.partner   )&&
-                    <Drawer.Section style={styles.drawerSection} >
-                        <DrawerItem icon={({ color, size }) => (
-                            <Image source={require("../assets/menu/delivery.png")} style={{width:size,height:size}}/>
-
-                        )} labelStyle={{ color: "white" }}
-
-                            label="livraisons"
-                            onPress={() => { props.navigation.navigate("deliveries") }}
-                        />
-
-                    </Drawer.Section>
-    }
+  
     {
 
         
@@ -182,9 +188,7 @@ labelStyle={{ color: "white" }}
                     <Drawer.Section style={styles.drawerSection} >
                         <DrawerItem  labelStyle={{ color: "white" }}
                         icon={({ color, size }) => (
-                            <Image source={require("../assets/menu/qr-code.png")} style={{width:size,height:size}}/>
-
-                        )}
+                            <Image source={require("../assets/menu/qr-code.png")} style={{width:size,height:size}}/>)}
                             label={"Qr Scanner"}
                           onPress={() => {  props.navigation.navigate("qrscanner")  }} />
                    

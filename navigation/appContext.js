@@ -12,9 +12,11 @@ import Constants from 'expo-constants';
 
 export default function AppContext(props) {
 
-    const [socket, setSocket] = useState(io('https://addresti-back-end.herokuapp.com'));
+    const [socket, setSocket] = useState(io('http://192.168.1.11:5000'));
     const [location, setLocation] = useState(null);
     const [user, setUser] = useState(null)
+    const [deliveryData, setDeliveryData] = useState(null)
+
     const [conversations, setConversations] = useState(null);
     const [darkMode, setDarkMode] = useState(false);
     const [isloading, setIsloading] = useState(true);
@@ -117,10 +119,18 @@ export default function AppContext(props) {
 
 
     const sendLocalisation = (id_user,partner,order,position)=>{
-        socket.emit('localisation',{id_user,partner,order,position});
+        socket.emit('localisation',{userid:id_user,partner:partner,order:order,position:{latitude:position.coords.latitude,longitude:position.coords.longitude}});
     };
 
+
+    useEffect(()=>{
+        socket.on('new-localisation',({ userid, order, position, partner })=>{
+            setDeliveryData({...deliveryData,position:position,person:order.deliverer});
+        })
+    },[socket])
     
+
+
     useEffect(() => {
         socket.off('send-message');
         socket.off('create-conversation');
@@ -317,7 +327,6 @@ export default function AppContext(props) {
     }
 
     const LoginHandler = async ({ user, token }) => {
-        console.log("token : ",token)
         await AsyncStorageService.setToken(token);
         setUser(user);
         setLoggedIn(true);
@@ -380,6 +389,7 @@ export default function AppContext(props) {
             conversations: conversations,
             location: location,
             bag: bag,
+            deliveryData:deliveryData,
             isloading: isloading,
             setUser: setUser,
             setLocation: setLocation,

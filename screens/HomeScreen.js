@@ -14,14 +14,10 @@ import MapViewDirections from 'react-native-maps-directions';
 import { getCities,getService } from '../rest/geoLocationApi'
 import {getPartner} from '../rest/partnerApi';
 import {getDelivererOrders} from '../rest/ordersApi'
-import Swipeable from 'react-native-gesture-handler/Swipeable';
-import Animated from 'react-native-reanimated';
+import Animated, { Easing } from 'react-native-reanimated';
+import { Fragment } from 'react';
 
 const api_directions_key = "AIzaSyDcbXzRxlL0q_tM54tnAWHMlGdmPByFAfE";
-const partnersList = [
-  {name:"mixmax",id:"1",image:require("../assets/mixmax.jpg")},
-  {name:"bershka",id:"2",image:require("../assets/bershkadark.jpg")},
-];
 
 const services_init = [
   {_id:'1',serviceName:"taxi",icon:require("../assets/taxi-dark.png")},
@@ -31,8 +27,6 @@ const services_init = [
   {_id:'5',serviceName:"emergency",icon:require("../assets/ambulance-dark.png")}
 
 ]
-
-
 export default function Home(props){
   const { showActionSheetWithOptions } = useActionSheet();
   const context = useContext(AuthContext);
@@ -44,71 +38,92 @@ export default function Home(props){
   const [searchResult, setSearchResult] = useState([]);
   const [showModal, setShowmodal] = useState(false);
   const [cities, setCities] = useState([]);
+  const [deliveries,setDeliveries]=useState([]);
   const [services,setServices]=useState([]);
   const [regions, setRegions] = useState([]);
   const [profiles, setProfiles] = useState([]);
   const [initServices,setInitServices]=useState();
   const [profileChecked,setProfileChecked]=useState(false);
-
   const [alignement] = useState(new Animated.Value(0));
 
 
-  const bringDownActionsheet = ()=>{
-    Animated.timing(alignement,{
-      toValue:1,
-      duration:500
-    }).start();
-  };
-  const bringUpActionSheet = ()=>{
-    Animated.timing(alignement,{
-      toValue:0,
-      duration:500
-    }).start();
-  };
 
-
-
-
-  const actionSheetInterpolate=alignement.interpolate({
-      inputRange:[0,1],
-      outputRange:[-Dimensions.get("screen").height/2.4+50,0]})
-  
-
-  const actionSheetStyle = {
-    bottom:actionSheetInterpolate
-  }
-
-  const gestureHandler =(e)=>{
-    if(e.nativeEvent.contentOffset.y<Dimensions.get("window").height){
-      bringDownActionsheet();
-
+  const  calcCrow=(lat1, lon1, lat2, lon2) => {
+    if ((lat1 == lat2) && (lon1 == lon2)) {
+        return 0;
     }
     else {
+        var radlat1 = Math.PI * lat1/180;
+        var radlat2 = Math.PI * lat2/180;
+        var theta = lon1-lon2;
+        var radtheta = Math.PI * theta/180;
+        var dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
+        if (dist > 1) {
+            dist = 1;
+        }
+        dist = Math.acos(dist);
+        dist = dist * 180/Math.PI;
+        dist = dist * 60 * 1.1515;
+        dist = dist * 1.609344 
+        console.log(dist/1000)
+        return dist/1000;
+    }
+}
+
+  const gestureHandler = (e)=>{
+    console.log(e);
+    if(e.nativeEvent.contentOffset.y>0){
       bringUpActionSheet();
     }
   }
+  const bringUpActionSheet=()=>{
+    Animated.timing(alignement,{
+      toValue:1,
+      duration:500,
+      easing:Easing.bounce()
+    }).start()
+  }
 
-  const getLocation = async ()=>{
-    let gpsServiceStatus = await Location.hasServicesEnabledAsync();
-    if (gpsServiceStatus) {
-      let location = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
-      if(context.user.isVendor){
-        getDelivererOrders(context.partner._id).then(orders=>{
-          orders.map(order=>{
-            context.sendLocalisation(order.client._id,context.partner,order._id,location);
+  const actionSheetInterpolate= alignement.interpolate({
+    inputRange:[0,1],
+    outputRange:[-Dimensions.get('screen').height/2.4+10,0]
+  })
+  
+  const actionSheetStyle={
+    bottom:actionSheetInterpolate
+  };
+
+
+const getLocation =  ()=>{
+      if(context.user.isVendor&&context.partner){
+        if(deliveries.length>0){
+          deliveries.map( async order=>{
+            if(order.actif==true&&order.taked==true&&order.prepared==true){
+              let gpsServiceStatus = await Location.hasServicesEnabledAsync();
+              if (gpsServiceStatus) {
+                let location = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });  
+              context.sendLocalisation(order.client._id,context.partner,order,location);
+            }
+            else {
+              alert("Enable Location service"); 
+            }        
+          }
           })
-        })
+        }
       }
-    }
-    else {
-      alert("Enable Location services"); //or any code to handle if location service is disabled otherwise
-    }
+    
+   
   }
     getLocation();
 
   useEffect(() => {
-
-
+      if(context.user.isVendor&&context.partner){
+        getDelivererOrders(context.partner._id).then(orders=>{
+          setDeliveries(orders);
+        }).catch(err=>{
+          alert("getting deliveries error")
+        })
+      }
     setServices(services_init);
     setPartners(null);
     setServiceChosen(false)
@@ -359,6 +374,10 @@ const checkPartner=(value)=>{
         provider="google"
         
       >
+        {
+        context.deliveryData ? context.location ?context.location.location 
+        ? calcCrow(context.deliveryData.position.latitude,
+                context.deliveryData.position.longitude,context.location.location.latitude,context.location.location.latitude)<=3 ? 
         <Marker
           coordinate={
             Platform.OS == 'ios' ?
@@ -372,37 +391,54 @@ const checkPartner=(value)=>{
                 longitude: context.location ? context.location.location?Number(context.location.location.longitude) : 0:0
       
               }
-
-
-
           }
-        >
+          >
           <Image source={context.user.photo ? {uri:context.user.photo} : require('../assets/user_image.png')} style={context.darkMode ? { height: 30, width: 30, borderRadius: 30, borderColor: "white", borderWidth: 2 }: { height: 30, width: 30, borderRadius: 30, borderColor: "#2474F1", borderWidth: 2 }} />
 
         </Marker>
+:null:null:null:null
+}
 
+{
+          context.deliveryData ? context.location ?context.location.location 
+          
+          ? calcCrow(context.deliveryData.position.latitude,
+                  context.deliveryData.position.longitude,context.location.location.latitude,context.location.location.latitude)<=3 ? 
+  
         <Marker
           coordinate={{
-            latitude: 35.7773,
-            longitude: 10.8313
+            latitude: Number(context.deliveryData.position.latitude),
+            longitude: Number(context.deliveryData.position.longitude)
 
           }}
 
         >
           <Image source={require('../assets/user_image.png')} style={context.darkMode ? { height: 30, width: 30, borderRadius: 30, borderColor: "white", borderWidth: 2 }: { height: 30, width: 30, borderRadius: 30, borderColor: "#2474F1", borderWidth: 2 }} />
         </Marker>
+:null:null:null:null
+}
+
+
+ {       
+         context.deliveryData ? context.location ?context.location.location 
+         ? calcCrow(context.deliveryData.position.latitude,
+                 context.deliveryData.position.longitude,context.location.location.latitude,context.location.location.latitude)<=3? 
+ 
         <MapViewDirections
           apikey={api_directions_key}
           origin={context.location ? context.location.location ? context.location.location : context.location.temperarlyLocation:null}
           destination={{
-            latitude: 35.7773,
-            longitude: 10.8313
+            latitude: context.deliveryData.position.latitude,
+            longitude: context.deliveryData.position.longitude
           }}
           strokeWidth={3}
           strokeColor={context.darkMode ? "#2474F1" : "#3d3d3d"}
         />
-      </MapView>
-      <View style={styles.Mycode}>
+        :null:null:null:null
+        }
+        </MapView>
+  
+  <View style={styles.Mycode}>
         <View style={styles.dropDownContainer}>
           <TouchableOpacity style={{width:"100%",height:"100%"}} onPress={() => { setdropDown(!dropDown)}}>
               <Image style={styles.dropDown} source={dropDown ? require("../assets/up.png") : require("../assets/down.png")} />
@@ -428,7 +464,7 @@ const checkPartner=(value)=>{
           <Image style={styles.imageUser} source={context.user.photo ? { uri: context.user.photo } : require('../assets/user_image.png')} />
         </TouchableOpacity>
       </View>
-      {profileChecked && <Animated.View style={{...styles.listPartners,actionSheetStyle}}>
+      {profileChecked && <View style={styles.listPartners}>
   <View style={{width:"100%",height:"80%"}}>
   <FlatList
           data={profiles}
@@ -461,7 +497,7 @@ const checkPartner=(value)=>{
         </TouchableOpacity>
        </View>
       
-      </Animated.View> 
+      </View> 
 }
 
           
@@ -493,12 +529,10 @@ const checkPartner=(value)=>{
         <TouchableOpacity onPress={() => { setShowmodal(true); }}>
         <Text   style={context.darkMode ? styles.searchInputDark : styles.searchInput} >{ searchResult.length>0 && cities.length>0?"Rechercher votre ville":"il ya pas de services encore"}</Text>
         </TouchableOpacity>
-
       </View>
 }
 
-
-<View        style={seviceChosen&&partners&&partners.length>0 ?styles.domainswithPartners : styles.domainswithoutPartners}>
+<View style={seviceChosen&&partners&&partners.length>0 ?styles.domainswithPartners : styles.domainswithoutPartners}>
         
         <FlatList
         horizontal
@@ -570,14 +604,11 @@ const checkPartner=(value)=>{
         </FlatList>
 </View>
 }
-
-
-
-     
         <Modal
           transparent={true}
           animationType={'slide'}
           visible={showModal}
+
 
         >
           <View style={{ backgroundColor: "#000000aa", flex: 1 }}>
@@ -627,7 +658,27 @@ const checkPartner=(value)=>{
 
         </Modal>
 
-      
+        <Animated.View style={{
+        position:"absolute",
+        left:0,
+        right:0,
+        backgroundColor:"white",
+        borderTopRightRadius:40,
+        borderTopLeftRadius:40,
+        height:Dimensions.get('screen')/2.4,
+        top:Dimensions.get('screen').height/3},actionSheetStyle}>
+          <ScrollView 
+          onScroll={(e)=>{
+            gestureHandler(e);
+          }}
+          style={{
+            width:60,
+            borderTopWidth:3,
+            borderTopColor:"#aaa",
+          }}
+          ></ScrollView>
+          <Text>ActionSheet</Text>
+        </Animated.View>
     </View>
 
   );

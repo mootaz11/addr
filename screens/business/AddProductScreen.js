@@ -13,7 +13,7 @@ import MyButton from '../../common/MyButton';
 import Colors from '../../constants/Colors';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AuthContext from '../../navigation/AuthContext'
-import { getPartnerDashboard, addCategory,getPartner } from '../../rest/partnerApi'
+import { getPartnerDashboard, addCategory,getPartner,addSubCategory } from '../../rest/partnerApi'
 import { addProduct } from '../../rest/productApi';
 
 const variants_food = [
@@ -87,6 +87,7 @@ const AddProductScreen = (props) => {
     const [modalVariantsVisible, setModalVariantsVisible] = useState(false);
     const [modalDiscountVisible, setModalDiscountVisible] = useState(false);
     const [modalCategoryVisible, setModelCategoryVisible] = useState(false);
+    const [modalSubCategoryVisible,setModalSubCategoryVisible]=useState(false);
 
     const [titleTouched, setTitleTouched] = useState(false);
     const [descriptionTouched, setDescriptionTouched] = useState(false);
@@ -95,7 +96,8 @@ const AddProductScreen = (props) => {
     const [weightTouched, setWeightTouched] = useState(false);
 
     const [gender, setGender] = useState();
-    const [category, setCategory] = useState(false);
+    const [category, setCategory] = useState();
+    const [subCategory,setSubCategory]=useState();
     const [productType, setProductType] = useState("food");
     const [selectedImages, setSelectedImages] = useState([]);
     const [imagesTouched, setImagesTouched] = useState(false);
@@ -111,9 +113,12 @@ const AddProductScreen = (props) => {
     const [weightUnit, setWeightUnit] = useState('g');
     const [allSousVariantsCombinaisons, setSousVariantsCombinaisons] = useState([]);
     const [categories, setCategories] = useState([]);
+    const [subcategories,setSubcategories]=useState([]);
     const [foodVariants, setFoodVariants] = useState(variants_food);
     const [ModalSousVariantVisible, setModalSousVariantVisible] = useState(false)
     const [nameCategory, setNameCategory] = useState("");
+    const [nameSubCategory, setNameSubCategory] = useState("");
+
     const [service, setService] = useState();
 
 
@@ -241,8 +246,21 @@ const AddProductScreen = (props) => {
         }
     }, [variantsInputs, foodVariants]);
 
+
+
+    const addNewSubCategory=()=>{
+        addSubCategory(context.partner._id,category,nameSubCategory).then(newSubCategory => {
+            setSubcategories([...subcategories, newSubCategory]);
+            setModalSubCategoryVisible(!modalSubCategoryVisible);
+            setNameSubCategory("");
+        }).catch(message => {
+            console.log("err",message)
+            alert("add sub category failed");
+        })
+    
+    }
+
     const addNewCategory = () => {
-        
         addCategory(context.partner._id, nameCategory).then(newCategory => {
             setCategories([...categories, newCategory]);
             setModelCategoryVisible(!modalCategoryVisible);
@@ -486,9 +504,6 @@ const AddProductScreen = (props) => {
 
     const submitHandler = useCallback(() => {
         if (productType == "regular") {
-
-
-
             if (!formState.formIsValid || selectedImages.length === 0 || variantsInputs.length === 0) {
                 setImagesTouched(true);
                 setVariantsTouched(true);
@@ -496,7 +511,6 @@ const AddProductScreen = (props) => {
                 ]);
                 return;
             }
-
             else {
                 // where you find title,description, productType, price, weight values
                 let _variants = []
@@ -522,7 +536,6 @@ const AddProductScreen = (props) => {
                     pricing: allSousVariantsCombinaisons
                 }
 
-
                 const fd = new FormData();
 
                 selectedImages.forEach(image => {
@@ -535,6 +548,8 @@ const AddProductScreen = (props) => {
                 addProduct(context.partner._id, fd).then(message => {
                     Alert.alert('Operation Done', message, [{ text: 'Okay' }]);
 
+                }).catch(err=>{
+                    alert("add product failed")
                 })
 
             }
@@ -583,10 +598,11 @@ const AddProductScreen = (props) => {
                 fd.append('variants', JSON.stringify([..._variants]));
                 fd.append('category', category);
 
-                // addProduct(context.partner._id,fd).then(message=>{
-                //     console.log(message);
-                // })
-
+                addProduct(context.partner._id,fd).then(message=>{
+                    
+                    Alert.alert('Operation Done', message, [{ text: 'Okay' }]);
+                }
+                ).catch(err=>{alert("operation failed")})
             }
         }
 
@@ -674,21 +690,45 @@ const AddProductScreen = (props) => {
                             <View style={styles.genderPickerContainer}>
                                 <Picker
                                     selectedValue={category}
-
-                                    onValueChange={(itemValue, itemIndex) => setCategory(itemValue)}
-                                    mode="dropdown"
-                                >
+                                    onValueChange={(itemValue, itemIndex) => {setCategory(itemValue);} }
+                                    mode="dropdown">
                                     {
                                         categories &&
                                         categories.map((_category, index) => (
-                                            <Picker.Item key={index} label={_category.name} value={_category._id} />
+                                            <Picker.Item  key={index} label={_category.name} value={_category._id} />
                                         ))
+                                    }
+                                </Picker>
+                            </View>
+                            <View style={styles.CategoryContainer}>
+                            <Text style={styles.titreStyle} >Sub Category</Text>
 
+                            <View style={styles.addCAtegoryContainer}>
+                                
+                                <TouchableOpacity onPress={()=>{category ?  setModalSubCategoryVisible(!modalSubCategoryVisible):alert("please choose category")}} style={{width:10,height:10}}>
+                                    <Image
+                                        style={{resizeMode:'cover',width:30,height:30}}
+                                        source={require('../../assets/images/add.png')}
+                                    />                                
+                                    </TouchableOpacity>
+                            </View>
+                            <View style={styles.genderPickerContainer}>
+                                <Picker
+                                    selectedValue={subCategory}
+                                    onValueChange={(itemValue, itemIndex) => setSubCategory(itemValue)}
+                                    mode="dropdown"
+                                >    
+                                    {
+                                        subcategories.length>0 &&
+                                        subcategories.map((_subcategory, index) => (
+                                            <Picker.Item key={index} label={_subcategory.name} value={_subcategory._id} />
+                                        ))
                                     }
                                 </Picker>
 
                             </View>
 
+                        </View>
                         </View>
                         <View style={styles.imagesContainer}>
                             <Text style={styles.titreStyle}>Images</Text>
@@ -906,21 +946,22 @@ const AddProductScreen = (props) => {
                             <Modal
                                 animationType="slide"
                                 transparent={true}
-                                visible={modalCategoryVisible}
+                                visible={modalCategoryVisible||modalSubCategoryVisible}
                             >
                                 <View style={styles.centeredViewModal}>
                                     <View style={styles.modalContainer}>
+                                        
                                         <View style={styles.variantInputTitleContainer}>
-                                            <Text>Category</Text>
+                                            <Text>{modalCategoryVisible ? "Category" : "Sub Category"}</Text>
                                         </View>
+
                                         <View style={styles.variantInputContainer}>
                                             <TextInput
                                                 style={styles.inputVariant}
-                                                placeholder="your category name"
+                                                placeholder={modalSubCategoryVisible ? "your Subcategory name":"your category name"}
                                                 placeholderTextColor={Colors.placeholder}
-                                                value={nameCategory}
-                                                onChangeText={text => setNameCategory(text)}
-                                            //onBlur={lostFocusHandler}
+                                                value={modalCategoryVisible ? nameCategory:nameSubCategory}
+                                                onChangeText={text => modalCategoryVisible ?setNameCategory(text):setNameSubCategory(text)}
                                             />
                                         </View>
 
@@ -929,14 +970,15 @@ const AddProductScreen = (props) => {
 
                                             <TouchableHighlight
                                                 style={{ ...styles.modalButton, backgroundColor: '#2196F3' }}
-                                                onPress={addNewCategory}>
+                                                onPress={modalCategoryVisible ?  addNewCategory:addNewSubCategory}>
                                                 <Text style={styles.textStyle}>Save</Text>
                                             </TouchableHighlight>
 
                                             <TouchableHighlight
                                                 style={{ ...styles.openButton, backgroundColor: '#fa382a' }}
                                                 onPress={() => {
-                                                    setModelCategoryVisible(!modalCategoryVisible);
+                                                    modalCategoryVisible ?
+                                                    setModelCategoryVisible(!modalCategoryVisible):setModalSubCategoryVisible(!modalSubCategoryVisible)
                                                 }}>
                                                 <Text style={styles.textStyle}>Close</Text>
                                             </TouchableHighlight>

@@ -42,6 +42,8 @@ export default function Orders(props) {
         if(mounted){
             setCheckedStep(order_pipeline[0]);
         getClientOrders().then(orders => {
+            console.log(orders);
+
             setRatings(_ratings);
             let _placedOrders = [];
             let _orderDuringDelivery = [];

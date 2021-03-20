@@ -18,11 +18,9 @@ export default function Conversation(props) {
     const [message, setMessage] = useState("");
     const [messages, setMessages] = useState([]);
     const [conversation, setConversation] = useState(null);
-    const [dark, setDark] = useState(context.darkMode);
     const [conversationId,setConversationId]=useState("");
 
 
-    console.log(props.route.params.conversation.users)
 
 
     useEffect(() => {

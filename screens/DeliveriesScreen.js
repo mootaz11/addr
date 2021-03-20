@@ -51,7 +51,6 @@
             }
             if(order.actif==false&&order.taked==true&&order.prepared==true){
                 _deliveredOrders.push(order);
-                console.log(order);
             }
            })
            setOrders(_orders);

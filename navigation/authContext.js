@@ -7,6 +7,7 @@ export default React.createContext({
     conversations:[],
     socket:null,
     location:null,
+    deliveryData:null,
     locationState:false,
     loggedIn:false,
     bag:[]

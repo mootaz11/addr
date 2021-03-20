@@ -6,7 +6,6 @@ import Colors from '../../constants/Colors';
 import {  getPartnerProducts } from '../../rest/productApi';
 import AuthContext from '../../navigation/AuthContext';
 import _ from 'lodash';
-import { Icon } from 'react-native-elements';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 
@@ -15,7 +14,6 @@ const ListProductsScreen = (props) => {
     const context = useContext(AuthContext)
     const [search, setSearch] = useState("");
     const [searchResult, setSearchResult] = useState([]);
-    const [dark,setDark]=useState(true);
 
     const filtreList = (text) => {
         setSearch(text)
@@ -31,6 +29,8 @@ const ListProductsScreen = (props) => {
     useEffect(() => {
         if(context.partner._id){
         getPartnerProducts(context.partner._id).then(data => {
+            console.log(data)
+            console.log(data.products);
             setProducts(data.products)
             setSearchResult(data.products)
 
@@ -76,7 +76,7 @@ const ListProductsScreen = (props) => {
                 <View style={styles.search}>
                     <Image
                         style={styles.image}
-                        source={dark ?require("../../assets/images/searchingDark.png") :require("../../assets/images/searching.png")}
+                        source={context.darkMode ?require("../../assets/images/searchingDark.png") :require("../../assets/images/searching.png")}
                     />
                     <TextInput
                         value={search}

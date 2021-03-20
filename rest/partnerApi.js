@@ -30,6 +30,21 @@ export const addCategory=(partnerId,nameCategory)=>{
     })
 }
 
+
+export const addSubCategory=(partnerId,categoryId,nameSubCategory)=>{
+    return new Promise((resolve,reject)=>{
+        axios.post(`/partner/${partnerId}/category/${categoryId}`,{name:nameSubCategory})
+        .then(res=>{
+            if(res.status===200){
+                resolve(res.data.subCategory);
+            }
+        }).catch(err=>{
+            reject(err.message);
+        })
+    })
+}
+
+
 export const getDelivererDashboard = (partnerId)=>{
     return new Promise((resolve,reject)=>{
         axios.get(`/partner/deliverer/dashboard/${partnerId}`).then(res=>{

@@ -30,6 +30,7 @@ export default function  BusinessOrders (props) {
 
     useEffect(()=>{
         getPartnerOrders(context.partner._id).then(orders=>{
+            
             let _ordersToPrepare =[]
             let _preparedOrders =[]
             let _deliveredOrders=[]

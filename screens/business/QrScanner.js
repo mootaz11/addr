@@ -60,13 +60,27 @@ export default function qrScanner (props){
                                   onBarCodeScanned={ scanned ? undefined :_handleBarcodeScanned}
 r
                                 style={{
-                                    height: Dimensions.get('window').height,
+                                    height: Dimensions.get('window').height*0.92,
                                     width: Dimensions.get('window').width,
+                                    flexDirection:"column",
+                                    alignItems:"center",
+                                    justifyContent:"center"
                                     
                                 }}
-
                             >
-                              
+                                <View style={{width:200,height:200,flexDirection:"column",justifyContent:'space-between'}}>
+                               
+                              <View style={{width:"100%",height:"50%",flexDirection:"row",justifyContent:"space-between"}}>
+                              <Image style={{width:50,height:50}} source={require("../../assets/corner1.png")}/>
+                              <Image style={{width:50,height:50,}} source={require("../../assets/corner3.png")}/>
+                              </View>
+                              <View style={{width:"100%",height:"50%",flexDirection:"row",justifyContent:"space-between"}}>
+                                <Image style={{width:50,height:50}} source={require("../../assets/corner4.png")}/>
+                              <Image style={{width:50,height:50,}} source={require("../../assets/corner2.png")}/>
+                                </View>
+
+
+                                </View>
                                 </BarCodeScanner>}
                    
                 </View>
@@ -75,9 +89,7 @@ r
             </SafeAreaView>
         );
     }
-    
-    
-    
+
     const styles = StyleSheet.create({
        
        
