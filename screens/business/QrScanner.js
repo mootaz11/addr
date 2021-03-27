@@ -1,22 +1,30 @@
-import React, { useContext, useState,useEffect } from 'react'
-import { View, Text, StyleSheet, Dimensions, Button ,Alert, TouchableOpacity, SafeAreaView,Image} from 'react-native'
+import React, { useContext, useState, useEffect } from 'react'
+import { View, Text, StyleSheet, Dimensions, Button, Alert, TouchableOpacity, SafeAreaView, Image } from 'react-native'
 import { BarCodeScanner } from 'expo-barcode-scanner';
 import * as Permissions from 'expo-permissions';
 import AuthContext from '../../navigation/AuthContext';
 
 
-export default function qrScanner (props){
+export default function qrScanner(props) {
     const [hasCameraPermission, setHasCameraPermission] = useState(null);
-    const [attendeeList, setAttendeeList] = useState([]);
-    const [lastScannedUrl, setLastScannedUrl] = useState("");
     const context = useContext(AuthContext)
-
     const [scanned, setScanned] = useState(false);
     const [count, setCount] = useState(0);
-    
+
     useEffect(() => {
         _requestCameraPermission();
     });
+
+    const checkDelivering=()=>{
+        props.navigation.navigate('')
+    }
+
+    const checkCollecting=()=>{
+
+    }
+
+
+
     const openDrawer = () => {
         props.navigation.openDrawer();
     }
@@ -25,21 +33,21 @@ export default function qrScanner (props){
         const { status } = await Permissions.askAsync(Permissions.CAMERA);
         setHasCameraPermission("granted");
     };
-    
-    const _handleBarcodeScanned = ( result ) => {
+
+    const _handleBarcodeScanned = (result) => {
         setScanned(true);
-        setCount(count+1);
-        Alert.alert(`Scanned! code :${result.data}`, 'press OK to continue scanning' ,[{ text: 'OK', onPress: () => { setScanned(false); }}]); 
+        setCount(count + 1);
+        Alert.alert(`Scanned! code :${result.data}`, 'press OK to continue scanning', [{ text: 'OK', onPress: () => { setScanned(false); } }]);
     };
-    
-        return (
-            <SafeAreaView style={{ flex: 1 }}>
+
+    return (
+        <SafeAreaView style={{ flex: 1 }}>
 
             <View style={styles.container}>
                 <View style={context.darkMode ? styles.menuDark : styles.menu}>
                     <View style={styles.leftArrowContainer}>
                         <TouchableOpacity onPress={openDrawer} style={styles.leftArrow}>
-                        <Image source={context.darkMode ?  require("../../assets/menu_dark.png"):require("../../assets/menu.png")} style={{height:"100%",width:"100%",resizeMode:"cover"}}/>
+                            <Image source={context.darkMode ? require("../../assets/menu_dark.png") : require("../../assets/menu.png")} style={{ height: "100%", width: "100%", resizeMode: "cover" }} />
                         </TouchableOpacity>
                     </View>
                     <View style={styles.titleContainer}>
@@ -57,119 +65,137 @@ export default function qrScanner (props){
                               </Text>
                             : <BarCodeScanner
 
-                                  onBarCodeScanned={ scanned ? undefined :_handleBarcodeScanned}
-r
+                                onBarCodeScanned={scanned ? undefined : _handleBarcodeScanned}
+                                r
                                 style={{
-                                    height: Dimensions.get('window').height*0.92,
+                                    height: Dimensions.get('window').height * 0.92,
                                     width: Dimensions.get('window').width,
-                                    flexDirection:"column",
-                                    alignItems:"center",
-                                    justifyContent:"center"
-                                    
+                                    flexDirection: "column",
+                                    alignItems: "center",
+                                    justifyContent: "center"
+
                                 }}
                             >
-                                <View style={{width:200,height:200,flexDirection:"column",justifyContent:'space-between'}}>
-                               
-                              <View style={{width:"100%",height:"50%",flexDirection:"row",justifyContent:"space-between"}}>
-                              <Image style={{width:50,height:50}} source={require("../../assets/corner1.png")}/>
-                              <Image style={{width:50,height:50,}} source={require("../../assets/corner3.png")}/>
-                              </View>
-                              <View style={{width:"100%",height:"50%",flexDirection:"row",justifyContent:"space-between"}}>
-                                <Image style={{width:50,height:50}} source={require("../../assets/corner4.png")}/>
-                              <Image style={{width:50,height:50,}} source={require("../../assets/corner2.png")}/>
-                                </View>
 
 
+                                <View style={{ width: "80%", height: 80, flexDirection: "row", borderRadius: 16, position: "absolute", bottom: 40, backgroundColor: "#3E3E3E" }}>
+                                    <View style={{ width: "50%", height: "100%", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+
+                                    <TouchableOpacity style={{ width: "50%", height: "50%" }}>
+                                            <Image style={{ width: "100%", height: "100%", resizeMode: "contain" }} source={require("../../assets/delivery_guy.png")} />
+                                        </TouchableOpacity>         
+                                        <Text style={{color:"#7a7a7a"}}>Delivering</Text>                          
+                                    </View>
+                                    
+                                    <View style={{ width: "50%", height: "100%", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+
+                                        <TouchableOpacity style={{ width: "50%", height: "50%" }}>
+                                            <Image style={{ width: "100%", height: "100%", resizeMode: "contain" }} source={require("../../assets/delivery_truck.png")} />
+                                        </TouchableOpacity>
+                                        <Text style={{color:"#7a7a7a"}}>Collecting</Text>                          
+
+
+                                    </View>
                                 </View>
-                                </BarCodeScanner>}
-                   
+                                <View style={{ width: 200, height: 200, flexDirection: "column", justifyContent: 'space-between' }}>
+
+                                    <View style={{ width: "100%", height: "50%", flexDirection: "row", justifyContent: "space-between" }}>
+                                        <Image style={{ width: 50, height: 50 }} source={require("../../assets/corner1.png")} />
+                                        <Image style={{ width: 50, height: 50, }} source={require("../../assets/corner3.png")} />
+                                    </View>
+                                    <View style={{ width: "100%", height: "50%", flexDirection: "row", justifyContent: "space-between" }}>
+                                        <Image style={{ width: 50, height: 50 }} source={require("../../assets/corner4.png")} />
+                                        <Image style={{ width: 50, height: 50, }} source={require("../../assets/corner2.png")} />
+                                    </View>
+                                </View>
+                            </BarCodeScanner>}
+
                 </View>
-               
-            </View>
-            </SafeAreaView>
-        );
-    }
 
-    const styles = StyleSheet.create({
-       
-       
-    
-        container: {
-            flex: 1,
-            flexDirection: "column",
-            height: Dimensions.get("window").height,
-            width: Dimensions.get("window").width,
-            backgroundColor: "#F2F6FF",
-        },
-    
-        containerDark: {
-            flex: 1,
-            flexDirection: "column",
-            height: Dimensions.get("window").height,
-            width: Dimensions.get("window").width,
-            backgroundColor: "#121212",
-    
-        },
-        mapContainer: {
-            width: "100%",
-            height: "92%",
-            flexDirection: "column"
-    
-        },
-        menu: {
-            width: "100%",
-            height: "8%",
-            backgroundColor: "white",
-            flexDirection: "row",
-            marginTop:10
-        },
-        menuDark: {
-            width: "100%",
-            height: "8%",
-            backgroundColor: "#121212",
-            flexDirection: "row",
-            marginTop:10
-    
-        },
-        leftArrowContainer: {
-            width: "10%",
-            height: "100%",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center"
-        },
-        leftArrow: {
-            width: 30,
-            height: 30,
-            marginTop:10
-        },
-    
-        titleContainer: {
-            width: "80%",
-            height: "100%",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center"
-        },
-        Title: {
-            fontWeight: "700",
-            fontSize: Dimensions.get("window").width * 0.08
-        },
-        searchContainer: {
-            width: "10%",
-            height: "100%",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center"
-        },
-    
-        TitleDark: {
-            fontWeight: "700",
-            fontSize: Dimensions.get("window").width * 0.08,
-            color: "white"
-    
-        },
-    
-    
-    })
-    
+            </View>
+        </SafeAreaView>
+    );
+}
+
+const styles = StyleSheet.create({
+
+
+
+    container: {
+        flex: 1,
+        flexDirection: "column",
+        height: Dimensions.get("window").height,
+        width: Dimensions.get("window").width,
+        backgroundColor: "#F2F6FF",
+    },
+
+    containerDark: {
+        flex: 1,
+        flexDirection: "column",
+        height: Dimensions.get("window").height,
+        width: Dimensions.get("window").width,
+        backgroundColor: "#121212",
+
+    },
+    mapContainer: {
+        width: "100%",
+        height: "92%",
+        flexDirection: "column"
+
+    },
+    menu: {
+        width: "100%",
+        height: "8%",
+        backgroundColor: "white",
+        flexDirection: "row",
+        marginTop: 10
+    },
+    menuDark: {
+        width: "100%",
+        height: "8%",
+        backgroundColor: "#121212",
+        flexDirection: "row",
+        marginTop: 10
+
+    },
+    leftArrowContainer: {
+        width: "10%",
+        height: "100%",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center"
+    },
+    leftArrow: {
+        width: 30,
+        height: 30,
+        marginTop: 10
+    },
+
+    titleContainer: {
+        width: "80%",
+        height: "100%",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center"
+    },
+    Title: {
+        fontWeight: "700",
+        fontSize: Dimensions.get("window").width * 0.08
+    },
+    searchContainer: {
+        width: "10%",
+        height: "100%",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center"
+    },
+
+    TitleDark: {
+        fontWeight: "700",
+        fontSize: Dimensions.get("window").width * 0.08,
+        color: "white"
+
+    },
+
+
+})
