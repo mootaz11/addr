@@ -35,7 +35,6 @@ export const generateRatings = (id, delivery) => {
 export default function deliveryAdress(props) {
     const [locationChosen, setlocationChosen] = useState(true);
     const [deliveryOption, setDeliveryOption] = useState(null);
-    const [deliveryOptions,setDeliveryOptions]=useState(null);
     const context = useContext(AuthContext);
     const [openModal,setOpenModal]=useState(false);
     const [location,setLocation] =useState(null)
@@ -50,43 +49,27 @@ export default function deliveryAdress(props) {
             lat:context.location.location.latitude,
             lng:context.location.location.longitude
         })
-
-        getDeliveryOptions(props.route.params.order.partner._id,{location:{
-            lat:context.location.location.latitude,
-            lng:context.location.location.longitude
-        }}
-        ).then(_deliveryOptions=>{
-            setDeliveryOptions(_deliveryOptions);
-        })
-        .catch(err=>{
-            alert("error while getting options")
-        })
     }
 }}
 
 return()=>{
-    setDeliveryOption(null);setDeliveryOptions(null);mounted=false;
+    setDeliveryOption(null);mounted=false;
 }
 },[props.route.params])            
     
     const goBack = () => {
-        props.navigation.navigate("bag", { products: props.route.params.products })
+        props.navigation.goBack({ products: props.route.params.products })
+     //   props.navigation.navigate("bag", { products: props.route.params.products })
     }
 
 
 
     const saveAdress=()=>{
 
-        getDeliveryOptions(props.route.params.order.partner._id,{location:location}).then(_deliveryOptions=>{
-    setDeliveryOptions(_deliveryOptions);
     setOpenModal(!openModal);
     setlocationChosen(!locationChosen);    
 
-})
-
-.catch(err=>{
-    alert("error while getting options")
-})      
+    
     }
 
     const handleChangeAddress = async (evt)=>{
@@ -99,21 +82,14 @@ return()=>{
 
     const checkReview = () => {
         if(phone.length>0){
-            if(deliveryOption)
-            {
-            props.navigation.navigate("orderReview", { order: props.route.params.order,phone:phone,location:location,deliveryPartnerId:deliveryOption.partner._id})
-            }
-            else {  
-                alert("no delivery option chosen");
-                }
-                  
+            
+            props.navigation.navigate("orderReview", { order: props.route.params.order,phone:phone,location:location,deliveryPartnerId:deliveryOption.partner._id})      
         }
+
         else {
             alert("please set your phone number");
         }
     }
-
-
     return (
         <SafeAreaView >
             <View style={context.darkMode ? styles.containerDark : styles.container}>
@@ -158,56 +134,13 @@ return()=>{
                 </View>
 
                 <View style={styles.deliveries}>
-                    <Text style={context.darkMode ? { fontSize: 20, fontWeight: "600", color: "white" } : { fontSize: 20, fontWeight: "600" }}>Choose your delivery Option</Text>
-                    {deliveryOptions && deliveryOptions.length>0 ? <FlatList data={deliveryOptions}
-                        renderItem={({ item }) =>
-                            <TouchableOpacity onPress={() => { setDeliveryOption(item); }}>
-
-                                <View style={deliveryOption && item._id == deliveryOption._id ? styles.deliveryOptionChosen : (context.darkMode ? styles.deliveryOptionDark : styles.deliveryOption)}>
-                                    <View style={styles.deliveryOptionContainer}>
-                                        <View style={styles.deliveryImageContainer}>
-                                            <Image style={{ width: "100%", height: "100%", resizeMode: "cover", borderRadius: 12 }} source={{uri:item.partner.profileImage}} />
-                                        </View>
-                                        <View style={styles.deliveryOptionInfoContainer}>
-                                            <View style={styles.delivererInfo}>
-                                                <Text style={deliveryOption && item._id == deliveryOption._id ? { textAlign: "center", fontSize: Dimensions.get("window").width * 0.036, fontWeight: '600', color: "white" } : (context.darkMode ? { textAlign: "center", fontSize: Dimensions.get("window").width * 0.036, fontWeight: '600', color: "white" } : { textAlign: "center", fontSize: Dimensions.get("window").width * 0.036, fontWeight: '600' })}>name : {item.partner.partnerName}</Text>
-                                                <Text style={deliveryOption && item._id == deliveryOption._id ? { textAlign: "center", fontSize: Dimensions.get("window").width * 0.036, fontWeight: '600', color: "white" } : (context.darkMode ? { textAlign: "center", fontSize: Dimensions.get("window").width * 0.036, fontWeight: '600', color: "white" } : { textAlign: "center", fontSize: Dimensions.get("window").width * 0.036, fontWeight: '600' })}>price : {item.partner.deliveryPrice} TND</Text>
-                                                {
-                                                    item.rating&&
-                                   <FeedbackListItem
-                                    
-                                    darkMode={context.darkMode||deliveryOption && item._id == deliveryOption._id}
-                                    image={require("../assets/user_image.png")}
-                                    message={""}
-                                    rate={item.rating}
-                                />
-                                    }
-                                            </View>
+                                
 
                                             
-                                        </View>
-                                        <View style={styles.openDays}>
-                                            <View style={styles.delivererInfo}>
-                                                <Text style={deliveryOption && item._id == deliveryOption._id ? { textAlign: "center", fontSize: 16, fontWeight: '600', color: "white" } : (context.darkMode ? { textAlign: "center", fontSize: 16, fontWeight: '600', color: "white" } : { textAlign: "center", fontSize: 16, fontWeight: '600' })}>{item.deliveryTime.from+" to "+item.deliveryTime.from} pm</Text>
-                                            </View>
-                                        </View>
-                                    
-                                    </View>
-                                
-                                </View>
-                                
-                            </TouchableOpacity>
-
-                        }
-
-                        keyExtractor={item => item._id}
-
-                    >
-
-                    </FlatList>
-:<View>
-    <Text style={context.darkMode ?{color:"white",fontSize:Dimensions.get("screen").width*0.07,marginTop:12,textShadowColor:"white",textShadowOffset:{width:0.5,height:0.5},textShadowRadius:1}:{color:"black",fontSize:Dimensions.get("screen").width*0.07,marginTop:12,textShadowColor:"black",textShadowOffset:{width:0.5,height:0.5},textShadowRadius:1}}>Oops...! no delivery options you can contact Partner</Text>
-    </View>}
+                     
+<View>
+    <Text style={context.darkMode ?{color:"white",fontSize:Dimensions.get("screen").width*0.07,marginTop:12,textShadowColor:"white",textShadowOffset:{width:0.5,height:0.5},textShadowRadius:1}:{color:"black",fontSize:Dimensions.get("screen").width*0.07,marginTop:12,textShadowColor:"black",textShadowOffset:{width:0.5,height:0.5},textShadowRadius:1}}>Addresti will handle the delivery phase ... no worries Dear customer</Text>
+    </View>
                 </View>
                 <View style={styles.buttonContainer}>
                     <TouchableOpacity style={styles.addButton} onPress={()=>{checkReview()}}>

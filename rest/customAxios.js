@@ -2,7 +2,7 @@ import axios from 'axios'
 import AsyncStorageService from '../rest/AsyncStorageService'
 const production = false;
 
-const host = production ? 'https://addresti-back-end.herokuapp.com':'http://192.168.1.11:5000'
+const host = production ? 'https://addresti-back-end.herokuapp.com':'http://192.168.1.14:5000'
 const custom_axios = axios.create({
     baseURL: host,
 })

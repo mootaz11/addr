@@ -11,7 +11,7 @@ export default function Basket(props){
 
     const checkBag=(item)=>{props.navigation.navigate("bag",{order:item})}
     
-    const goBack = () => {props.navigation.navigate(props.route.params.last_screen);}
+    const goBack = () => {props.navigation.goBack()}
 
     useEffect(() => {
         let mounted=true;

@@ -178,6 +178,7 @@ const AddProductScreen = (props) => {
             if (!partner.services.isFood && !partner.services.isDelivery) {
                 setProductType("regular");
             }
+            setSubcategories(partner.categories[0].subCategories);
             setCategories(partner.categories)
         })
        .catch(err=>{alert("error while getting partner")})
@@ -251,6 +252,11 @@ const AddProductScreen = (props) => {
     const addNewSubCategory=()=>{
         addSubCategory(context.partner._id,category,nameSubCategory).then(newSubCategory => {
             setSubcategories([...subcategories, newSubCategory]);
+            
+            var _categories = [...categories];
+            _categories[categories.findIndex(cat=>{return cat._id ==category})].subCategories.push(newSubCategory);
+            setCategories(_categories);
+
             setModalSubCategoryVisible(!modalSubCategoryVisible);
             setNameSubCategory("");
         }).catch(message => {
@@ -483,6 +489,13 @@ const AddProductScreen = (props) => {
         );
     };
 
+const handleCategory =(itemValue)=>{
+    setCategory(itemValue);
+    const cat_index = categories.findIndex(cat=>{return cat._id==itemValue});
+    if(cat_index>=0){
+        setSubcategories(categories[cat_index].subCategories);
+    }
+}
 
     const discountChangeHandler = () => {
         setValueDiscount((prevState) => !prevState);
@@ -528,12 +541,13 @@ const AddProductScreen = (props) => {
                     basePrice: formState.inputValues.price,
                     discount: pourcentage,
                     description: formState.inputValues.description,
-                    partner: context.user._id,
+                    partner: context.partner._id,
                     weight: formState.inputValues.weight,
                     type: productType.toLowerCase(),
                     gendre: gender ? gender.toLowerCase() : "",
                     name: formState.inputValues.title,
-                    pricing: allSousVariantsCombinaisons
+                    pricing: allSousVariantsCombinaisons,
+
                 }
 
                 const fd = new FormData();
@@ -544,6 +558,7 @@ const AddProductScreen = (props) => {
                 fd.append('product', JSON.stringify({ ...product }));
                 fd.append('variants', JSON.stringify([..._variants]));
                 fd.append('category', category);
+                fd.append('subCategory',subCategory);   
 
                 addProduct(context.partner._id, fd).then(message => {
                     Alert.alert('Operation Done', message, [{ text: 'Okay' }]);
@@ -577,6 +592,7 @@ const AddProductScreen = (props) => {
                     _variants.push(_variant);
                 })
 
+                
                 const product = {
                     basePrice: formState.inputValues.price,
                     discount: valueDiscount,
@@ -690,7 +706,7 @@ const AddProductScreen = (props) => {
                             <View style={styles.genderPickerContainer}>
                                 <Picker
                                     selectedValue={category}
-                                    onValueChange={(itemValue, itemIndex) => {setCategory(itemValue);} }
+                                    onValueChange={(itemValue, itemIndex) => {handleCategory(itemValue)} }
                                     mode="dropdown">
                                     {
                                         categories &&
@@ -715,11 +731,12 @@ const AddProductScreen = (props) => {
                             <View style={styles.genderPickerContainer}>
                                 <Picker
                                     selectedValue={subCategory}
-                                    onValueChange={(itemValue, itemIndex) => setSubCategory(itemValue)}
+                                    onValueChange={(itemValue, itemIndex) => {setSubCategory(itemValue);}}
                                     mode="dropdown"
                                 >    
+
                                     {
-                                        subcategories.length>0 &&
+                                       subcategories  &&
                                         subcategories.map((_subcategory, index) => (
                                             <Picker.Item key={index} label={_subcategory.name} value={_subcategory._id} />
                                         ))

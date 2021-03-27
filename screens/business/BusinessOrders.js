@@ -42,6 +42,7 @@ export default function  BusinessOrders (props) {
                 if(order.actif==true && order.taked==false && order.prepared==true)
                 {
                     _preparedOrders.push(order);
+
                 }
                 if(order.actif==false && order.taked==true &&order.prepared==true)
                 {

@@ -17,6 +17,21 @@ export const getRegion =(id)=>{
     })
 }
 
+
+export const getDomains = ()=>{
+    return new Promise((resolve,reject)=>{
+        axios.get(`/domain/`).then(res=>{
+            if(res.status===200){
+                resolve(res.data.domains);
+            }
+
+        })
+        .catch(err=>{
+            reject(err);
+        })
+    })
+}
+
 export const getService =(idService)=>{
     return new Promise((resolve,reject)=>{
         axios.get(`/geo-location/service/${idService}`).then(res=>{

@@ -3,7 +3,6 @@ import { createStackNavigator } from '@react-navigation/stack';
 import Chat from '../screens/ChatScreen';
 import Home from '../screens/HomeScreen';
 import Orders from '../screens/Orders';
-import Deliveries from '../screens/DeliveriesScreen'
 import Conversation from '../screens/Conversation';
 import AuthContext from '../navigation/AuthContext';
 import { NavigationContainer,DarkTheme,DefaultTheme } from '@react-navigation/native';
@@ -13,7 +12,7 @@ import Login from '../screens/LoginScreen';
 import Settings from '../screens/SettingsScreen';
 import Brand from '../screens/brandScreen';
 import SingleBrand from '../screens/singleBrand';
-import genderCategory from '../screens/genderScreen';
+import subCategory from '../screens/SubCategory';
 import Products from '../screens/productsScreen';
 import SingleProduct from '../screens/SingleProduct';
 import bag from '../screens/bagScreen';
@@ -29,6 +28,8 @@ import followPackages from '../screens/business/followPackages';
 import Basket from '../screens/BasketScreen';
 import Contact from '../screens/contactScreen'
 import qrScanner from '../screens/business/QrScanner';
+import collecting from '../screens/business/CollectingDeliveries';
+import delivering from '../screens/business/DeliveringOrders';
 
 
 
@@ -74,7 +75,8 @@ return(
           <drawerStack.Navigator   drawerContent={props => <CustomDrawer  {...props}/>}>
             <drawerStack.Screen    options={{ swipeEnabled: false }}  name="Login" component={Login} />
             <drawerStack.Screen name="orders" component={Orders}/>
-            <drawerStack.Screen name="deliveries" component={Deliveries}/>
+            <drawerStack.Screen name="collecting" component={collecting}/>
+            <drawerStack.Screen name="delivering" component={delivering}/>
             <drawerStack.Screen name="Settings" component={Settings}/>
             <drawerStack.Screen name="Home" component={Home}/>
             <drawerStack.Screen name="chat" component={ChatStack}/>
@@ -82,7 +84,7 @@ return(
             <drawerStack.Screen name="conversation"  component={Conversation}/>
             <drawerStack.Screen name ="brand" component={Brand}/>
             <drawerStack.Screen name ="singleBrand" component={SingleBrand}/>
-            <drawerStack.Screen name="gender" component={genderCategory}/>
+            <drawerStack.Screen name="subCategory" component={subCategory}/>
             <drawerStack.Screen name="products" component={Products}/>
             <drawerStack.Screen name="singleProduct" component={SingleProduct}/>
             <drawerStack.Screen name="bag" component={bag}/>

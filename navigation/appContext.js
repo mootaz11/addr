@@ -11,12 +11,10 @@ import { Notifications } from 'expo';
 import Constants from 'expo-constants';
 
 export default function AppContext(props) {
-
     const [socket, setSocket] = useState(io('http://192.168.1.11:5000'));
     const [location, setLocation] = useState(null);
     const [user, setUser] = useState(null)
     const [deliveryData, setDeliveryData] = useState(null)
-
     const [conversations, setConversations] = useState(null);
     const [darkMode, setDarkMode] = useState(false);
     const [isloading, setIsloading] = useState(true);
@@ -110,7 +108,6 @@ export default function AppContext(props) {
                 setConversations(_convSorted);
                 setIsloading(false);
                 setLoggedIn(true);
-
             }).catch(err => { alert("network or server error")})
         }
     }, [user])
@@ -137,7 +134,6 @@ export default function AppContext(props) {
         if (conversations) {
             socket.on('send-message', (message) => {
                 const _conversations = [...conversations];
-
                 const conv_index = _conversations.findIndex(conv => { return conv._id == message.conversation });
                 let notSeenSum = 0
                 if (conv_index >= 0) {

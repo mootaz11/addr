@@ -68,12 +68,13 @@ export default function SingleBrand(props) {
 
     }
     const checkCategory = (item) => {
-        if(partner.services.isFood){
-            props.navigation.navigate("products", {category:item,last_screen:"food",gender:''});
-        }
-        else {
-            props.navigation.navigate("gender", { gender: item.name ,categories:partner.categories})
-        }
+        // if(partner.services.isFood){
+        //     props.navigation.navigate("products", {category:item,last_screen:"food",gender:''});
+        // }
+        // else {
+        //     props.navigation.navigate("gender", { gender: item.name ,categories:partner.categories})
+        // }
+        props.navigation.navigate("subCategory", { subCategory: item.name ,subCategories:item.subCategories})
     
     }
     const checkProduct = (item)=>{

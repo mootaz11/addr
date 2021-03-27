@@ -1,11 +1,11 @@
  import React,{useState,useContext,useEffect} from 'react'
  import { View, Text, StyleSheet, TouchableOpacity, Image, SafeAreaView ,Dimensions} from 'react-native'
  import { Icon } from 'react-native-elements';
- import AuthContext from '../navigation/AuthContext';
+ import AuthContext from '../../navigation/AuthContext';
  import _ from 'lodash';
  import { FlatList } from 'react-native-gesture-handler';
  import FontAwesome from 'react-native-vector-icons/FontAwesome';
- import {getDelivererOrders,markOrderAsTaked} from '../rest/ordersApi'
+ import {getDelivererOrders,markOrderAsTaked} from '../../rest/ordersApi'
 
  const order_pipeline = [
      { step: "Order", _id: "1" },
@@ -18,130 +18,30 @@
 //waiting order (prepared:true,actif:true,taked:false) ok => livreur , taked:true
 //
 
- export default function  Deliveries (props) {
+ export default function  collecting (props) {
      const context = useContext(AuthContext);
      const [Orders, setOrders] = useState([]);
-     const [waitingOrders, setWaitingOrders] = useState([]);
-     const [OrdersTodeliver, setOrdersToDeliver] = useState([]);
-     const [ordersDelivered,setOrdersDelivered]=useState([]);
-     const [checkedStep, setCheckedStep] = useState(order_pipeline[0])
-
-     const [order, setOrder] = useState(true);
-     const [waitingOrder,setWaitingOrder]=useState(false);
-     const [orderToDeliver,setOrderToDeliver]=useState(false);
-     const [orderDelivered,setOrderDelivered]=useState(false);
+    
 
     
     useEffect(() => {
        getDelivererOrders(context.partner._id).then(orders=>{
-           let _orders=[];
-           let _waitingOrders=[];
-           let _ordersToDeliver=[];
-           let _deliveredOrders=[];
-
-           orders.map(order=>{
-            if (order.actif == true && order.taked == false && order.prepared == false) {
-                _orders.push(order);
-            }
-            if(order.actif==true&&order.taked==false&&order.prepared==true){
-                _waitingOrders.push(order);
-            }
-            if(order.actif==true&&order.taked==true&&order.prepared==true){
-                _ordersToDeliver.push(order);
-            }
-            if(order.actif==false&&order.taked==true&&order.prepared==true){
-                _deliveredOrders.push(order);
-            }
-           })
-           setOrders(_orders);
-           setOrdersToDeliver(_ordersToDeliver);
-           setWaitingOrders(_waitingOrders);
-           setOrdersDelivered(_deliveredOrders);
+        
        })
     }, [])
  
  
  
    
-     const openDrawer = () => {
-         props.navigation.openDrawer();
-     }
+  
 
-
-    const takeOrder =(item)=>{
-        markOrderAsTaked(item._id,context.partner._id).then(message=>{
-            setOrderToDeliver([...OrdersTodeliver,item]);
-            setWaitingOrders(waitingOrders.filter(order=>order._id!=item._id));
-        })
-    }
  
 
-     const checkStep = (item) => {
-         setCheckedStep(item)
-     
-         if (item.step == "Order") {
-            setOrder(true);
-            setOrderDelivered(false);
-            setOrderToDeliver(false);
-            setWaitingOrder(false)     
-        
-        }
-         
-        if (item.step == "Waiting order") {
-            setOrder(false);
-            setOrderDelivered(false);
-            setOrderToDeliver(false);
-            setWaitingOrder(true)     
-         }
-         
-         if(item.step=="Order to Deliver"){
-            setOrder(false);
-            setOrderDelivered(false);
-            setOrderToDeliver(true);
-            setWaitingOrder(false);     
-         }
-         
-         if (item.step == "Order Delivered") {
-            setOrder(false);
-            setOrderDelivered(true);
-            setOrderToDeliver(false);
-            setWaitingOrder(false)     
-         }
-
-     }
      return (
  <SafeAreaView style={{flex:1}}>
  <View style={context.darkMode ? styles.containerDark : styles.container}>
-             <View style={context.darkMode ? styles.menuDark : styles.menu}>
-                     <View style={styles.leftArrowContainer} >
-                     <TouchableOpacity onPress={openDrawer} style={{height:30,width:30}}>
-                        <Image source={context.darkMode ?  require("../assets/menu_dark.png"):require("../assets/menu.png")} style={{height:"100%",width:"100%",resizeMode:"cover"}}/>
-                        </TouchableOpacity>
-                     </View>
-                 <View style={styles.titleContainer}>
-                     <Text style={context.darkMode ? styles.TitleDark : styles.Title}>Deliveries</Text>
-                 </View>
- 
-             </View>
-             <View style={styles.headerElements}>
-                 <FlatList
-                     data={order_pipeline}
-                     numColumns={2}
-                     renderItem={({ item }) =>
-                         <TouchableOpacity style={checkedStep && item._id == checkedStep._id ? styles.stepChecked :(context.darkMode ? styles.stepDark: styles.step)} onPress={() => checkStep(item)}>
-                             <View style={{ width: "100%", height: "100%", flexDirection: "column", justifyContent: "center", alignItems: "center", }}>
-                                 <Text style={checkedStep && item._id == checkedStep._id ? { color: "white", fontSize: 15, textAlign: "center" } : (context.darkMode ? { color: "white", fontSize: 15, textAlign: "center" }:{ color: "black", fontSize: 15, textAlign: "center" } )}>{item.step}</Text>
-                             </View>
-                         </TouchableOpacity>
- 
- 
-                     }
-                     keyExtractor={item => item._id}
-                 >
- 
-                 </FlatList>
- 
-             </View>
+            <Text>collecting</Text>
+            
              <View style={styles.ordersContainer}>
  
                  <FlatList

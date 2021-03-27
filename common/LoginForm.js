@@ -36,6 +36,7 @@ const formReducer = (state, action) => {
     return state;
 };
 
+
 const LoginForm = (props) => {
     const context = useContext(AuthContext);
     const [formState, dispatchFormState] = useReducer(formReducer, {
@@ -44,7 +45,6 @@ const LoginForm = (props) => {
             password: ''
         }, 
         inputValidities: {
-            email: false,
             password: false
         }, 
         formIsValid: false
@@ -84,12 +84,11 @@ const LoginForm = (props) => {
             style={styles.input} 
             inputId="email"
             imageSrc={require("../assets/images/login.png")} 
-            placeholder="email"
+            placeholder="email or username"
             keyboardType="email-address"
             autoCapitalize="none"
             required
-            email
-            errorText ="please enter your email address"
+            
             onInputChange={inputChangeHandler}
             />
         </View>

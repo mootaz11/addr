@@ -1,22 +1,23 @@
 import React, { useEffect, useState,useContext } from 'react'
+import { SafeAreaView } from 'react-native';
 import {View,Text, StyleSheet,Dimensions,Image,TouchableOpacity} from 'react-native'
 import { FlatList } from 'react-native-gesture-handler';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import AuthContext from '../navigation/AuthContext';
 
-export default function genderCategory(props){
+export default function subCategory(props){
     const context = useContext(AuthContext);
     const [categories,setCategories]=useState(null)
     const [gender,setGender]=useState("")
     
     useEffect(()=>{
         if(props.route.params.gender)
-        {setGender(props.route.params.gender)}
-        if(props.route.params.categories.length>0){
-            setCategories(props.route.params.categories);
+        {setGender(props.route.params.subCategory)}
+        if(props.route.params.subCategories.length>0){
+            setCategories(props.route.params.subCategories);
         }
 
-    },[props.route.params.gender,props.route.params.categories])
+    },[props.route.params.subCategory,props.route.params.subCategories])
 
     
     const goBack= ()=>{
@@ -24,10 +25,11 @@ export default function genderCategory(props){
     }
     
     const checkCategory=(_category)=>{
-        props.navigation.navigate("products",{category:_category,gender:gender.toLowerCase(),last_screen:"gender"})    
+       props.navigation.navigate("products",{last_screen:"sub_category",products:_category.products})    
     }
 
     return(
+        <SafeAreaView style={{flex:1}}>
         <View style={context.darkMode ?  styles.containerDark : styles.container}>
                 <View style={context.darkMode ?  styles.menuDark : styles.menu}>
                     <View style={styles.leftArrowContainer}>
@@ -37,10 +39,10 @@ export default function genderCategory(props){
                         </TouchableOpacity>
                     </View>
                  <View style={styles.titleContainer}>
-                 <Text style={context.darkMode ?  styles.TitleDark : styles.Title}>{props.route.params.gender}</Text>
+                 <Text style={context.darkMode ?  styles.TitleDark : styles.Title}>{props.route.params.subCategory}</Text>
                 </View>   
                 <View style={styles.searchContainer}>
-                <FontAwesome color={context.darkMode ?  "white" : "black"} style={{ padding: 0, fontSize: 24 }} name="search"  />
+                {/* <FontAwesome color={context.darkMode ?  "white" : "black"} style={{ padding: 0, fontSize: 24 }} name="search"  /> */}
 
                 </View>
             
@@ -77,6 +79,7 @@ export default function genderCategory(props){
            
 
         </View>
+        </SafeAreaView>
     );
 }
 
@@ -136,6 +139,7 @@ const styles = StyleSheet.create({
         justifyContent:"center"
     },
     leftArrow:{
+        marginLeft:5,
         width:30,
         height:30
     },

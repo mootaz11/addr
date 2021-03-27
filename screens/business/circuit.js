@@ -61,7 +61,7 @@ const deliverers = [
         
 ]
 
-export default function followPackages(props) {
+export default function circuit(props) {
     const context = useContext(AuthContext)
     
     const openDrawer = () => {

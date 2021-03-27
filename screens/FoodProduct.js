@@ -212,7 +212,7 @@ const goBack = () => {
                             <Text style={context.darkMode ? { fontSize: 20, fontWeight: "600",color:"white" }:{ fontSize: 20, fontWeight: "600" }}>Cost</Text>
                         </View>
                         <View >
-                            <Text style={context.darkMoZde ? { fontSize: 20, fontWeight: "600" ,color:"white"}:{ fontSize: 20, fontWeight: "600" }}>{product.total} DT</Text>
+                            <Text style={context.darkMode ? { fontSize: 20, fontWeight: "600" ,color:"white"}:{ fontSize: 20, fontWeight: "600" }}>{product.total} DT</Text>
                         </View>
                     </View>
 

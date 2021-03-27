@@ -22,19 +22,10 @@ export default function Products(props){
                 setProducts(props.route.params.topTrends);
             }
 
+            
             if(props.route.params.last_screen!="topTrends"&&props.route.params.last_screen!="newArrivals"){  
-                getProductsByCategory(props.route.params.category._id,props.route.params.gender)
-                .then(_products=>{
-                    if(isMounted){
-                        if(_products.length>0){
-                            setProducts(_products);
-                        }
-                    }     
-                }).catch(err=>{
-                    if(isMounted){
-                        alert("error occured")
-                    }
-                })      
+                
+                setProducts(props.route.params.products)    
             }
             
             

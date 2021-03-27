@@ -53,7 +53,8 @@ export default function bag(props) {
     }, [props.route.params])
 
     const goBack = () => {
-        props.navigation.navigate('basket', { price: preOrder.price });
+        props.navigation.goBack({ price: preOrder.price })
+//        props.navigation.navigate('basket', { price: preOrder.price });
     }
 
     const increaseQuantity = (item) => {
