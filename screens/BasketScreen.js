@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react'
 import { SafeAreaView } from 'react-native';
+import { Platform } from 'react-native';
 import { Dimensions, StyleSheet, View, TouchableOpacity, Image, Text } from 'react-native'
 import { FlatList } from 'react-native-gesture-handler';
 import AuthContext from '../navigation/AuthContext';
@@ -25,7 +26,7 @@ export default function Basket(props){
             }
         })
         return ()=>mounted=false;        
-    }, [props.route])
+    }, [props.route.params])
 
     return (
         <SafeAreaView>
@@ -43,33 +44,36 @@ export default function Basket(props){
             {
                 baskets&&baskets.length>0 ? 
                 <View style={styles.bagContainer}>
-                <Text style={context.darkMode ? { fontSize:Dimensions.get("screen").width*0.05, fontWeight: "500",color:"white" }:{ fontSize:Dimensions.get("screen").width*0.05, fontWeight: "500" }}>Basket({baskets.length})</Text>
+                <Text style={context.darkMode ? { fontFamily:'Poppins',fontSize:Dimensions.get("screen").width*0.05, fontWeight: "500",color:"white" }:{ fontFamily:'Poppins',fontSize:Dimensions.get("screen").width*0.05,color:"black", fontWeight: "500" }}>Basket({baskets.length})</Text>
                 <FlatList
                     data={baskets}
                     renderItem={
                         ({ item }) =>
                         <TouchableOpacity  onPress={()=>checkBag(item)}>
                             <View style={context.darkMode ? styles.productContainerDark : styles.productContainer}>
+                               
                                 <View style={{ width: "30%", height: "100%", flexDirection: "column",justifyContent:"center"  ,borderRadius:12}}>
-                                    <View style={{flexWrap:"wrap",margin:5}}>
-                                        <Text style={context.darkMode ? {textAlign:"left" ,fontSize:Dimensions.get("screen").width*0.04,fontWeight:"500",color:"white"}:{textAlign:"left" ,fontSize:Dimensions.get("screen").width*0.04,fontWeight:"500"}}>Partner :</Text>
+                                    <View style={{margin:4}}>
+                                        <Text style={context.darkMode ? {textAlign:"left" ,fontFamily:'Poppins',fontSize:Dimensions.get("screen").width*0.03,fontWeight:"500",color:"white"}:{textAlign:"left" ,fontFamily:'Poppins',fontSize:Dimensions.get("screen").width*0.03,fontWeight:"500",color:"black"}}>Partner :</Text>
+                                    </View>
+                                    <View style={{margin:5}}>
+                                        <Text style={context.darkMode ? {textAlign:"left",fontFamily:'Poppins',fontSize:Dimensions.get("screen").width*0.03,fontWeight:"500",color:"white"} : {textAlign:"left",fontFamily:'Poppins',fontSize:Dimensions.get("screen").width*0.03,fontWeight:"500",color:"black"}}>Date :</Text>
                                     </View>
                                     <View style={{flexWrap:"wrap",margin:5}}>
-                                        <Text style={context.darkMode ? {textAlign:"left",fontSize:Dimensions.get("screen").width*0.04,fontWeight:"500",color:"white"} : {textAlign:"left",fontSize:Dimensions.get("screen").width*0.04,fontWeight:"500"}}>Date :</Text>
-                                    </View>
-                                    <View style={{flexWrap:"wrap",margin:5}}>
-                                        <Text style={context.darkMode ? {textAlign:"left",fontSize:Dimensions.get("screen").width*0.04,fontWeight:"500",color:"white"} : context.darkMode ? {textAlign:"left",fontSize:Dimensions.get("screen").width*0.04,fontWeight:"500",color:"white"} : {textAlign:"left",fontSize:Dimensions.get("screen").width*0.04,fontWeight:"500"}}>Total Price :</Text>
+                                        <Text style={context.darkMode ? {textAlign:"left",fontFamily:'Poppins',fontSize:Dimensions.get("screen").width*0.03,fontWeight:"500",color:"white"} : context.darkMode ? {textAlign:"left",fontFamily:'Poppins',fontSize:Dimensions.get("screen").width*0.03,fontWeight:"500",color:"white"} : {textAlign:"left",fontFamily:'Poppins',fontSize:Dimensions.get("screen").width*0.03,fontWeight:"500",color:"black"}}>Total Price :</Text>
                                     </View>
                                 </View>
+
+
                                 <View style={{ width: "40%", height: "100%", flexDirection: "column",justifyContent:"center",borderRadius:12 }}>
-                                <View style={{flexWrap:"wrap",margin:5}}>
-                                        <Text style={{textAlign:"left" ,fontSize:Dimensions.get("screen").width*0.04,fontWeight:"500",color:"#2474F1"}}>{item.partner.partnerName}</Text>
+                                <View style={{margin:5}}>
+                                        <Text style={{textAlign:"left" ,fontFamily:'Poppins',fontSize:Dimensions.get("screen").width*0.03,fontWeight:"500",color:"#2474F1"}}>{item.partner.partnerName}</Text>
                                     </View>
-                                    <View style={{flexWrap:"wrap",margin:5}}>
-                                        <Text style={context.darkMode ? {textAlign:"left",fontSize:Dimensions.get("screen").width*0.04,fontWeight:"500",color:"white"} : {textAlign:"left",fontSize:Dimensions.get("screen").width*0.04,fontWeight:"500"}}>{item.date.toString().split('T')[0]}</Text>
+                                    <View style={{marginVertical:5}}>
+                                        <Text style={context.darkMode ? {textAlign:"left",fontFamily:'Poppins',fontSize:Dimensions.get("screen").width*0.03,fontWeight:"500",color:"white"} : {textAlign:"left",fontFamily:'Poppins',fontSize:Dimensions.get("screen").width*0.03,fontWeight:"500",color:"black"}}>{item.date.toString().split('T')[0]}</Text>
                                     </View>
-                                    <View style={{flexWrap:"wrap",margin:5}}>
-                                        <Text style={context.darkMode ? {textAlign:"left",fontSize:Dimensions.get("screen").width*0.04,fontWeight:"500",color:"white"} : {textAlign:"left",fontSize:Dimensions.get("screen").width*0.04,fontWeight:"500"}}>{item.price} DT</Text>
+                                    <View style={{margin:5}}>
+                                        <Text style={context.darkMode ? {textAlign:"left",fontFamily:'Poppins',fontSize:Dimensions.get("screen").width*0.03,fontWeight:"500",color:"white"} : {textAlign:"left",fontFamily:'Poppins',fontSize:Dimensions.get("screen").width*0.03,fontWeight:"500",color:"black"}}>{item.price} DT</Text>
                                     </View>
                     
                                 </View>
@@ -89,7 +93,7 @@ export default function Basket(props){
         :
         <View style={{flexDirection:"column",justifyContent:"center",alignItems:"center"}}>
             <Image source={require("../assets/empty_basket.png")} style={{ width:"50%",height:"50%"}}/>
-            <Text style={context.darkMode ? {fontSize:20,color:"white",textAlign:"center"}:{fontSize:20,color:"black",textAlign:"center"}}>Basket is Empty</Text>
+            <Text style={context.darkMode ? {fontFamily:'Poppins',fontSize:20,color:"white",textAlign:"center"}:{fontFamily:'Poppins',fontSize:20,color:"black",textAlign:"center"}}>Basket is Empty</Text>
         </View>
                 }
         </View>
@@ -143,6 +147,7 @@ const styles = StyleSheet.create({
         flexDirection: "column",
         justifyContent: "center",
     },
+
     productContainer: {
         width: "100%",
         height: 120,
@@ -150,12 +155,14 @@ const styles = StyleSheet.create({
         marginVertical: 10,
         flexDirection: "row",
         borderRadius: 12,
-        shadowColor:"grey",
-        shadowOpacity:1,
-        shadowOffset:{width:1,height:1},
+        backgroundColor:"white",
+        shadowColor:Platform.OS=='ios' ?'grey':'black',
+        shadowOpacity:0.5,
+        borderWidth:3,
+        shadowOffset: { width: 1, height: 2},
         borderColor:"white",
-        borderWidth:1,
-        shadowRadius:12,
+        elevation:Platform.OS=='android'?1:0,
+        shadowRadius:2,
         
     },
     productContainerDark: {
@@ -215,11 +222,10 @@ const styles = StyleSheet.create({
         justifyContent: "center"
     },
     leftArrow: {
-        width: 30,
-        height: 30
+        width: Dimensions.get("screen").height * 0.04,
+        height: Dimensions.get("screen").height * 0.04
         ,marginLeft:10
         
-        ,marginTop:10
 
     },
 
@@ -232,12 +238,12 @@ const styles = StyleSheet.create({
     },
     Title: {
         fontWeight: "700",
-        fontSize: Dimensions.get("window").width * 0.07,
+        fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.07,
         color:"black"
     },
     TitleDark: {
         fontWeight: "700",
-        fontSize: Dimensions.get("window").width * 0.07,
+        fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.07,
         color: "white"
 
     },

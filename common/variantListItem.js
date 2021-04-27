@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
     itemContainer:{
         //backgroundColor:'red',
         //flex:1,
-        height:Platform.OS=='android' ?  Dimensions.get('window').height*0.205:Dimensions.get('window').height*0.25, //120
+        height:Platform.OS=='android' ?  Dimensions.get('window').height*0.205:Dimensions.get('window').height*0.27, //120
         marginVertical:5
     },
     variantHeader:{
@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
         flexDirection:'row',
         margin:3,
         width:'30%',
-        height:Dimensions.get('window').height*0.0364,//28
+        height:Dimensions.get('window').height*0.0366,//28
         borderRadius:5
     },
     sousvariantValue:{

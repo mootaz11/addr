@@ -30,6 +30,8 @@ import Contact from '../screens/contactScreen'
 import qrScanner from '../screens/business/QrScanner';
 import collecting from '../screens/business/CollectingDeliveries';
 import delivering from '../screens/business/DeliveringOrders';
+import debouItems from '../screens/business/DebouOrders';
+import Notifications from '../screens/NotificationsScreen';
 
 
 
@@ -99,7 +101,10 @@ return(
             <drawerStack.Screen name="deliveryDash" component={DeliveryDashboardScreen}/>
             <drawerStack.Screen name="followPackages" component={followPackages}/>
             <drawerStack.Screen name="contact" component={Contact}/>
-            <drawerStack.Screen name="qrscanner" component={qrScanner}/>
+            <drawerStack.Screen name="livraisons" component={qrScanner}/>
+            <drawerStack.Screen name="debou" component={debouItems}/>
+            <drawerStack.Screen name="notifications" component={Notifications}/>
+
 
           </drawerStack.Navigator>
       </NavigationContainer>

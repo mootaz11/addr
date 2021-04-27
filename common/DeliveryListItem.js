@@ -27,8 +27,8 @@ const DeliveryListItem = (props) => {
                     <Text style={dark ?styles.nameStyleDark :  styles.nameStyle}> {props.name} </Text>
                     <Text style={dark ? {color:"white"}:{color:"black"}}>{props.time}</Text>
                 </View>
-                <View style={styles.buttonsContainer}>
-                <TouchableOpacity onPress={props.startConversation.bind(this,props.deliverer)}> 
+                <View style={styles.buttonsContainer}>      
+                <TouchableOpacity onPress={props.startConversation.bind(this,props.deliverer,props.name)}> 
                         <Image
                         style={styles.imageButton}
                         source={dark ? require("../assets/speech-bubble.png") : require("../assets/images/speech.png")}

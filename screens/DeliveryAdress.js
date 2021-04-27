@@ -10,52 +10,46 @@ import AuthContext from '../navigation/AuthContext';
 import {getDeliveryOptions} from '../rest/ordersApi';
 import FeedbackListItem from '../common/FeedbackListItem';
 
-const deliveryOptions = [
-    { name: "Sara", price: 20, ratings: 5, workdays: "4-7 jours ouvrés", _id: "55", image: require("../assets/user_image.png") },
-    { name: "Saleh", price: 25, ratings: 3, workdays: "4-7 jours ouvrés", _id: "56", image: require("../assets/user_image.png") },
-    { name: "Ammar", price: 24, ratings: 5, workdays: "4-7 jours ouvrés", _id: "57", image: require("../assets/user_image.png") },
-    { name: "Mohamed", price: 15, ratings: 0, workdays: "4-7 jours ouvrés", _id: "85", image: require("../assets/user_image.png") },
-]
-export const generateRatings = (id, delivery) => {
-    let rating = deliveryOptions[deliveryOptions.findIndex(item => { return item._id == id })].ratings;
-    let ratingsTab = [];
-    for (let i = 0; i < rating; i++) {
-        ratingsTab.push(
-            <FontAwesome key={i} color={delivery && id == delivery._id ? "white" : "black"} style={{ fontSize: 16, fontWeight: "600" }} name="star" />
-        )
-    }
-    if (ratingsTab.length > 0) {
-        return ratingsTab
 
-    }
-    else {
-        return <Text style={delivery && id == delivery._id ? { fontSize: 16, color: "white" } : { fontSize: 16 }}>no ratings</Text>
-    }
-}
 export default function deliveryAdress(props) {
     const [locationChosen, setlocationChosen] = useState(true);
     const [deliveryOption, setDeliveryOption] = useState(null);
+    const [deliveryOptions,setDeliveryOptions]=useState([]);
     const context = useContext(AuthContext);
     const [openModal,setOpenModal]=useState(false);
     const [location,setLocation] =useState(null)
     const [phone,setPhone]=useState('');
     
     useEffect(()=>{
-        let mounted = true ; 
-        if(mounted){
-    if(locationChosen){
+            if(context.user.phone){
+                setPhone(context.user.phone);
+            }
+
+
+
         if(context.location&&context.location.location){
         setLocation({
             lat:context.location.location.latitude,
             lng:context.location.location.longitude
         })
-    }
-}}
 
-return()=>{
-    setDeliveryOption(null);mounted=false;
+
+        let _location = {lat:context.location.location.latitude,
+            lng:context.location.location.longitude
 }
-},[props.route.params])            
+        getDeliveryOptions(props.route.params.partner,{location:_location}).then(data=>{
+            setDeliveryOption({Time:data.deliveryInfo.deliveryTime
+                ,Type:data.deliveryInfo.deliveryType,
+                Price:data.deliveryInfo.deliveryPrice,
+               Name:data.deliveryPartner.partnerName,
+                id:data.deliveryPartner._id})
+        }).catch(err=>{
+            
+        })    
+}
+
+
+},[props.route.params,context.location])            
     
     const goBack = () => {
         props.navigation.goBack({ products: props.route.params.products })
@@ -67,8 +61,15 @@ return()=>{
     const saveAdress=()=>{
 
     setOpenModal(!openModal);
-    setlocationChosen(!locationChosen);    
-
+    setlocationChosen(!locationChosen);  
+      
+    getDeliveryOptions(props.route.params.partner,{location:location}).then(data=>{
+        setDeliveryOption({Time:data.deliveryInfo.deliveryTime
+            ,Type:data.deliveryInfo.deliveryType,
+            Price:data.deliveryInfo.deliveryPrice,
+           Name:data.deliveryPartner.partnerName,
+            id:data.deliveryPartner._id})
+    })
     
     }
 
@@ -83,7 +84,13 @@ return()=>{
     const checkReview = () => {
         if(phone.length>0){
             
-            props.navigation.navigate("orderReview", { order: props.route.params.order,phone:phone,location:location,deliveryPartnerId:deliveryOption.partner._id})      
+            props.navigation.navigate("orderReview", { order: props.route.params.order,
+                phone:phone,
+                orderDestination:location,
+                deliveryPartner:deliveryOption,
+                productVariants:props.route.params.productVariants,
+                ingredients:props.route.params.ingredients
+            })      
         }
 
         else {
@@ -109,16 +116,16 @@ return()=>{
 
                 <View style={styles.infoadressContainer}>
                     <View style={styles.getDeliveryTo}>
-                        <Text style={context.darkMode ? { fontSize: 20, fontWeight: "700", color: "white" } : { fontSize: 20, fontWeight: "700" }}>Get delivery to your</Text>
+                        <Text style={context.darkMode ? { fontFamily:'Poppins',fontSize: 20, fontWeight: "700", color: "white" } : { fontFamily:'Poppins',fontSize: 20, fontWeight: "700" }}>Get delivery to your</Text>
                     </View>
                     <TouchableOpacity style={locationChosen ? styles.otherPosition : (context.darkMode ? styles.homeDark : styles.home)} onPress={() => { setlocationChosen(locationChosen => !locationChosen) }}>
                         <View style={{ width: "100%", height: "100%", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
-                            <Text style={locationChosen ? { fontSize: 18, fontWeight: "400", color: "white" } : (context.darkMode ? { fontSize: 18, fontWeight: "400", color: "white" } : { fontSize: 18, fontWeight: "400", color: "black" })}>Home</Text>
+                            <Text style={locationChosen ? { fontFamily:'Poppins',fontSize: 18, fontWeight: "400", color: "white" } : (context.darkMode ? { fontFamily:'Poppins',fontSize: 18, fontWeight: "400", color: "white" } : { fontFamily:'Poppins',fontSize: 18, fontWeight: "400", color: "black" })}>Home</Text>
                         </View>
                     </TouchableOpacity>
                     <TouchableOpacity style={!locationChosen ? styles.otherPosition : (context.darkMode ? styles.homeDark : styles.home)} onPress={() => {setOpenModal(openModal=>!openModal);setlocationChosen(locationChosen => !locationChosen) }}>
                         <View style={{ width: "100%", height: "100%", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
-                            <Text style={!locationChosen ? { fontSize: 18, fontWeight: "400", color: "white" } : (context.darkMode ? { fontSize: 18, fontWeight: "400", color: "white" } : { fontSize: 18, fontWeight: "400", color: "black" })}>Other position</Text>
+                            <Text style={!locationChosen ? { fontFamily:'Poppins',fontSize: 18, fontWeight: "400", color: "white" } : (context.darkMode ? { fontFamily:'Poppins',fontSize: 18, fontWeight: "400", color: "white" } : { fontFamily:'Poppins',fontSize: 18, fontWeight: "400", color: "black" })}>Other position</Text>
                         </View>
                     </TouchableOpacity>
                     <View style={context.darkMode ? styles.phoneNumberContainerDark : styles.phoneNumberContainer}>
@@ -139,13 +146,13 @@ return()=>{
                                             
                      
 <View>
-    <Text style={context.darkMode ?{color:"white",fontSize:Dimensions.get("screen").width*0.07,marginTop:12,textShadowColor:"white",textShadowOffset:{width:0.5,height:0.5},textShadowRadius:1}:{color:"black",fontSize:Dimensions.get("screen").width*0.07,marginTop:12,textShadowColor:"black",textShadowOffset:{width:0.5,height:0.5},textShadowRadius:1}}>Addresti will handle the delivery phase ... no worries Dear customer</Text>
+    <Text style={context.darkMode ?{color:"white",fontFamily:'Poppins',fontSize:Dimensions.get("screen").width*0.07,marginTop:12,textShadowColor:"white",textShadowOffset:{width:0.5,height:0.5},textShadowRadius:1}:{color:"black",fontFamily:'Poppins',fontSize:Dimensions.get("screen").width*0.07,marginTop:12,textShadowColor:"black",textShadowOffset:{width:0.5,height:0.5},textShadowRadius:1}}>{deliveryOption ? `${deliveryOption.Name} will handle your delivery with just ${deliveryOption.Price} Dt for delivery cost  `:"no delivery option found for your zone !!"}</Text>
     </View>
                 </View>
                 <View style={styles.buttonContainer}>
                     <TouchableOpacity style={styles.addButton} onPress={()=>{checkReview()}}>
                         <View style={{ height: "100%", height: "100%", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
-                            <Text style={{ fontSize: 18, fontWeight: "700", color: "white" }}>NEXT</Text>
+                            <Text style={{ fontFamily:'Poppins',fontSize: 18, fontWeight: "700", color: "white" }}>NEXT</Text>
                         </View>
                     </TouchableOpacity>
             </View>
@@ -160,8 +167,8 @@ return()=>{
                         <View style={{ width: "100%", height: "80%" }}>
                             <MapView
                                 initialRegion={{
-                                    latitude:  context.location.location ? Number(context.location.location.latitude):0,
-                                    longitude: context.location.location ? Number(context.location.location.longitude):0
+                                    latitude:  context.location ? Number(context.location.location.latitude):0,
+                                    longitude: context.location ? Number(context.location.location.longitude):0
                                     ,latitudeDelta: 0.5,
                                     longitudeDelta: 0.5 * (Dimensions.get("window").width / Dimensions.get("window").height )
                                 }}
@@ -176,13 +183,13 @@ return()=>{
                                     coordinate={
                                         Platform.OS == 'ios' ?
                                             {
-                                                latitude:  context.location.location ? Number(context.location.location.latitude):0,
-                                                longitude: context.location.location ? Number(context.location.location.longitude):0
+                                                latitude:  context.location ? Number(context.location.location.latitude):0,
+                                                longitude: context.location ? Number(context.location.location.longitude):0
                         
                                             } :
                                             {
-                                                latitude:  context.location.location ? Number(context.location.location.latitude):0,
-                                                longitude: context.location.location ? Number(context.location.location.longitude):0}
+                                                latitude:  context.location ? Number(context.location.location.latitude):0,
+                                                longitude: context.location ? Number(context.location.location.longitude):0}
 
 
 
@@ -198,7 +205,7 @@ return()=>{
                             <TouchableOpacity style={{width: "50%", height: 50,}} onPress={()=>{saveAdress()}}>
 
                                 <View style={{ width: "100%", height: 50, backgroundColor: "#2474F1", borderRadius: 24, flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
-                                    <Text style={{ color: "white", fontSize: Dimensions.get("window").width * 0.05 }}>save Address</Text>
+                                    <Text style={{ color: "white", fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.05 }}>save Address</Text>
                                 </View>
                             </TouchableOpacity>
 
@@ -437,8 +444,9 @@ const styles = StyleSheet.create({
         justifyContent: "center"
     },
     leftArrow: {
-        width: 30,
-        height: 30,
+        width: Dimensions.get("screen").height * 0.04,
+        height: Dimensions.get("screen").height * 0.04
+        ,marginLeft:10
     },
 
     titleContainer: {
@@ -450,11 +458,11 @@ const styles = StyleSheet.create({
     },
     Title: {
         fontWeight: "700",
-        fontSize: Dimensions.get("window").width * 0.07,
+        fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.07,
     },
     TitleDark: {
         fontWeight: "700",
-        fontSize: Dimensions.get("window").width * 0.07,
+        fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.07,
         color: "white"
 
     }

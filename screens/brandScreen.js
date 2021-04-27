@@ -38,10 +38,10 @@ export default function Brand(props){
                 {   props.route.params.page=="Brand" &&
                     <View style={styles.categories}>
                     <View style={styles.brand}>
-                        <Text style={{fontSize:20,color:"white",fontWeight:"500"}}>Brand</Text>
+                        <Text style={{fontFamily:'Poppins',fontSize:20,color:"white",fontWeight:"500"}}>Brand</Text>
                     </View>
                     <View style={context.darkMode ? styles.otherDark : styles.other}>
-                    <Text style={context.darkMode ? {fontSize:20,color:"white",fontWeight:"500"} :{fontSize:20,color:"black",fontWeight:"500"}}>Others</Text>
+                    <Text style={context.darkMode ? {fontFamily:'Poppins',fontSize:20,color:"white",fontWeight:"500"} :{fontFamily:'Poppins',fontSize:20,color:"black",fontWeight:"500"}}>Others</Text>
                     
                     </View>
                     
@@ -53,7 +53,6 @@ export default function Brand(props){
 
                     <Image style={styles.leftArrow} source={context.darkMode ? require("../assets/left-arrow-dark.png") : require("../assets/left-arrow.png")}/>
                     </TouchableOpacity>    
-
                     </View>
                 
                  <View style={styles.titleContainer}>
@@ -192,11 +191,11 @@ titleContainer:{
 Title:{
     fontWeight:"700",
     color:"black",
-    fontSize: Dimensions.get("window").width * 0.07,
+    fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.07,
 },
 TitleDark:{
     fontWeight:"700",
-    fontSize: Dimensions.get("window").width * 0.07,
+    fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.07,
     color:"white"
 },
 searchContainer:{
@@ -244,12 +243,12 @@ partnerImage:{
     resizeMode:"cover"
 },
 partnerName:{
-    fontSize:18,
+    fontFamily:'Poppins',fontSize:18,
     color:"black",
     fontWeight:"500"
 },
 partnerNameDark:{
-    fontSize:18,
+    fontFamily:'Poppins',fontSize:18,
     color:"white",
     fontWeight:"500"
 

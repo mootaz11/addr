@@ -149,9 +149,11 @@ export default function foodProduct(props) {
             alert("please choose at least one option")
         }
     }
-const checkBag =()=>{
-    props.navigation.navigate("basket",{last_screen:"food"});
+
+const checkBasket =()=>{
+    props.navigation.navigate("basket",{last_screen:"singleBrand"});
 }
+
 
 const goBack = () => {
         props.navigation.goBack();
@@ -164,10 +166,14 @@ const goBack = () => {
                     <TouchableOpacity style={styles.leftArrow} onPress={goBack}>
                         <Image style={{ width: "100%", height: "100%" }} source={require("../assets/left-arrow-dark.png")} />
                     </TouchableOpacity>
-                    <FontAwesome color={"white"} style={{ padding: 0, fontSize: 24,textShadowColor:"black",textShadowOffset:{width:0.5,height:0.5},textShadowRadius:1, position: "absolute", top: "8%", right: "2%" }} name="shopping-bag" onPress={()=>{checkBag()}} />
+                    <TouchableOpacity onPress={checkBasket}  style={{ position: "absolute",width: Dimensions.get("screen").height * 0.03, height: Dimensions.get("screen").height * 0.03,top: "10%", right: "2%" ,elevation:10,zIndex:50}}>
+                <FontAwesome color={"white"} style={{ padding: 0, fontFamily:'Poppins',fontSize: 24, position: "absolute", top: "10%", right: "2%" }} name="shopping-bag" />
+
+
+                </TouchableOpacity>
                 </View>
                 <View style={styles.details}>
-                    <Text style={{fontSize:Dimensions.get("window").width*0.1,marginLeft:10,fontWeight:'500',letterSpacing:0.1}}>{product.name[0].toUpperCase()+product.name.slice(1)}</Text>
+                    <Text style={{fontFamily:'Poppins',fontSize:Dimensions.get("window").width*0.1,marginLeft:10,fontWeight:'500',letterSpacing:0.1}}>{product.name[0].toUpperCase()+product.name.slice(1)}</Text>
                     <SectionList
                         sections={food_data}
                         renderItem={({ item, index }) =>
@@ -187,18 +193,18 @@ const goBack = () => {
                                                 </View>
                                             </TouchableOpacity> 
                                     }
-                                    <Text style={context.darkMode ?{ fontSize: 17 ,color:"white"} : { fontSize: 17,color:"black" }}>{item.choix}</Text>
+                                    <Text style={context.darkMode ?{ fontFamily:'Poppins',fontSize: 17 ,color:"white"} : { fontFamily:'Poppins',fontSize: 17,color:"black" }}>{item.choix}</Text>
                                 </View >
-                                <Text style={context.darkMode ?{ fontSize: 17 ,color:"white"} : { fontSize: 17 }}>{item.price} dt</Text>
+                                <Text style={context.darkMode ?{ fontFamily:'Poppins',fontSize: 17 ,color:"white"} : { fontFamily:'Poppins',fontSize: 17 }}>{item.price} dt</Text>
                             </View>}
                         renderSectionHeader={({ section: { title } }) => (
                             <View style={context.darkMode ? styles.headerSectionDark : styles.headerSection}>
                                 <Text style={context.darkMode ? styles.sectionHeaderTitleDark : styles.sectionHeaderTitle}>{title}</Text>
                                 {
                                     title === "SUPPLEMENTS" ?
-                                        <Text style={context.darkMode ? { fontSize: 15, fontWeight: "700", color: "white", backgroundColor: "#787878" }:{ fontSize: 15, fontWeight: "700", color: "white", backgroundColor: "#787878" }}>MAX 16</Text> :
+                                        <Text style={context.darkMode ? { fontFamily:'Poppins',fontSize: 15, fontWeight: "700", color: "white", backgroundColor: "#787878" }:{ fontFamily:'Poppins',fontSize: 15, fontWeight: "700", color: "white", backgroundColor: "#787878" }}>MAX 16</Text> :
                                         title === "CHOIX" ?
-                                            <Text style={context.darkMode ?{ fontSize: 15, fontWeight: "700", color: "white", backgroundColor: "#404040" }: { fontSize: 15, fontWeight: "700", color: "white", backgroundColor: "#787878" }}>Obligatoire</Text> :
+                                            <Text style={context.darkMode ?{ fontFamily:'Poppins',fontSize: 15, fontWeight: "700", color: "white", backgroundColor: "#404040" }: { fontFamily:'Poppins',fontSize: 15, fontWeight: "700", color: "white", backgroundColor: "#787878" }}>Obligatoire</Text> :
                                             null
                                 }
                             </View>
@@ -209,10 +215,10 @@ const goBack = () => {
                 <View style={styles.addProductContainer}>
                     <View style={styles.cost}>
                         <View >
-                            <Text style={context.darkMode ? { fontSize: 20, fontWeight: "600",color:"white" }:{ fontSize: 20, fontWeight: "600" }}>Cost</Text>
+                            <Text style={context.darkMode ? { fontFamily:'Poppins',fontSize: 20, fontWeight: "600",color:"white" }:{ fontFamily:'Poppins',fontSize: 20, fontWeight: "600" }}>Cost</Text>
                         </View>
                         <View >
-                            <Text style={context.darkMode ? { fontSize: 20, fontWeight: "600" ,color:"white"}:{ fontSize: 20, fontWeight: "600" }}>{product.total} DT</Text>
+                            <Text style={context.darkMode ? { fontFamily:'Poppins',fontSize: 20, fontWeight: "600" ,color:"white"}:{ fontFamily:'Poppins',fontSize: 20, fontWeight: "600" }}>{product.total} DT</Text>
                         </View>
                     </View>
 
@@ -220,8 +226,8 @@ const goBack = () => {
                         <TouchableOpacity style={styles.addButton} onPress={addProduct}>
 
                             <View style={{ height: "100%", height: "100%", flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
-                                <FontAwesome color={"white"} style={{ marginRight: 8, padding: 0, fontSize: 15, fontWeight: "700" }} name="shopping-bag" />
-                                <Text style={{ fontSize: 15, fontWeight: "700", color: "white" }}>ADD</Text>
+                                <FontAwesome color={"white"} style={{ marginRight: 8, padding: 0, fontFamily:'Poppins',fontSize: Dimensions.get("screen").width*0.03, fontWeight: "700" }} name="shopping-bag" />
+                                <Text style={{ fontFamily:'Poppins',fontSize: Dimensions.get("screen").width*0.04, fontWeight: "700", color: "white" }}>ADD</Text>
                             </View>
                         </TouchableOpacity>
 
@@ -298,7 +304,7 @@ const styles = StyleSheet.create({
     },
     sectionHeaderTitle: {
         color: "#313131",
-        fontSize: 15,
+        fontFamily:'Poppins',fontSize: 15,
         fontWeight: "700"
     },
     sectionHeaderTitleDark:{
@@ -349,8 +355,8 @@ const styles = StyleSheet.create({
 
 
     leftArrow: {
-        width: 30,
-        height: 30,
+        width: Dimensions.get("screen").height * 0.03,
+        height: Dimensions.get("screen").height * 0.03,
         position: "absolute",
         top: "8%",
         left: "2%",

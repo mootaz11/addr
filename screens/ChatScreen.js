@@ -1,4 +1,5 @@
 import React, { useContext,useState,useEffect } from 'react';
+import { Dimensions } from 'react-native';
 import { View, Text, StyleSheet, Platform, Image, TouchableOpacity } from 'react-native';
 import { FlatList } from 'react-native-gesture-handler';
 import AuthContext from '../navigation/AuthContext';
@@ -18,8 +19,8 @@ export default function Chat({ navigation }) {
     return (
         <View style={context.darkMode ? styles.containerDark : styles.container}>
             <View style={styles.menu}>
-                <TouchableOpacity onPress={openDrawer} style={{ height: 30, width: 30 }}>
-                    <Image source={require("../assets/menu_dark.png")} style={{ height: "100%", width: "100%", resizeMode: "cover" }} />
+                <TouchableOpacity onPress={openDrawer} style={{ height: Dimensions.get("screen").height * 0.03,width:Dimensions.get("screen").height * 0.03,}}>
+                    <Image source={require("../assets/menu_dark.png")} style={{ height: "80%", width: "80%", resizeMode: "cover" }} />
                 </TouchableOpacity>
                 <Text style={styles.Title}>Chat</Text>
             </View>
@@ -42,7 +43,7 @@ export default function Chat({ navigation }) {
                                                     
                                                     
                                                     :
-                                                    context.partner ? 
+                                                    context.partner&&context.partner.managers&&item.partner==context.partner._id ? 
                                                     item.users.findIndex(u=> {
                                                         return context.partner.managers.findIndex(manager=>{return u._id ==manager.user})==-1 
                                                         && context.partner.deliverers.findIndex(deliverer=>{return u._id ==deliverer})==-1
@@ -72,7 +73,9 @@ export default function Chat({ navigation }) {
                                             item.type == "personal" ?
                                                 item.users[item.users.findIndex(u => { return u._id != context.user._id })].firstName ?
                                                     item.users[item.users.findIndex(u => { return u._id != context.user._id })].firstName : "" :
-                                                context.partner ? 
+                                                    
+                                                    context.partner&&context.partner.managers&&item.partner==context.partner._id ? 
+
 
                                                 item.users.findIndex(u=>{return context.partner.managers.findIndex(manager=>{return u._id ===manager.user})==-1 && context.partner.deliverers.findIndex(deliverer=>{return u._id ===deliverer})==-1 && context.partner.owner !== u._id })>=0  ?
                                                 item.users[item.users.findIndex(u => { return context.partner.managers.findIndex(manager => { return u._id === manager.user }) == -1 && context.partner.deliverers.findIndex(deliverer => { return u._id === deliverer }) == -1 && context.partner.owner !== u._id })].firstName
@@ -87,7 +90,8 @@ export default function Chat({ navigation }) {
                                                     item.users[item.users.findIndex(u => { return u._id != context.user._id })].lastName
                                                 :
 
-                                                context.partner ? 
+                                                context.partner&&context.partner.managers&&item.partner==context.partner._id ? 
+
                                                  
                                                 item.users.findIndex(u=>{return context.partner.managers.findIndex(manager=>{return u._id ===manager.user})==-1 && context.partner.deliverers.findIndex(deliverer=>{return u._id ===deliverer})==-1 && context.partner.owner !== u._id })>=0  ? 
                                                 
@@ -131,7 +135,8 @@ export default function Chat({ navigation }) {
                                                         ?
                                                         { uri: item.users[item.users.findIndex(u => { return u._id != context.user._id })].photo } : require('../assets/user_image.png')
                                                     :
-                                                    context.partner ? 
+                                                    context.partner&&context.partner.managers&&item.partner==context.partner._id ? 
+
                                                     item.users.findIndex(u => { return context.partner.managers.findIndex(manager => { return u._id === manager.user }) == -1 && context.partner.deliverers.findIndex(deliverer => { return u._id === deliverer }) == -1 && context.partner.owner !== u._id }) >= 0 ?
                                                         item.users[item.users.findIndex(u => { return context.partner.managers.findIndex(manager => { return u._id === manager.user }) == -1 && context.partner.deliverers.findIndex(deliverer => { return u._id === deliverer }) == -1 && context.partner.owner !== u._id })].photo
                                                             ?
@@ -149,7 +154,8 @@ export default function Chat({ navigation }) {
                                                 item.type == "personal" ?
                                                     item.users[item.users.findIndex(u => { return u._id != context.user._id })].firstName != null && item.users[item.users.findIndex(u => { return u._id != context.user._id })].lastName != null ?
                                                         item.users[item.users.findIndex(u => { return u._id != context.user._id })].firstName + " " + item.users[item.users.findIndex(u => { return u._id != context.user._id })].lastName : "" :
-                                                   context.partner ?
+                                                        context.partner&&context.partner.managers&&item.partner==context.partner._id ? 
+
                                                         item.users.findIndex(u => { return context.partner.managers.findIndex(manager => { return u._id === manager.user }) == -1 && context.partner.deliverers.findIndex(deliverer => { return u._id === deliverer }) == -1 && context.partner.owner !== u._id }) >= 0 ?
                                                             item.users[item.users.findIndex(u => { return context.partner.managers.findIndex(manager => { return u._id === manager.user }) == -1 && context.partner.deliverers.findIndex(deliverer => { return u._id === deliverer }) == -1 && context.partner.owner !== u._id })].firstName
                                                             + " " + item.users[item.users.findIndex(u => { return context.partner.managers.findIndex(manager => { return u._id === manager.user }) == -1 && context.partner.deliverers.findIndex(deliverer => { return u._id === deliverer }) == -1 && context.partner.owner !== u._id })].lastName
@@ -200,7 +206,7 @@ const styles = StyleSheet.create({
     },
     seenNumber: {
         color: "white",
-        fontSize: 11
+        fontFamily:'Poppins',fontSize: 11,
     },
     container: {
         flex: 1,
@@ -224,7 +230,7 @@ const styles = StyleSheet.create({
 
     },
     Title: {
-        fontSize: 22,
+        fontFamily:'Poppins',fontSize: 22,
         color: "white",
         fontWeight: "600",
         letterSpacing: 1,
@@ -268,8 +274,8 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignContent: "center",
         flexDirection: "column",
-        width: 90,
-        height: 110,
+        width: Dimensions.get("screen").height * 0.11,
+        height: Dimensions.get("screen").height*0.14,
         overflow: "hidden",
         margin: 8,
     },
@@ -281,9 +287,9 @@ const styles = StyleSheet.create({
         margin: 2,
     },
     headUserImage: {
-        height: 60,
-        width: 60,
-        borderRadius: 60,
+        height: Dimensions.get("screen").width*0.17,
+        width: Dimensions.get("screen").width*0.17,
+        borderRadius: Dimensions.get("screen").width*0.17,
         resizeMode: "cover",
 
 
@@ -291,7 +297,7 @@ const styles = StyleSheet.create({
     },
     friendHeadName: {
         color: "white"
-        , fontSize: 15,
+        , fontFamily:'Poppins',fontSize: Dimensions.get("screen").width*0.03,
         fontWeight: "100",
         letterSpacing: 1,
         textAlign: "center"
@@ -339,27 +345,27 @@ const styles = StyleSheet.create({
     },
     sender: {
         margin: 2,
-        fontSize: 13,
+        fontFamily:'Poppins',fontSize: 13,
         color: "black",
         fontWeight: "700",
     },
     senderDark: {
         margin: 2,
-        fontSize: 13,
+        fontFamily:'Poppins',fontSize: 13,
         color: "white",
         fontWeight: "700",
     },
     message: {
         color: "#bababa",
         overflow: "visible",
-        fontSize: 15,
+        fontFamily:'Poppins',fontSize: 15,
 
 
     },
     time: {
         color: "#bababa",
         overflow: "visible",
-        fontSize: 12
+        fontFamily:'Poppins',fontSize: 12
 
     }
 

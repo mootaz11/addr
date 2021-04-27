@@ -4,12 +4,13 @@
     "slug": "addr",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/logoIphone.jpg",
 
     "splash": {
-      "image": "./assets/logo_white.png",
+      "image": "./assets/logoSplash.png",
+      
       "resizeMode": "contain",
-      "backgroundColor": "#2474f1"
+      "backgroundColor": "#ffffff"
     },
     "updates": {
       "fallbackToCacheTimeout": 0
@@ -18,6 +19,7 @@
       "**/*"
     ],
     "ios": {
+      "icon": "./assets/logoIphone.jpg",
       "supportsTablet": true,
       "infoPlist": {
         "NSCameraUsageDescription": "This app uses the camera to let user put a photo in his profile page.",
@@ -37,6 +39,14 @@
         "googleMapsApiKey": "AIzaSyAxCgj947FZABl1m_AmOa65BZarGxVs_yA"
       }
     },
+
+
+    "notification":{
+      "icon":"./assets/logoIphone.jpg",
+      "androidCollapsedTitle": "Addressti"
+   },
+
+   
     "android": {
       "package": "com.addressti.addressti",
       "config": {
@@ -45,6 +55,8 @@
         }
       },
       "useNextNotificationsApi": true,
+
+
       "permissions": [
         "CAMERA",
         "WRITE_EXTERNAL_STORAGE",

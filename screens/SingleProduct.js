@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react'
-import { View, Text, ScrollView, StyleSheet, Dimensions, Image, TouchableOpacity, ActivityIndicator,Alert} from 'react-native'
+import { View, Text, ScrollView, StyleSheet, Dimensions, Image, TouchableOpacity, ActivityIndicator, Alert } from 'react-native'
 import AuthContext from '../navigation/AuthContext';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { Picker } from '@react-native-community/picker'
@@ -9,115 +9,136 @@ import { createOrder } from '../rest/ordersApi'
 export default function SingleProduct(props) {
     const context = useContext(AuthContext)
     const [product, setProduct] = useState(null);
-    const [dark, setDark] = useState(true);
     const [active, setActive] = useState();
     const [productImages, setProductsImages] = useState([]);
-    const [description,setDescription]= useState("");
-    const [option,setOption]=useState("");
-    const [variantsIds,setVariantsIds]=useState([]);
-    const [productPricing,setProductPricing]=useState(null);
+    const [description, setDescription] = useState("");
+    const [option, setOption] = useState("");
+    const [variantsIds, setVariantsIds] = useState([]);
+    const [productPricing, setProductPricing] = useState(null);
+    const [selectedOption,setSelectedOption]=useState(null);
+
+
 
     useEffect(() => {
-        getProduct(props.route.params.product._id).then(product => {
-            var descr = ""
-            var variants_ids=[]
-           
-            product.variants.map(variant => {
-                descr += variant.name +" : "+variant.options[0].name+" | "
-                variants_ids.push({variant:variant._id,variantOption:variant.options[0]._id})
-           
-            });
-        
-            product.pricing.map(pricing=>{
-                var plen =0;
-                for(let i =0;i<variants_ids.length;i++){
-                    if(pricing.variantOptions.findIndex(u=>{return u._id==variants_ids[i].variantOption})>=0){
-                        plen+=1;
+        let mounted=true;
+        if(mounted){
+            getProduct(props.route.params.product._id).then(product => {
+                var descr = ""
+                var variants_ids = []
+    
+                product.variants.map(variant => {
+                    descr += variant.name + " : " + variant.options[0].name + " | "
+                    variants_ids.push({ variant: variant._id, variantOption: variant.options[0]._id })
+    
+                });
+                descr=descr.substr(0,descr.length-2)
+                
+                product.pricing.map(pricing => {
+                    var plen = 0;
+                    for (let i = 0; i < variants_ids.length; i++) {
+                        if (pricing.variantOptions.findIndex(u => { return u._id == variants_ids[i].variantOption }) >= 0) {
+                            plen += 1;
+                        }
                     }
+    
+                    if (plen == pricing.variantOptions.length) {
+                        setProductPricing(pricing);
+                    }
+                })
+    
+                setDescription(descr)
+                setVariantsIds(variants_ids)
+    
+                let _product_images = [];
+                product.secondaryImages.map(element => {
+                    if (_product_images.findIndex(image => { return image == element }) === -1) {
+                        _product_images.push(element);
+                    }
+                });
+                if (_product_images.findIndex(image => { return image == product.mainImage }) == -1) {
+                    _product_images.push(product.mainImage);
                 }
-
-            if(plen==pricing.variantOptions.length){
-                setProductPricing(pricing);
-                }
-            })
-
-            setDescription(descr)
-            setVariantsIds(variants_ids)
-
-            let _product_images=[];
-            product.secondaryImages.map(element => {
-                if (_product_images.findIndex(image => { return image == element }) === -1) {
-                    _product_images.push(element);
-                }
-            });
-            if (_product_images.findIndex(image => { return image == product.mainImage }) == -1)
-           { 
-                _product_images.push(product.mainImage);
-        }
                 setProductsImages(_product_images);
                 setProduct(product)
-        })
-
+            })
+        }
+        return ()=>{mounted=false,  setProduct(null);
+            setProductsImages([]);
+            setVariantsIds([])}
     }, [props.route.params.product])
 
     const _createOrder = () => {
-       if(product&&productPricing){
-        const body = {
-            product: { ...product},
-            quantity: 1,
-            productPricing: productPricing._id,
-        }
-        createOrder(body).then(created => {
-            console.log(created)
-            if(created){
-                alert("order created");
-            }
-        }).catch(err => {
-            alert("error occured");
-        })
-       }
-       else {
-           alert("no options chosen")
-       }
-    }
-    const checkBasket = ()=>{
-        props.navigation.navigate("basket",{last_screen:"SingleProduct"});
-    }
-    const handleOption = (optionValue) =>{
-        var variants_ids=[];
-        product.variants.map(variant=>{
-            if(variant.options.findIndex(o=>{return o._id==optionValue})>=0){
+        if (product && productPricing) {
 
-                if(variantsIds.findIndex(_variant=>{return _variant.variant==  variant._id})>=0){
-                    variants_ids=[...variantsIds];
-                    let _variant = variantsIds[variantsIds.findIndex(_variant=>{return _variant.variant==  variant._id})];
-                    _variant.variantOption=optionValue;
-                    variants_ids[variants_ids.findIndex(_variant=>{return _variant.variant==  variant._id})]=_variant;
+            const body = {
+                product: { ...product },
+                quantity: 1,
+                productPricing: productPricing._id,
+            }
+            createOrder(body).then(orderCreated => {
+                if (orderCreated) {
+                    context.setBag(bag=>bag+1)
+                    Alert.alert(
+                        "",
+                        "order created done ",
+                        [
+
+                            { text: "OK" }
+                        ],
+                        { cancelable: false }
+
+
+                    );
+                }
+            }).catch(err => {
+                alert("order did not passed");
+            })
+        }
+        else {
+            alert("no options chosen")
+        }
+    }
+    const checkBasket = () => {
+        setProduct(null);
+        setProductsImages([]);
+        setVariantsIds([]);
+        props.navigation.navigate("basket", { last_screen: "SingleProduct" });
+    }
+    const handleOption = (optionValue) => {
+        var variants_ids = [];
+        product.variants.map(variant => {
+            if (variant.options.findIndex(o => { return o._id == optionValue }) >= 0) {
+                if (variantsIds.findIndex(_variant => { return _variant.variant == variant._id }) >= 0) {
+                    variants_ids = [...variantsIds];
+                    let _variant = variantsIds[variantsIds.findIndex(_variant => { return _variant.variant == variant._id })];
+                    _variant.variantOption = optionValue;
+                    variants_ids[variants_ids.findIndex(_variant => { return _variant.variant == variant._id })] = _variant;
                     setVariantsIds(variants_ids);
                 }
             }
         })
-        product.pricing.map(pricing=>{
-            var plen =0;
-            for(let i =0;i<variants_ids.length;i++){
-                if(pricing.variantOptions.findIndex(u=>{return u._id==variants_ids[i].variantOption})>=0){
-                    plen+=1;
+        product.pricing.map(pricing => {
+            var plen = 0;
+            for (let i = 0; i < variants_ids.length; i++) {
+                if (pricing.variantOptions.findIndex(u => { return u._id == variants_ids[i].variantOption }) >= 0) {
+                    plen += 1;
                 }
             }
 
-        if(plen==pricing.variantOptions.length){
-            setProductPricing(pricing);
+            if (plen == pricing.variantOptions.length) {
+                setProductPricing(pricing);
             }
         })
 
-        
-    
+
+
     }
-    
+
     const goBack = () => {
         props.navigation.goBack()
         setProduct(null);
         setProductsImages([]);
+        setVariantsIds([])
     }
 
     const changeImage = ({ nativeEvent }) => {
@@ -128,7 +149,7 @@ export default function SingleProduct(props) {
     }
     if (product) {
         return (
-            <View style={context.darkMode ?  styles.containerDark : styles.container}>
+            <View style={context.darkMode ? styles.containerDark : styles.container}>
                 <View style={styles.headerImageContainer}>
                     <ScrollView
                         pagingEnabled
@@ -137,17 +158,17 @@ export default function SingleProduct(props) {
                         style={{ width: "100%", height: "100%" }}>
                         {
                             productImages.map((image, index) =>
-                                (
-                                    <Image key={index} style={styles.headerImage} source={{ uri: image }} />
+                            (
+                                <Image key={index} style={styles.headerImage} source={{ uri: image }} />
 
-                                ))                                
+                            ))
                         }
                     </ScrollView>
                     <TouchableOpacity style={styles.leftArrow} onPress={goBack}>
                         <Image style={{ width: "100%", height: "100%" }} source={require("../assets/left-arrow.png")} />
                     </TouchableOpacity>
-                    <TouchableOpacity style={{ position: "absolute", top: "5%", right: "2%" }} onPress={()=>{checkBasket()}}>
-                        <FontAwesome color={"black"} style={{ padding: 0, fontSize: 24, position: "absolute", top: "5%", right: "2%" }} name="shopping-bag" />
+                    <TouchableOpacity style={{ position: "absolute", top: "8%", right: "2%" }} onPress={() => { checkBasket() }}>
+                        <FontAwesome color={"black"} style={{   fontSize: Dimensions.get("screen").height * 0.03 }} name="shopping-bag" />
 
                     </TouchableOpacity>
                     <View style={{ position: "absolute", top: "20%", left: "2%", flex: 1, flexDirection: "column" }}>
@@ -162,24 +183,23 @@ export default function SingleProduct(props) {
                 </View>
 
 
-                <ScrollView>
-                    <View style={context.darkMode ?  styles.productBodyContainerDark : styles.productBodyContainer}>
+                    <View style={context.darkMode ? styles.productBodyContainerDark : styles.productBodyContainer}>
                         <View style={styles.productInfo}>
                             <View style={styles.productTitle}>
-                                <Text style={context.darkMode ?  { fontSize: 28, fontWeight: "600", color: "white" } : { fontSize: 28, fontWeight: "600" }}>{props.route.params.product.name}</Text>
+                                <Text style={context.darkMode ? { fontFamily: 'PoppinsBold', fontSize: Dimensions.get("screen").width*0.07, fontWeight: "600", color: "white" } : { fontFamily: 'Poppins', fontSize: 28, fontWeight: "600" }}>{props.route.params.product.name}</Text>
                             </View>
                             <View style={styles.productDetails}>
-                                <Text style={context.darkMode ?  { fontSize: 14, fontWeight: "100", color: "white" } : { fontSize: 14, fontWeight: "100" }}>{description.length >0 && description}</Text>
+                                <Text style={context.darkMode ? { fontFamily: 'Poppins', fontSize: 14, fontWeight: "100", color: "white" } : { fontFamily: 'Poppins', fontSize: 14, fontWeight: "100" }}>{description.length > 0 && description}</Text>
                             </View>
                             <View style={styles.productDescription}>
-                                <Text style={context.darkMode ?  { fontSize: 14, fontWeight: "100", color: "white" } : { fontSize: 14, fontWeight: "100" }}>{props.route.params.product.description} </Text>
+                                <Text style={context.darkMode ? { fontFamily: 'Poppins', fontSize: 14, fontWeight: "100", color: "white" } : { fontFamily: 'Poppins', fontSize: 14, fontWeight: "100" }}>{props.route.params.product.description} </Text>
                             </View>
                         </View>
                     </View>
-                    <View style={context.darkMode ?  styles.productValuesDark : styles.productValues}>
+                    <View style={context.darkMode ? styles.productValuesDark : styles.productValues}>
                         <View
                             style={{
-                                borderBottomColor: context.darkMode ?  "#292929" : '#d8d8d8',
+                                borderBottomColor: context.darkMode ? "#292929" : '#d8d8d8',
                                 borderBottomWidth: 1,
                                 marginLeft: 5,
                                 marginRight: 5,
@@ -193,19 +213,29 @@ export default function SingleProduct(props) {
                                 data={product.variants}
                                 horizontal
                                 renderItem={({ item }) =>
-                                    <View style={{ width: 150,height:120, marginHorizontal:3, flex: 1, backgroundColor:"white"}}>
-                                        <Text style={context.darkMode ? { fontSize: Dimensions.get("window").fontScale * 20, textAlign: "center", color: "white", }:{ fontSize: Dimensions.get("window").fontScale * 20, textAlign: "center", color: "black", }}>{item.name}</Text>
-                                        <Picker
-                                            style={context.darkMode ? {backgroundColor:"white",marginHorizontal:5,marginTop:4,borderRadius:20}:{backgroundColor:"#2474F1",marginHorizontal:5,marginTop:4,borderRadius:20}}
-                                            selectedValue={option}
-                                            onValueChange={(itemValue, itemIndex) => {  handleOption(itemValue); setOption(itemValue) }}
-                                        >
+                                    <View style={context.darkMode ? {width: 150, height: Dimensions.get("screen").width *0.1,borderRadius:12, marginHorizontal: 3, flex: 1,backgroundColor:"#333333"}:{ width: 150, height: Dimensions.get("screen").width *0.1,borderRadius:12, marginHorizontal: 3, flex: 1, backgroundColor: "white" }}>
+                                        {!selectedOption&&<TouchableOpacity onPress={() => { setSelectedOption(item._id)  }} style={{ flexDirection: "row", width: "100%", height: "100%", justifyContent: 'flex-start' }}>
+                                            <Image style={{ marginLeft: 8, width: "15%", height: "100%", resizeMode: "contain" }} source={context.darkMode ?require("../assets/picker_up_dark.png"):require("../assets/picker_up.png")} />
+                                            <View style={{ width: "85%", height: "100%", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+                                                <Text style={context.darkMode ? { fontFamily: 'PoppinsBold', fontSize: Dimensions.get("screen").width * 0.05, color: "white"}:{ fontFamily: 'PoppinsBold', fontSize: Dimensions.get("screen").width * 0.05, color: "black"}}>{item.name}</Text>
+                                            </View>
+                                        </TouchableOpacity>}
+
+
+                                       {
+                                      selectedOption&&selectedOption==item._id &&
+                                       <Picker
+                                            selectedValue={variantsIds[variantsIds.findIndex(_variantId => { return _variantId.variant == item._id })].variantOption}
+                                            onValueChange={(itemValue, itemIndex) => { handleOption(itemValue); setOption(itemValue);setSelectedOption(null)}}>
                                             {
                                                 item.options.map((option, index) => (
-                                                    <Picker.Item color={"black"}  key={index} label={option.name} value={option._id}  />
+                                                    <Picker.Item color={"black"} key={index} label={option.name} value={option._id} />
                                                 ))
                                             }
                                         </Picker>
+                                       } 
+
+
                                     </View>
 
                                 }
@@ -218,10 +248,10 @@ export default function SingleProduct(props) {
 
                         <View style={styles.cost}>
                             <View >
-                                <Text style={context.darkMode ?  { fontSize: 20, fontWeight: "600", color: "white" } : { fontSize: 20, fontWeight: "600",color:"black" }}>Cost</Text>
+                                <Text style={context.darkMode ? { fontFamily: 'Poppins', fontSize: 20, fontWeight: "600", color: "white" } : { fontFamily: 'Poppins', fontSize: 20, fontWeight: "600", color: "black" }}>Cost</Text>
                             </View>
                             <View >
-                                <Text style={context.darkMode ?  { fontSize: 20, fontWeight: "600", color: "white" } : { fontSize: 20, fontWeight: "600" ,color:"black"}}>{product ? productPricing ? productPricing.price+product.basePrice : product.basePrice:"" } DT</Text>
+                                <Text style={context.darkMode ? { fontFamily: 'Poppins', fontSize: 20, fontWeight: "600", color: "white" } : { fontFamily: 'Poppins', fontSize: 20, fontWeight: "600", color: "black" }}>{product ? productPricing ? productPricing.price + product.basePrice : product.basePrice : ""} DT</Text>
                             </View>
                         </View>
 
@@ -229,14 +259,13 @@ export default function SingleProduct(props) {
                             <TouchableOpacity style={styles.addButton} onPress={_createOrder}>
                                 <View style={{ height: "100%", height: "100%", flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
                                     <FontAwesome color={"white"} style={{ marginRight: 8, padding: 0, fontSize: 15, fontWeight: "700" }} name="shopping-bag" />
-                                    <Text style={{ fontSize: 15, fontWeight: "700", color: "white" }}>ADD</Text>
+                                    <Text style={{ fontFamily: 'Poppins', fontSize: 15, fontWeight: "700", color: "white" }}>ADD</Text>
                                 </View>
                             </TouchableOpacity>
 
                         </View>
 
                     </View>
-                </ScrollView>
             </View>
 
 
@@ -298,18 +327,21 @@ const styles = StyleSheet.create({
 
     },
     productInfo: {
-        height: 220
+        height: Dimensions.get("screen").height*0.25
     },
 
     productTitle: {
-        margin: 8
+        marginLeft:5,
+        height:"50%"
     },
     productDetails: {
-        margin: 8
+        height:"20%",
+        marginLeft:5
 
     },
     productDescription: {
-        margin: 8
+        height:"30%",
+        marginLeft: 5
     },
 
     container: {
@@ -330,10 +362,10 @@ const styles = StyleSheet.create({
 
 
     leftArrow: {
-        width: 30,
-        height: 30,
+        width: Dimensions.get("screen").height * 0.03,
+        height: Dimensions.get("screen").height * 0.03,
         position: "absolute",
-        top: "5%",
+        top: "8%",
         left: "2%",
         zIndex: 50,
         elevation: 10,
@@ -360,11 +392,11 @@ const styles = StyleSheet.create({
 
     headerImageContainer: {
         width: Dimensions.get("window").width,
-        height: Dimensions.get("window").width,
+        height: Dimensions.get("window").height*0.5,
     },
     headerImage: {
         width: Dimensions.get("window").width,
-        height: Dimensions.get("window").width,
+        height: Dimensions.get("window").height*0.5,
         resizeMode: "cover"
     },
 

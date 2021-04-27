@@ -5,7 +5,7 @@ import AuthContext from '../navigation/AuthContext';
 import _ from 'lodash';
 import { FlatList, TextInput } from 'react-native-gesture-handler';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import { getClientOrders, markOrderAsReceived } from "../rest/ordersApi"
+import { getClientOrders, markOrderAsReceived ,getDeliveryOrder} from "../rest/ordersApi"
 import {createFeedback} from '../rest/feedBackApi';
 
 const order_pipeline = [
@@ -14,7 +14,7 @@ const order_pipeline = [
     { step: "Historique", _id: "3" },
 ];
 
-const _ratings = [{ pressed: false }, { pressed: false }, { pressed: false }, { pressed: false }, { pressed: false }]
+const _ratings = [{ pressed: false,_id:1 }, { pressed: false,_id:2 }, { pressed: false ,_id:3 }, { pressed: false,_id:4 }, { pressed: false ,_id:5 }]
 
 
 
@@ -28,21 +28,20 @@ export default function Orders(props) {
     const [orderPlaced, setOrderPlaced] = useState(true);
     const [orderDuringDelivery, setOrderDuringDelivery] = useState(false);
     const [history, setHistory] = useState(false);
-    const [dark, setDark] = useState(true);
     const [rate, setRate] = useState(false);
-    const [product,setProduct]=useState(false);
-    const [information, setInformation] = useState(false);
     const [enabled, setEnabled] = useState(false);
     const [ratings, setRatings] = useState(null);
     const [orderRate,setOrderRate]=useState(null);
     const [feedBack,setFeedBack]=useState("");
     const [orderInfo,setOrderInfo]=useState(null);
+    const [information, setInformation] = useState(false);
+
+
     useEffect(() => {
         let mounted = true ; 
         if(mounted){
             setCheckedStep(order_pipeline[0]);
         getClientOrders().then(orders => {
-            console.log(orders);
 
             setRatings(_ratings);
             let _placedOrders = [];
@@ -61,11 +60,9 @@ export default function Orders(props) {
                     }
                 })
             }
-
             setHistoryOrdersData(_historyOrders);
             setPlacedOrdersData(_placedOrders);
             setOrderDuringDeliveryData(_orderDuringDelivery);
-
 
         }).catch(err => {
             console.log(err);
@@ -90,7 +87,6 @@ export default function Orders(props) {
 
     const handleRatings = (index) => {
         let _rates = [...ratings];
-        console.log(index)
         for (let i = 0; i < _rates.length; i++) {
             if (i <= index) {
                 _rates[i].pressed = true;
@@ -102,8 +98,6 @@ export default function Orders(props) {
         setRatings(_rates)
     }
 
-
-
     const orderDone = (item) => {
         markOrderAsReceived(item._id).then(res => {
             item.actif = false;
@@ -111,6 +105,7 @@ export default function Orders(props) {
             setHistoryOrdersData(historyOrdersData => [item, ...historyOrdersData])
         })
     }
+
 
     const checkStep = (item) => {
         setCheckedStep(item)
@@ -131,9 +126,15 @@ export default function Orders(props) {
         }
     }
     const start_conversation=()=>{
-        const conversation =  context.openConversationHandler({},{user:context.user,other:orderInfo.deliverer},"personal");
-        props.navigation.navigate("conversation",{conversation,orders:true})
+        if(orderInfo.deliveryOrder&&orderInfo.deliveryOrder.clientDeliverer){
+            const conversation =  context.openConversationHandler({},{user:context.user,other:orderInfo.deliveryOrder.clientDeliverer},"personal");
+            setEnabled(!enabled)
+            props.navigation.navigate("conversation",{conversation,orders:true})    
     
+        }
+        else {
+            alert("deliverer not found yet");
+        }
     }
     
     const rateDeliverer =()=>{
@@ -146,7 +147,7 @@ export default function Orders(props) {
         createFeedback(context.partner._id,body).then(message=>{
             console.log(message);
         })
-        .catch(err=>{alert("error occured")})
+        .catch(err=>{alert("giving feedback failed")})
         setRatings(_ratings);
         setEnabled(false);
         setRate(false);
@@ -158,15 +159,15 @@ export default function Orders(props) {
             <View style={context.darkMode ? styles.containerDark : styles.container}>
                 <View style={context.darkMode ? styles.menuDark : styles.menu}>
                         <View style={styles.leftArrowContainer} >
-                        <TouchableOpacity onPress={openDrawer} style={{height:30,width:30}}>
-                        <Image source={context.darkMode ?  require("../assets/menu_dark.png"):require("../assets/menu.png")} style={{height:"100%",width:"100%",resizeMode:"cover",marginHorizontal: 4}}/>
+                        <TouchableOpacity onPress={openDrawer} style={{height:Dimensions.get("screen").height * 0.03,width:Dimensions.get("screen").height * 0.03}}>
+                        <Image source={context.darkMode ?  require("../assets/menu_dark.png"):require("../assets/menu.png")} style={{height:"80%",width:"80%",resizeMode:"cover",marginHorizontal: 4}}/>
                         </TouchableOpacity>
                         </View>
                     <View style={styles.titleContainer}>
                         <Text style={context.darkMode ? styles.TitleDark : styles.Title}>Orders</Text>
                     </View>
-
                 </View>
+
                 <View style={styles.headerElements}>
                     <FlatList
                         data={order_pipeline}
@@ -174,7 +175,7 @@ export default function Orders(props) {
                         renderItem={({ item }) =>
                             <TouchableOpacity style={checkedStep && item._id == checkedStep._id ? styles.stepChecked : (context.darkMode ? styles.stepDark : styles.step)} onPress={() => checkStep(item)}>
                                 <View style={{ width: "100%", height: "100%", flexDirection: "column", justifyContent: "center", alignItems: "center", }}>
-                                    <Text style={checkedStep && item._id == checkedStep._id ? { color: "white", fontSize: 15, textAlign: "center" } : (context.darkMode ? { color: "white", fontSize: 15, textAlign: "center" } : { color: "black", fontSize: 15, textAlign: "center" })}>{item.step}</Text>
+                                    <Text style={checkedStep && item._id == checkedStep._id ? { color: "white", fontFamily:'Poppins',fontSize: Dimensions.get("screen").width*0.03, textAlign: "center" } : (context.darkMode ? { color: "white", fontFamily:'Poppins',fontSize:  Dimensions.get("screen").width*0.03, textAlign: "center" } : { color: "black", fontFamily:'Poppins',fontFamily:'Poppins',fontSize: Dimensions.get("screen").width*0.03, textAlign: "center" })}>{item.step}</Text>
                                 </View>
                             </TouchableOpacity>
                         }
@@ -183,38 +184,31 @@ export default function Orders(props) {
 
                     </FlatList>
                 </View>
-               {placedOrdersData.length>0 ||placedOrdersData.length>0||orderDuringDeliveryData.length>0?  <View style={styles.ordersContainer}>
+               {placedOrdersData.length>0 ||placedOrdersData.length>0||orderDuringDeliveryData.length >0?  <View style={styles.ordersContainer}>
                     <FlatList
                         data={orderPlaced ? placedOrdersData : orderDuringDelivery ? orderDuringDeliveryData : history ? historyOrdersData : null}
                         renderItem={({ item }) =>
-                            <TouchableOpacity onPress={() => {setOrderInfo(item); setEnabled(!enabled); setInformation(!information) }}>
+                            <TouchableOpacity style={{width:"100%",height:Dimensions.get("screen").height*0.18}} onPress={() => {if (history){setOrderInfo(item); setEnabled(!enabled); setInformation(!information)} }}>
                                 <View style={context.darkMode ? styles.deliveryDark : styles.delivery} >
                                     <View style={styles.clientImageContainer}>
                                         <Image style={{ width: "80%", height: "80%", resizeMode: "contain" }} source={item.deliverer ? {uri:item.deliveryPartner.image} :require("../assets/deliverer.jpg")} />
                                     </View>
                                     <View style={styles.deliveryInfo}>
-                                        <Text style={context.darkMode ? styles.infoDark : styles.info}>Nom de Livreur: {item.deliverer ? item.deliverer.firstName + " " + item.deliverer.lastName : "wait for deliverer "} </Text>
-                                        <Text style={context.darkMode ? styles.infoDark : styles.info}>Numero Telephone:  {item.deliverer ? item.deliverer.phone ? item.deliverer.phone : "no phone yet" : "wait for  deliverer "} </Text>
+                                        <Text style={context.darkMode ? styles.infoDark : styles.info}>Nom de Livreur: {item.deliveryOrder ? item.deliveryOrder.clientDeliverer ?item.deliveryOrder.clientDeliverer.username: "wait for deliverer ":"wait for deliverer"} </Text>
+                                        <Text style={context.darkMode ? styles.infoDark : styles.info}>Numero Telephone:  {item.deliveryOrder ? item.deliveryOrder.clientDeliverer ? item.deliveryOrder.clientDeliverer.phone : "no phone yet" : "wait for  deliverer "} </Text>
                                         <Text style={context.darkMode ? styles.infoDark : styles.info}>Date: {item.date.split('T')[0]}</Text>
                                         {history &&
-                                            <TouchableOpacity onPress={() => {setOrderRate(item); setEnabled(!enabled); setRate(!rate) }}>
-                                                <Text style={{fontSize: Dimensions.get("window").width*0.038, fontWeight: "600", color: "#2474F1", textDecorationLine: "underline" }}>your opinion about this order</Text>
+                                            <TouchableOpacity onPress={() => {if(item.deliveryOrder&&item.deliveryOrder.clientDeliverer) {setOrderRate(item); setEnabled(!enabled); setRate(!rate) }}}>
+                                                <Text style={{fontFamily:'Poppins',fontSize: Dimensions.get("window").width*0.038, fontWeight: "600", color: "#2474F1", textDecorationLine: "underline" }}>your opinion about this order</Text>
                                             </TouchableOpacity>
                                         }
                                     </View>
-                                    {
-                                        orderDuringDelivery &&
-
+                                    {orderDuringDelivery &&
                                             <View style={{ width: "10%", height: "100%", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
-
                                                 <TouchableOpacity onPress={() => { orderDone(item) }}>
-                                                    <FontAwesome color={"#4BB543"} style={{ padding: 0, fontSize: 30, }} name="check" />
-
+                                                    <FontAwesome color={"#4BB543"} style={{ padding: 0, fontFamily:'Poppins',fontSize: 30, }} name="check" />
                                                 </TouchableOpacity>
-
-                                            </View>
-                                            
-                                    }
+                                            </View>    }
                                 </View>
                             </TouchableOpacity>
                         }
@@ -226,17 +220,17 @@ export default function Orders(props) {
                 orderPlaced ?
                 <View style={{flexDirection:"column",justifyContent:"center",alignItems:"center"}}>
                 <Image source={require("../assets/empty_basket.png")} style={{ width:"50%",height:"50%"}}/>
-                <Text style={context.darkMode ? {fontSize:20,color:"white",textAlign:"center"}:{fontSize:20,color:"black",textAlign:"center"}}>order placed is Empty</Text>
+                <Text style={context.darkMode ? {fontFamily:'Poppins',fontSize:20,color:"white",textAlign:"center"}:{fontFamily:'Poppins',fontSize:20,color:"black",textAlign:"center"}}>order placed is Empty</Text>
             </View>
             :
             history ? 
             <View style={{flexDirection:"column",justifyContent:"center",alignItems:"center"}}>
             <Image source={require("../assets/historique.png")} style={{ width:"50%",height:"50%"}}/>
-            <Text style={context.darkMode ? {fontSize:20,color:"white",textAlign:"center"}:{fontSize:20,color:"black",textAlign:"center"}}>historical orders are Empty</Text>
+            <Text style={context.darkMode ? {fontFamily:'Poppins',fontSize:20,color:"white",textAlign:"center"}:{fontFamily:'Poppins',fontSize:20,color:"black",textAlign:"center"}}>historical orders are Empty</Text>
         </View>:
          <View style={{flexDirection:"column",justifyContent:"center",alignItems:"center"}}>
          <Image source={require("../assets/order_during_delivery.png")} style={{ width:"50%",height:"50%"}}/>
-         <Text style={context.darkMode ? {fontSize:20,color:"white",textAlign:"center"}:{fontSize:20,color:"black",textAlign:"center"}}>order during delivery is Empty</Text>
+         <Text style={context.darkMode ? {fontFamily:'Poppins',fontSize:20,color:"white",textAlign:"center"}:{fontFamily:'Poppins',fontSize:20,color:"black",textAlign:"center"}}>order during delivery is Empty</Text>
      </View>
 
                 }
@@ -244,14 +238,14 @@ export default function Orders(props) {
                 <Modal
                     transparent={true}
                     animationType={'slide'}
-                    visible={enabled}
+                    visible={enabled&&history}
                 >
                     <View style={{ backgroundColor: "#000000aa", flex: 1 }}>
-                        <View style={{ flex: 1, width: Dimensions.get("screen").width * 0.9, height: Dimensions.get("screen").height * 0.8, margin: 40, alignSelf: "center", justifyContent: "center", backgroundColor: "white" }}>
+                        <View style={{ flex: 1, width: Dimensions.get("screen").width * 0.9, height: Dimensions.get("screen").height * 0.8, margin: 40,borderRadius:12, alignSelf: "center", justifyContent: "center", backgroundColor: "white" }}>
                             {information &&
                                 <View style={{ width: "100%", height: "90%" }}>
                                     <View style={{ width: "90%", alignSelf: "center", height: "12%", borderBottomColor: "#2474F1", borderBottomWidth: 1, flexDirection: "row", justifyContent: "space-between" }}>
-                                        <Text style={{ fontSize: Dimensions.get("window").width * 0.05 }}>Livraison par:{orderInfo ? orderInfo.deliverer? orderInfo.deliverer.firstName+" "+orderInfo.deliverer.lastName:"":""}</Text>
+                                        <Text style={{ fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.05 }}>Livraison par:{orderInfo ? orderInfo.deliveryOrder.clientDeliverer? orderInfo.deliveryOrder.clientDeliverer.username :"":""}</Text>
                                         <TouchableOpacity style={{width:30,height:30}} onPress={()=>{start_conversation()}}>
                                             <View style={{width:"100%",height:"100%"}}>
                                                 <Image style={{width:"100%",height:"100%"}} source={require("../assets/message_deliverer.png")}/>
@@ -260,23 +254,23 @@ export default function Orders(props) {
                                     </View>
                                     
                                     <View style={{ width: "90%", alignSelf: "center", height: "12%", borderBottomColor: "#2474F1", borderBottomWidth: 1, flexDirection: "column", justifyContent: "center" }}>
-                                        <Text style={{ fontSize: Dimensions.get("window").width * 0.05 }}>produit par:{orderInfo.partner.partnerName}</Text>
+                                        <Text style={{ fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.05 }}>produit par:{orderInfo.partner.partnerName}</Text>
 
                                     </View>
                                     <View style={{ width: "90%", alignSelf: "center", height: "12%", borderBottomColor: "#2474F1", borderBottomWidth: 1, flexDirection: "column", justifyContent: "center" }}>
-                                        <Text style={{ fontSize: Dimensions.get("window").width * 0.05 }}>ville:monastir</Text>
+                                        <Text style={{ fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.05 }}>ville:{orderInfo.city.cityName}</Text>
                                     </View>
                                     <View style={{ width: "90%", alignSelf: "center", height: "12%", borderBottomColor: "#2474F1", borderBottomWidth: 1, flexDirection: "column", justifyContent: "center" }}>
-                                        <Text style={{ fontSize: Dimensions.get("window").width * 0.05 }}>Region:mokninnn</Text>
+                                        <Text style={{ fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.05 }}>Region:{orderInfo.region.regionName}</Text>
 
                                     </View>
                                     <View style={{ width: "90%", alignSelf: "center", height: "12%", borderBottomColor: "#2474F1", borderBottomWidth: 1, flexDirection: "column", justifyContent: "center" }}>
-                                        <Text style={{ fontSize: Dimensions.get("window").width * 0.05 }}>Prix:{orderInfo.price} TND</Text>
+                                        <Text style={{ fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.05 }}>Prix:{orderInfo.price+orderInfo.deliveryOrder.price  +` : base price +delivery (${orderInfo.deliveryOrder.price})`} TND</Text>
                                     </View>
                                     <View style={{ width: "90%", alignSelf: "center", height: "30%", flexDirection: "column", alignItems: "center", justifyContent: "flex-end", }}>
                                         <TouchableOpacity style={{ width: "80%", height: "40%" }} onPress={() => { setEnabled(!enabled); setInformation(!information) }}>
                                             <View style={{ width: "100%", height: "100%", borderRadius: 25, backgroundColor: "#2474F1", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
-                                                <Text style={{ fontSize: Dimensions.get("window").width * 0.06, color: "white" }}>imprimer Information</Text>
+                                                <Text style={{ fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.04, color: "white" }}>close</Text>
                                             </View>
                                         </TouchableOpacity>
                                     </View>
@@ -288,33 +282,33 @@ export default function Orders(props) {
                                 rate &&
                                 <View style={{ width: "100%", height: "80%" }}>
                                     <View style={{ width: "100%", height: "20%", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-                                        <Text style={{ fontSize: Dimensions.get("window").width * 0.08, color: "#2474F1" }}>{"Rate delivery man"}</Text>
+                                        <Text style={{ fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.08, color: "#2474F1" }}>{"Rate delivery man"}</Text>
                                     </View>
                                     <View style={{ width: "90%", height: "20%", flexDirection: "column", alignSelf: "center" }}>
-                                        <Text style={{ fontSize: Dimensions.get("window").width * 0.08, color: "#2474F1" }}>Rate</Text>
+                                        <Text style={{ fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.08, color: "#2474F1" }}>Rate</Text>
                                         <View style={{ width: "100%", height: "80%", flexDirection: "row", justifyContent: "center" }}>
                                             {
                                                 ratings.map((rating, index) => (
                                                     <TouchableOpacity onPress={() => { handleRatings(index) }}>
-                                                        <FontAwesome key={index} color={rating.pressed ? "#bab82d" : "#e8e6e6"} style={{ fontSize: 40, marginHorizontal: 5, fontWeight: "600" }} name="star" />
+                                                        <FontAwesome key={rating._id} color={rating.pressed ? "#bab82d" : "#e8e6e6"} style={{ fontFamily:'Poppins',fontSize: 40, marginHorizontal: 5, fontWeight: "600" }} name="star" />
                                                     </TouchableOpacity>
                                                 ))
                                             }
                                         </View>
                                     </View>
                                     <View style={{ width: "90%", height: "50%", flexDirection: "column", alignSelf: "center" }}>
-                                        <Text style={{ fontSize: Dimensions.get("window").width * 0.05, color: "#2474F1", marginBottom: 10 }}>Feedback</Text>
+                                        <Text style={{ fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.05, color: "#2474F1", marginBottom: 10 }}>Feedback</Text>
                                         <TextInput style={{ width: "100%", height: 100, borderColor: "grey", borderWidth: 1, borderRadius: 12 }} value={feedBack} onChangeText={(text)=>{setFeedBack(text)}} />
                                         <View style={{ flexDirection: "row", width: "60%", alignSelf: "flex-end", height: "30%" }}>
                                             <TouchableOpacity onPress={()=>{setRate(!rate);setEnabled(false);setRatings(_ratings)}} style={{ width: "40%", height: "80%"}}>
                                             <View style={{ width: "100%", height: "100%", flexDirection: "column", alignItems: "center", marginTop: 10,justifyContent:"center" }}>
-                                                <Text style={{ fontSize: Dimensions.get("window").width * 0.07, textAlign:'center',textDecorationLine: "underline", color: "#2474F1", marginBottom: 10 }}>skip</Text>
+                                                <Text style={{ fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.07, textAlign:'center',textDecorationLine: "underline", color: "#2474F1", marginBottom: 10 }}>skip</Text>
                                             </View>
                                             </TouchableOpacity>
 
                                             <TouchableOpacity onPress={()=>rateDeliverer()} style={{ width: "50%", height: "70%"}}>
                                             <View style={{ width: "100%", height: "100%", borderRadius: 20, flexDirection: "column",justifyContent:"center", alignItems: "center", marginTop: 10, backgroundColor: "#2474F1" }}>
-                                            <Text style={{ fontSize: Dimensions.get("window").width * 0.06, color: "white" }}>Rate</Text>
+                                            <Text style={{ fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.06, color: "white" }}>Rate</Text>
 
                                             </View>
                                             </TouchableOpacity>
@@ -354,11 +348,11 @@ const styles = StyleSheet.create({
 
     },
     info: {
-        fontSize: Dimensions.get("window").width*0.038,
+        fontFamily:'Poppins',fontSize: Dimensions.get("window").width*0.034,
         fontWeight: "600"
     },
     infoDark: {
-        fontSize: Dimensions.get("window").width*0.038,
+        fontFamily:'Poppins',fontSize: Dimensions.get("window").width*0.034,
         fontWeight: "600",
         color: "white"
     },
@@ -373,8 +367,8 @@ const styles = StyleSheet.create({
 
     delivery: {
         width: "100%",
-        height: 80,
-        backgroundColor: "white",
+       height: Dimensions.get("screen").height*0.18  ,
+              backgroundColor: "white",
         shadowColor: "grey",
         shadowOffset: { width: 1, height: 1 },
         shadowOpacity: 0.1,
@@ -389,7 +383,7 @@ const styles = StyleSheet.create({
     deliveryDark: {
         backgroundColor: "#292929",
         width: "100%",
-        height: 80,
+        height:Dimensions.get("screen").height*0.18  ,
         shadowColor: "grey",
         shadowOffset: { width: 1, height: 1 },
         shadowOpacity: 0.1,
@@ -487,11 +481,11 @@ const styles = StyleSheet.create({
     },
     Title: {
         fontWeight: "700",
-        fontSize: 28
+        fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.07,
     },
     TitleDark: {
         fontWeight: "700",
-        fontSize: 28,
+        fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.07,
         color: "white"
 
     },

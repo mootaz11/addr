@@ -58,10 +58,18 @@ export default function orderReview(props) {
 
     const goToDeliveryAdress = ()=>{
      
-                placeOrder(orderReview._id,{orderDestination:props.route.params.location,
-                    deliveryPartnerId:props.route.params.deliveryPartnerId?
-                    props.route.params.deliveryPartnerId
-                    :orderReview.partner._id,phone:props.route.params.phone}).then(message=>{
+                console.log(props.route.params.orderDestination)
+                console.log( props.route.params.deliveryPartner.id)
+                console.log(props.route.params.deliveryPartner.Price)
+
+                placeOrder(orderReview._id,{orderDestination:props.route.params.orderDestination,
+                    deliveryPartnerId:props.route.params.deliveryPartner?
+                    props.route.params.deliveryPartner.id
+                    :orderReview.partner._id,
+                    phone:props.route.params.phone,
+                    deliveryPrice:props.route.params.deliveryPartner?
+                    props.route.params.deliveryPartner.Price:0
+                }).then(message=>{
                     Alert.alert(
                         "",
                         "order placed successfully!",
@@ -93,21 +101,21 @@ export default function orderReview(props) {
                 <View style={styles.orderInfoContainer}>
                     <View style={styles.clientInfo}>
                         <View style={styles.info}>
-                            <Text style={context.darkMode ? {fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500",color:"white"}: {fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500"}}>{orderReview.client.firstName+" "+orderReview.client.lastName}</Text>
+                            <Text style={context.darkMode ? {fontFamily:'Poppins',fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500",color:"white"}: {fontFamily:'Poppins',fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500"}}>{orderReview.client.firstName+" "+orderReview.client.lastName}</Text>
                         </View>
                         <View style={styles.info}>
-                            <Text style={context.darkMode ? {fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500",color:"white"}:{fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500"}}>Client code: {context.user.location.locationCode}</Text>
+                            <Text style={context.darkMode ? {fontFamily:'Poppins',fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500",color:"white"}:{fontFamily:'Poppins',fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500"}}>Client code: {context.user.location.locationCode}</Text>
                         </View>
                     </View>
                     <View style={styles.orderPaymentInfo}>
                     <View style={styles.info}>
-                            <Text style={context.darkMode ? {fontSize:Dimensions.get("screen").width*0.035,fontWeight:"500",color:"white"} : {fontSize:Dimensions.get("screen").width*0.0305,fontWeight:"500"}}>phone number : {props.route.params.phone.length>0 ?props.route.params.phone:orderReview.client.phone}</Text>
+                            <Text style={context.darkMode ? {fontFamily:'Poppins',fontSize:Dimensions.get("screen").width*0.035,fontWeight:"500",color:"white"} : {fontFamily:'Poppins',fontSize:Dimensions.get("screen").width*0.0305,fontWeight:"500"}}>phone number : {props.route.params.phone.length>0 ?props.route.params.phone:orderReview.client.phone}</Text>
                         </View>
                         <View style={styles.info}>
-                            <Text style={{fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500",color: "#2474F1"}}>payment method</Text>
+                            <Text style={{fontFamily:'Poppins',fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500",color: "#2474F1"}}>payment method</Text>
                         </View>
                         <View style={styles.info}>
-                            <Text style={context.darkMode ? {fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500",color:"white"} : {fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500"}}>cash on delivery</Text>
+                            <Text style={context.darkMode ? {fontFamily:'Poppins',fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500",color:"white"} : {fontFamily:'Poppins',fontSize:Dimensions.get("screen").width*0.038,fontWeight:"500"}}>cash on delivery</Text>
                         </View>
 
                     </View>
@@ -120,31 +128,54 @@ export default function orderReview(props) {
                         ({ item }) =>
                         <View style={context.darkMode ? styles.productContainerDark : styles.productContainer}>
                         <View style={styles.productImageContainer}>
-                            <Image style={styles.productImage}  source={{uri:item.product.mainImage}} />
+                            <Image style={styles.productImage} source={{ uri: item.product.mainImage }} />
                         </View>
                         <View style={styles.productInfoContainer}>
-                            <View style={{ width: "92%", height: "20%", marginVertical: 4, alignSelf: "center" }}>
-                                <Text style={context.darkMode ? { fontSize: 17, fontWeight: "700" ,color:"white"}:{ fontSize: 17, fontWeight: "700" }}>{item.product.name}</Text>
+                            <View style={{ width: "92%",flex:1, marginVertical: 4, alignSelf: "center" }}>
+                                <Text style={context.darkMode ? { fontFamily:'Poppins',fontSize: 17, fontWeight: "700", color: "white" } : { fontFamily:'Poppins',fontSize: 17, fontWeight: "700" }}>{item.product.name}</Text>
+                            </View>
+
+                            <View style={{ width: "92%", height: "10%", marginVertical: 4, alignSelf: "center" }}>
+                                <Text style={context.darkMode ? { fontFamily:'Poppins',fontSize: 20, fontWeight: "700", color: "white" } : { fontFamily:'Poppins',fontSize: 20, fontWeight: "700" }}>{item.product.basePrice.toString()} TND</Text>
                             </View>
                             <View style={{ width: "92%", height: "10%", marginVertical: 4, alignSelf: "center" }}>
-                                <Text style={context.darkMode ? { fontSize: 20, fontWeight: "700",color:"white" } :{ fontSize: 20, fontWeight: "700" }}>{item.product.basePrice} TND</Text>
+                                <Text style={context.darkMode ? { fontFamily:'Poppins',fontSize: 20, fontWeight: "700", color: "white" } : { fontFamily:'Poppins',fontSize: 20, fontWeight: "700" }}>{item.product.total ? item.product.total.toString() : item.product.basePrice.toString()} TND</Text>
                             </View>
-                            <View style={{ width: "92%", height: "10%", marginVertical: 4, alignSelf: "center" }}>
-                                <Text style={context.darkMode ? { fontSize: 20, fontWeight: "700",color:"white" } :{ fontSize: 20, fontWeight: "700" }}>{item.product.basePrice} TND</Text>
-                            </View>
-                            <View style={{ width: "92%", height: "15%", marginVertical: 4, alignSelf: "center" }}>
-                                {/* <Text style={context.dark ? { fontSize: 14 ,color:"white"} :{ fontSize: 14 }}>{item.color}</Text>
-                                <Text style={context.context.dark ?  { fontSize: 14,color:"white" }:{ fontSize: 14 }}>{item.size}</Text> */}
-                            </View>
-                            <View style={{ width: "92%", height: "18%", marginVertical: 4, alignSelf: "center", flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
-                  
+                            <View style={{ flex:1, marginVertical: 4,marginLeft:6 }}>
+                                {
+                                     props.route.params.ingredients &&  props.route.params.ingredients.length > 0 &&  props.route.params.ingredients.map(ingredient => (
 
-                                <View style={{ width: "30%", height: "100%", marginHorizontal: 6, borderWidth: 3, borderColor: "#bfbfbf", borderRadius: 12, alignItems: "center", justifyContent: "center", flexDirection: "column" }}>
-                                    <Text  style={context.darkMode ? { fontSize: 20, fontWeight: "400" ,color:"white"}:{ fontSize: 20, fontWeight: "400" }}>{item.quantity}</Text>
-                                </View>
+                                        ingredient._id==item._id
+                                        &&
+                                        <View key={ingredient.variant._id}>
+                                            <Text style={context.darkMode ? { fontFamily:'Poppins',fontSize: 14, color: "white" } : { fontFamily:'Poppins',fontSize: 14,color:"black" }}>{ingredient.variant.name}</Text>
+                                        </View>
+
+                                    ))
+                                }
+                                {
+                                    props.route.params.productVariants &&props.route.params.productVariants.length > 0 &&  props.route.params.productVariants.map(_variant => (
+
+                                        _variant._id==item._id
+                                        &&
+                                        <View key={_variant.variant._id}>
+                                            <Text style={context.darkMode ? { fontFamily:'Poppins',fontSize: 14, color: "white" } : { fontFamily:'Poppins',fontSize: 14,color:"black" }}>{_variant.variant.name}</Text>
+                                        </View>
+
+                                    ))
+                                }
+                                 <View style={{ width: "92%",flex:1, marginVertical: 4, alignSelf: "center", flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
+                                           
+
+                                            <View style={{ width: "25%", height: "80%", marginHorizontal: 6, borderWidth: 3, borderColor: "#bfbfbf", borderRadius: 12, alignItems: "center", justifyContent: "center", flexDirection: "column" }}>
+                                                <Text style={context.darkMode ? { fontFamily:'Poppins',fontSize: 20, fontWeight: "400", color: "white" } : { fontFamily:'Poppins',fontSize: 20, fontWeight: "400",color:"black" }}>{item.quantity}</Text>
+                                            </View>
+                                         
+                                        </View>
 
                             </View>
-                        </View>
+                        
+                            </View>
                     </View>
                     }
                     keyExtractor={item => item._id}
@@ -155,40 +186,40 @@ export default function orderReview(props) {
             <View style={styles.finalSteps}>
             <View style={styles.orderOverview}>
                     <View >
-                        <Text style={context.darkMode ? { fontSize: 20,fontWeight: "600",color:"white"}: { fontSize: 20,fontWeight: "600"}}>Order Summary</Text>
+                        <Text style={context.darkMode ? { fontFamily:'Poppins',fontSize: 20,fontWeight: "600",color:"white"}: { fontFamily:'Poppins',fontSize: 20,fontWeight: "600"}}>Order Summary</Text>
                     </View>
                   
                 </View>
                
                 <View style={styles.orderOverview}>
                     <View >
-                        <Text style={context.darkMode ?  { fontSize: 20,color:"white"}:{ fontSize: 20}}>Items Total</Text>
+                        <Text style={context.darkMode ?  { fontFamily:'Poppins',fontSize: 20,color:"white"}:{ fontFamily:'Poppins',fontSize: 20}}>Items Total</Text>
                     </View>
                     <View >
-                        <Text style={context.darkMode ? { fontSize: 20 ,color:"white"}: { fontSize: 20 }}>{orderReview.price} TND</Text>
-                    </View>
-                </View>
-                <View style={styles.orderOverview}>
-                    <View >
-                        <Text style={context.darkMode ? { fontSize: 20 ,color:"white"} :{ fontSize: 20}}>Delivery Price:</Text>
-                    </View>
-                    <View >
-                        <Text style={context.darkMode ? { fontSize: 20,color:"white" }:{ fontSize: 20 }}>{orderReview.partner.deliveryPrice} TND</Text>
+                        <Text style={context.darkMode ? { fontFamily:'Poppins',fontSize: 20 ,color:"white"}: { fontFamily:'Poppins',fontSize: 20 }}>{orderReview.price} TND</Text>
                     </View>
                 </View>
                 <View style={styles.orderOverview}>
                     <View >
-                        <Text style={context.darkMode ? { fontSize: 20, fontWeight: "600" ,color:"white"}:{ fontSize: 20, fontWeight: "600" }}>Total</Text>
+                        <Text style={context.darkMode ? { fontFamily:'Poppins',fontSize: 20 ,color:"white"} :{ fontFamily:'Poppins',fontSize: 20}}>Delivery Price:</Text>
                     </View>
                     <View >
-                        <Text style={context.darkMode ? { fontSize: 20, fontWeight: "600",color:"white" } : {  fontSize: 20, fontWeight: "600" }}>{orderReview.price+orderReview.partner.deliveryPrice} TND</Text>
+                        <Text style={context.darkMode ? { fontFamily:'Poppins',fontSize: 20,color:"white" }:{ fontFamily:'Poppins',fontSize: 20 }}>{props.route.params.deliveryPartner.Price} TND</Text>
+                    </View>
+                </View>
+                <View style={styles.orderOverview}>
+                    <View >
+                        <Text style={context.darkMode ? { fontFamily:'Poppins',fontSize: 20, fontWeight: "600" ,color:"white"}:{ fontFamily:'Poppins',fontSize: 20, fontWeight: "600" }}>Total</Text>
+                    </View>
+                    <View >
+                        <Text style={context.darkMode ? { fontFamily:'Poppins',fontSize: 20, fontWeight: "600",color:"white" } : {  fontFamily:'Poppins',fontSize: 20, fontWeight: "600" }}>{orderReview.price+props.route.params.deliveryPartner.Price} TND</Text>
                     </View>
                 </View>
 
             <View style={styles.buttonContainer}>
                 <TouchableOpacity style={styles.addButton} onPress={goToDeliveryAdress}>
                     <View style={{ height: "100%", height: "100%", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
-                        <Text style={{ fontSize: 18, fontWeight: "700", color: "white" }}>PLACE ORDER AND PAY</Text>
+                        <Text style={{ fontFamily:'Poppins',fontSize: Dimensions.get("screen").width*0.04, fontWeight: "700", color: "white" }}>PLACE ORDER AND PAY</Text>
                     </View>
                 </TouchableOpacity>
 
@@ -254,7 +285,7 @@ const styles = StyleSheet.create({
       
     },
     buttonContainer: {
-        height: "30%",
+        height: "25%",
         width: "100%",
         flexDirection: "column",
         justifyContent: "center",
@@ -284,10 +315,26 @@ const styles = StyleSheet.create({
     },
     productContainer: {
         width: "90%",
-        height: 250,
+        flex:1,
         alignSelf: "center",
         marginVertical: 10,
         flexDirection: "row",
+        backgroundColor: "white",
+        borderRadius: 12,
+        shadowColor: "black",
+        shadowOffset: { width: 2, height: 2 },
+        shadowOpacity: 0.1
+    },
+    productContainerDark: {
+        width: "90%",
+        flex:1,
+        alignSelf: "center",
+        marginVertical: 10,
+        flexDirection: "row",
+        backgroundColor: "#292929",
+        borderRadius: 12,
+
+
     },
     productImageContainer: {
         width: "50%",
@@ -312,18 +359,10 @@ const styles = StyleSheet.create({
         backgroundColor: "#121212",
 
     },
-    productContainerDark:{
-        width: "90%",
-        height: 250,
-        alignSelf: "center",
-        marginVertical: 10,
-        flexDirection: "row",
-        backgroundColor:"#292929",
-        borderRadius: 12,
+    
 
 
-    },
-    menuDark:{
+        menuDark:{
         width: "100%",
         height: "8%",
         backgroundColor: "#121212",
@@ -347,9 +386,10 @@ const styles = StyleSheet.create({
 
     },
     leftArrow: {
-        width: 30,
-        height: 30,
-        marginTop:10,
+        width: Dimensions.get("screen").height * 0.04,
+        height: Dimensions.get("screen").height * 0.04,
+
+        marginLeft:10,
 
     },
 
@@ -362,11 +402,13 @@ const styles = StyleSheet.create({
     },
     Title: {
         fontWeight: "700",
-        fontSize: 28
+        fontFamily:'Poppins',        fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.07,
+
     },
     TitleDark:{
         fontWeight: "700",
-        fontSize: 28,
+        fontFamily:'Poppins',        fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.07,
+
         color:"white"
 
     },

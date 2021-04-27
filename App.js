@@ -3,17 +3,18 @@ import { ActionSheetProvider } from '@expo/react-native-action-sheet';
 import { StyleSheet } from 'react-native';
 import NavigationScreen from './navigation/navigation';
 import AppContext from './navigation/appContext';
-export default function App() {
+// import useFonts hook  
 
-  return (
+export default function App() {
+  return(
     <ActionSheetProvider>
       <AppContext>
         <NavigationScreen></NavigationScreen>
       </AppContext>
     </ActionSheetProvider>
-
   );
-}
+  }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,

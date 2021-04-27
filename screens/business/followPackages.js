@@ -8,65 +8,82 @@ const api_directions_key = "AIzaSyDcbXzRxlL0q_tM54tnAWHMlGdmPByFAfE";
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
 
-const orders = [
-    {name:"mootaz amara",location:{
-        latitude: 35.7778,
-        longitude: 10.8313
-        },
-        image:require("../../assets/user_image.png")
-    },
-    {name:"julia ",location:{
-        latitude: 35.7778,
-        longitude: 10.7113
 
-      },
-        image:require("../../assets/julia.jpg")
-    },
-    {name:"julia ",location:{
-        latitude: 35.7138,
-        longitude: 10.7113
-
-      },
-        image:require("../../assets/user_image.png")
-    },
-    
-];
-const partner ={
-    name:'adidas',location:{
+const partner = {
+    name: 'adidas', location: {
         latitude: 35.6778,
         longitude: 10.8313
 
-      },
-      image:require("../../assets/adidas.jpg")
+    },
+    image: require("../../assets/adidas.jpg")
 }
-const deliverers = [   
-        {name:"mootaz amara",location:{
+const deliverers = [
+    {
+        name: "mootaz amara", location: {
             latitude: 35.7778,
             longitude: 10.8313
-            },
-            image:require("../../assets/user_image.png")
         },
-        {name:"julia ",location:{
+        image: require("../../assets/user_image.png")
+        , orders: [{
+            image: require("../../assets/user_image.png"),
+            longitude: 35.7766,
+            latitude: 10.7700
+        }, {
+            image: require("../../assets/user_image.png"),
+            longitude: 35.7766,
+            latitude: 10.7500
+        }]
+    }
+    ,
+    {
+        name: "julia ", location: {
             latitude: 35.7778,
             longitude: 10.7113
-          },
-            image:require("../../assets/julia.jpg")
         },
-        {name:"julia ",location:{
+        image: require("../../assets/julia.jpg"),
+        orders: [{
+            image: require("../../assets/user_image.png"),
+            longitude: 35.7566,
+            latitude: 10.7700
+        }]
+    },
+    {
+        name: "julia ", location: {
             latitude: 35.7138,
             longitude: 10.7113
-          },
-            image:require("../../assets/user_image.png")
         },
-        
+        image: require("../../assets/user_image.png")
+        ,
+        orders: []
+    },
+
 ]
+
 
 export default function followPackages(props) {
     const context = useContext(AuthContext)
-    
     const openDrawer = () => {
         props.navigation.openDrawer();
     }
+
+    const renderCircuit = (index) => {
+        var _orders = [...deliverers[index].orders];
+        _orders = [{
+            image: deliverers[index].image,
+            longitude: deliverers[index].location.longitude,
+            latitude: deliverers[index].location.latitude,
+        }, ...deliverers[index].orders
+        ]
+
+var _rows = []
+
+    
+                                      
+                                       
+}
+
+
+
 
     return (
         <SafeAreaView style={{ flex: 1 }}>
@@ -74,7 +91,7 @@ export default function followPackages(props) {
                 <View style={context.darkMode ? styles.menuDark : styles.menu}>
                     <View style={styles.leftArrowContainer}>
                         <TouchableOpacity onPress={openDrawer} style={styles.leftArrow}>
-                        <Image source={context.darkMode ?  require("../../assets/menu_dark.png"):require("../../assets/menu.png")} style={{height:"100%",width:"100%",resizeMode:"cover"}}/>
+                            <Image source={context.darkMode ? require("../../assets/menu_dark.png") : require("../../assets/menu.png")} style={{ height: "100%", width: "100%", resizeMode: "cover" }} />
                         </TouchableOpacity>
                     </View>
                     <View style={styles.titleContainer}>
@@ -84,16 +101,13 @@ export default function followPackages(props) {
 
                 </View>
                 <View style={styles.mapContainer}>
-
-
-
-
+              
                     <MapView
                         initialRegion={{
                             latitude: 35.7643,
                             longitude: 10.8113,
-                            longitudeDelta:0.5,
-                            latitudeDelta:0.0922
+                            longitudeDelta: 0.5,
+                            latitudeDelta: 0.0922
 
                         }}
 
@@ -101,90 +115,57 @@ export default function followPackages(props) {
                         customMapStyle={darkStyle}
                         provider="google"
                     >
-                          <Marker
-                                  coordinate={{
-                                    latitude: 35.7000,
-                                    longitude: 10.8113
-                                  }}
-                                >
-                             <FontAwesome color={"red"} style={{ padding: 0, fontSize: 20, }} name="close" />
-                        
-                                </Marker>
-                            <Marker
-                                  coordinate={{
-                                    latitude: partner.location.latitude,
-                                    longitude: partner.location.longitude
-                        
-                                  }}
-                        
-                                >
-                                  <Image source={partner.image} style={{ height: 40, width: 40, borderRadius: 30,borderColor:"white" ,borderWidth:2}} />
-                        
-                                </Marker>
+
+                        <Marker
+                            coordinate={{
+                                latitude: partner.location.latitude,
+                                longitude: partner.location.longitude
+
+                            }}
+
+                        >
+                            <Image source={partner.image} style={{ height: 40, width: 40, borderRadius: 30, borderColor: "white", borderWidth: 2 }} />
+
+                        </Marker>
                         {
-                            deliverers && deliverers.map((deliverer,index)=>
-                                (
-                                
-                                    <Marker
+                            deliverers && deliverers.map((deliverer, index) =>
+                            (
+
+                                <Marker
+
                                     key={index}
-                                  coordinate={{
-                                    latitude: deliverer.location.latitude,
-                                    longitude: deliverer.location.longitude
-                        
-                                  }}
-                        
-                                >
-                                  <Image source={deliverer.image} style={{ height: 40, width: 40, borderRadius: 30,borderColor:"white" ,borderWidth:2}} />
-                        
-                                </Marker>
-                        
-                                )
-                            )
-                            
-                        }
-      {
-                            deliverers && deliverers.map((deliverer,index)=>
-                                (
-                                
-                                    <MapViewDirections
-                                    key={index}
-                                    apikey={api_directions_key}
-                                    origin={{
-                                        latitude: partner.location.latitude,
-                                        longitude: partner.location.longitude
-                            
-                                      }}
-                                    destination={{
-                                        latitude:deliverer.location.latitude,
+                                    coordinate={{
+                                        latitude: deliverer.location.latitude,
                                         longitude: deliverer.location.longitude
-                            
-                                      }}
-                                    strokeWidth={3}
-                                    strokeColor={ index %2==0 ? "#24A9E1" : "#eb4034" }
-                                />
-                                )
+
+                                    }}
+
+                                >
+                                    <Image source={deliverer.image} style={{ height: 40, width: 40, borderRadius: 30, borderColor: "white", borderWidth: 2 }} />
+
+                                </Marker>
+
                             )
-                            
+                            )
+
                         }
-                        
-                       
-                       
+
 
                     </MapView>
                     <View style={styles.distance}>
                         <Text style={{ color: "white" }}>Distance:500KM</Text>
                     </View>
                     <View style={styles.circuit}>
-                        <Text style={{ color: "white", textAlignVertical: "center", fontSize: 18 }}>Circuit </Text>
+                        <Text style={{ color: "white", textAlignVertical: "center", fontFamily:'Poppins',fontSize: 18 }}>Circuit </Text>
                     </View>
                     <View style={styles.addLocation}>
                         <View style={{ width: 30, height: 30, borderRadius: 30, backgroundColor: '#2474f1' }}></View>
 
-                        <Text style={{ color: "white", textAlignVertical: "center", marginLeft: 5, fontSize: 16 }}>client location</Text>
+                        <Text style={{ color: "white", textAlignVertical: "center", marginLeft: 5, fontFamily:'Poppins',fontSize: 16 }}>client location</Text>
                     </View>
                     <View style={styles.getPosition}>
                         <View style={{ width: 30, height: 30, borderRadius: 30, backgroundColor: 'red' }}></View>
-                        <Text style={{ color: "white", textAlignVertical: "center", marginLeft: 5, fontSize: 16 }}>Parcel location</Text>
+                        <Text style={{ color: "white", textAlignVertical: "center", marginLeft: 5, fontFamily:'Poppins',fontSize: 16 }}>Parcel location</Text>
                     </View>
                 </View>
 
@@ -265,14 +246,14 @@ const styles = StyleSheet.create({
         height: "8%",
         backgroundColor: "white",
         flexDirection: "row",
-        marginTop:10
+        marginTop: 10
     },
     menuDark: {
         width: "100%",
         height: "8%",
         backgroundColor: "#121212",
         flexDirection: "row",
-        marginTop:10
+        marginTop: 10
 
     },
     leftArrowContainer: {
@@ -283,9 +264,9 @@ const styles = StyleSheet.create({
         justifyContent: "center"
     },
     leftArrow: {
-        width: 30,
-        height: 30,
-        marginTop:10
+        height: Dimensions.get("screen").height * 0.03,
+        width: Dimensions.get("screen").height * 0.03,
+        marginLeft: 10
     },
 
     titleContainer: {
@@ -297,7 +278,7 @@ const styles = StyleSheet.create({
     },
     Title: {
         fontWeight: "700",
-        fontSize: Dimensions.get("window").width * 0.08
+        fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.07
     },
     searchContainer: {
         width: "10%",
@@ -309,7 +290,7 @@ const styles = StyleSheet.create({
 
     TitleDark: {
         fontWeight: "700",
-        fontSize: Dimensions.get("window").width * 0.08,
+        fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.07,
         color: "white"
 
     },

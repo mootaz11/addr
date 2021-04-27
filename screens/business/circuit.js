@@ -107,7 +107,7 @@ export default function circuit(props) {
                                     longitude: 10.8113
                                   }}
                                 >
-                             <FontAwesome color={"red"} style={{ padding: 0, fontSize: 20, }} name="close" />
+                             <FontAwesome color={"red"} style={{ padding: 0, fontFamily:'Poppins',fontSize: 20, }} name="close" />
                         
                                 </Marker>
                             <Marker
@@ -175,16 +175,16 @@ export default function circuit(props) {
                         <Text style={{ color: "white" }}>Distance:500KM</Text>
                     </View>
                     <View style={styles.circuit}>
-                        <Text style={{ color: "white", textAlignVertical: "center", fontSize: 18 }}>Circuit </Text>
+                        <Text style={{ color: "white", textAlignVertical: "center", fontFamily:'Poppins',fontSize: 18 }}>Circuit </Text>
                     </View>
                     <View style={styles.addLocation}>
                         <View style={{ width: 30, height: 30, borderRadius: 30, backgroundColor: '#2474f1' }}></View>
 
-                        <Text style={{ color: "white", textAlignVertical: "center", marginLeft: 5, fontSize: 16 }}>client location</Text>
+                        <Text style={{ color: "white", textAlignVertical: "center", marginLeft: 5, fontFamily:'Poppins',fontSize: 16 }}>client location</Text>
                     </View>
                     <View style={styles.getPosition}>
                         <View style={{ width: 30, height: 30, borderRadius: 30, backgroundColor: 'red' }}></View>
-                        <Text style={{ color: "white", textAlignVertical: "center", marginLeft: 5, fontSize: 16 }}>Parcel location</Text>
+                        <Text style={{ color: "white", textAlignVertical: "center", marginLeft: 5, fontFamily:'Poppins',fontSize: 16 }}>Parcel location</Text>
                     </View>
                 </View>
 
@@ -297,7 +297,7 @@ const styles = StyleSheet.create({
     },
     Title: {
         fontWeight: "700",
-        fontSize: Dimensions.get("window").width * 0.08
+        fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.08
     },
     searchContainer: {
         width: "10%",
@@ -309,7 +309,7 @@ const styles = StyleSheet.create({
 
     TitleDark: {
         fontWeight: "700",
-        fontSize: Dimensions.get("window").width * 0.08,
+        fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.08,
         color: "white"
 
     },

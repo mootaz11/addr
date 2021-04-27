@@ -6,12 +6,20 @@ import { createConversation, getUserConversations, sendMessage, markAsreadConver
 import { getLocation, updateLocation, addTemporarlyLocation } from '../rest/locationApi';
 import { getConnectedUser, updateLocationState, setNotifToken, userLogout } from '../rest/userApi';
 import Loading from '../screens/Loading';
+import {useFonts}  from "expo-font";
 import * as Permissions from 'expo-permissions';
 import { Notifications } from 'expo';
 import Constants from 'expo-constants';
 
+
+const customFonts = {
+    Poppins: require("../assets/fonts/Poppins-Regular.ttf"),
+    PoppinsBold: require("../assets/fonts/Poppins-Bold.ttf")
+  };
+ 
+  
 export default function AppContext(props) {
-    const [socket, setSocket] = useState(io('http://192.168.1.11:5000'));
+    const [socket, setSocket] = useState(io('https://addresti-backend.herokuapp.com'));    
     const [location, setLocation] = useState(null);
     const [user, setUser] = useState(null)
     const [deliveryData, setDeliveryData] = useState(null)
@@ -19,9 +27,12 @@ export default function AppContext(props) {
     const [darkMode, setDarkMode] = useState(false);
     const [isloading, setIsloading] = useState(true);
     const [partner, setPartner] = useState(null);
-    const [bag, setBag] = useState(bag);
+    const [bag, setBag] = useState(0);
     const [loggedIn,setLoggedIn]=useState(false);
-
+    const [notifications,setNotifications]=useState(null);
+    const [total,setTotal]=useState(0);
+    const [isLoaded,setIsLoaded] = useFonts(customFonts);
+    
 
 
     const registerForPushNotificationsAsync = async () => {
@@ -38,7 +49,7 @@ export default function AppContext(props) {
                 return;
             }
             const token = await Notifications.getExpoPushTokenAsync()
-            if (token) {
+            if (token&&user) {
                 setNotifToken(user._id, token).then(user => {
                 })
             }
@@ -55,20 +66,23 @@ export default function AppContext(props) {
             });
         }       
     };
+
     useEffect(() => {
         AsyncStorageService.getAccessToken().then(token => {
             if (token) {
                 getConnectedUser().then(res => {
                     getLocation().then(async location => {
-                        if (!res.data.connectedUser.isPartner) { setBag(res.data.orders); }
+                        
+                        setBag(res.data.orders.length);
                         setLocation(location);
                         setDarkMode(false);
                         setUser(res.data.connectedUser);
+                        setTotal(res.data.notificationsLength);
+
                         async function fetchData() {
                             await registerForPushNotificationsAsync();
                           }
-                          fetchData();
-                                
+                          fetchData();     
                         const t = await AsyncStorageService.getAccessToken();
                         socket.emit('connectuser', t);
                     }).catch(err => { alert("error occured while setting Location") })
@@ -84,9 +98,6 @@ export default function AppContext(props) {
             }
         })
     }, [loggedIn])
-
-
-   
 
     useEffect(() => {
         if (user) {
@@ -106,6 +117,7 @@ export default function AppContext(props) {
                 let _convs = [..._conversations];
                 const _convSorted = _convs.sort((a, b) => a.last - b.last);
                 setConversations(_convSorted);
+                setNotifications(user.notifications)
                 setIsloading(false);
                 setLoggedIn(true);
             }).catch(err => { alert("network or server error")})
@@ -126,14 +138,29 @@ export default function AppContext(props) {
         })
     },[socket])
     
+    useEffect(()=>{
+        if(notifications){
+            socket.off('send-notification')
+            socket.on('send-notification',(notification)=>{
+                let _notifications = [...notifications];
+                const _notif_index = _notifications.findIndex(notif => { return notif._id == notification._id });
+                if(_notif_index==-1){
+                    _notifications = [notification,..._notifications]
+                    setNotifications(_notifications);
+                }
+            })     
+        }
+
+    },[notifications])
 
 
-    useEffect(() => {
+    useEffect(() => {   
         socket.off('send-message');
         socket.off('create-conversation');
         if (conversations) {
+            
             socket.on('send-message', (message) => {
-                const _conversations = [...conversations];
+                let _conversations = [...conversations];
                 const conv_index = _conversations.findIndex(conv => { return conv._id == message.conversation });
                 let notSeenSum = 0
                 if (conv_index >= 0) {
@@ -201,7 +228,6 @@ export default function AppContext(props) {
             }).catch(err => { reject(err) })
         }).catch(err => { reject(err) })
     }
-
     const openConversationHandler = (id, Users, type, partner) => {
         if (conversations)
             if (type != null && type == "personal") {
@@ -217,10 +243,10 @@ export default function AppContext(props) {
                 }
                 else {
                     const new_conversation = {
-                        image: Users.other.photo?Users.other.photo:require('../assets/user_image.png'),
+                        image: Users.other.photo?Users.other.photo:null,
                         type: "personal",
                         messages: [],
-                        other: Users.other.firstName + " " + Users.other.lastName,
+                        other: Users.other.firstName ? Users.other.firstName + " " + Users.other.lastName:Users.other.pseudoname,
                         users: [Users.user._id, Users.other._id],
                     }
                     return new_conversation;
@@ -236,16 +262,12 @@ export default function AppContext(props) {
                     }
                 })
                 if (count == Users.users_id.length) {
-                    conversation_found = conversations[conversations.findIndex(conv => { return conv._id == conversation._id })];
-
+                    conversation_found = conversations[conversations.findIndex(conv => { return conv._id == conversation._id &&conv.type=="group"})];
                 }
             })
-
-            if (conversation_found) {
+            if (conversation_found&&conversation_found.partner==partner._id) {
                 return conversation_found;
             }
-
-
             else {
                 const new_conversation = {
                     image: partner.profileImage,
@@ -336,7 +358,8 @@ export default function AppContext(props) {
                     
                          await  AsyncStorageService.clearToken();
                             setConversations(null);
-                            setLoggedIn(false);     
+                            setLoggedIn(false);   
+                            setPartner(null);  
 
                 }
             }).catch(err => {
@@ -374,7 +397,6 @@ export default function AppContext(props) {
         })
     }
    
-
     return (
         <AuthContext.Provider value={{
             darkMode: darkMode,
@@ -383,12 +405,17 @@ export default function AppContext(props) {
             partner: partner,
             socket: socket,
             conversations: conversations,
+            notifications:notifications,
             location: location,
             bag: bag,
             deliveryData:deliveryData,
             isloading: isloading,
+            isLoaded:isLoaded,
+            total:total,
             setUser: setUser,
+            setBag:setBag,
             setLocation: setLocation,
+            setNotifications:setNotifications,
             setPartner: setPartner,
             LoginHandler: LoginHandler,
             sendLocalisation:sendLocalisation,
@@ -405,7 +432,7 @@ export default function AppContext(props) {
         }
         }>
 
-            {isloading ? <Loading /> : props.children}
+            {isloading && !isLoaded ? <Loading /> : props.children}
 
         </AuthContext.Provider>
     )

@@ -13,6 +13,27 @@ export const updateLocationState =()=>{
     })
 
 }
+
+
+export const getUserNotifications =(total,limit)=>{
+    return new Promise((resolve,reject)=>{
+        axios.get(`/user/notifications`,{params: {total: total,limit:limit}
+    }).then(res=>{
+            if(res.status===200){
+                resolve(res.data.notifications);
+            }
+
+        }).catch(err=>{reject(err)})
+    })
+}
+
+
+
+
+
+
+
+
 export const setNotifToken =(id,token)=>{
     return new Promise((resolve,reject)=>{
         axios.patch(`/user/${id}/update-notificationtoken`,{notificationToken:token}).then(res=>{

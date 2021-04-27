@@ -42,7 +42,7 @@ export default function subCategory(props){
                  <Text style={context.darkMode ?  styles.TitleDark : styles.Title}>{props.route.params.subCategory}</Text>
                 </View>   
                 <View style={styles.searchContainer}>
-                {/* <FontAwesome color={context.darkMode ?  "white" : "black"} style={{ padding: 0, fontSize: 24 }} name="search"  /> */}
+                {/* <FontAwesome color={context.darkMode ?  "white" : "black"} style={{ padding: 0, fontFamily:'Poppins',fontSize: 24 }} name="search"  /> */}
 
                 </View>
             
@@ -57,7 +57,7 @@ export default function subCategory(props){
                    <TouchableOpacity onPress={()=>{checkCategory(item)}}>
                    <View style={styles.category}>
                        <View style={{marginLeft:8}}>
-                           <Text style={context.darkMode ?  {fontSize:20,fontWeight:"400",color:"white"}:{fontSize:20,fontWeight:"400"}}>{item.name}</Text>
+                           <Text style={context.darkMode ?  {fontFamily:'Poppins',fontSize:20,fontWeight:"400",color:"white"}:{fontFamily:'Poppins',fontSize:20,fontWeight:"400"}}>{item.name}</Text>
                        </View>
                        <View style={{width:30, height:"80%",justifyContent:"center",alignItems:"center" ,marginRight:8}}>
                         <Image style={styles.arrowright} source={context.darkMode ?  require("../assets/right-arrow-dark.png"):require("../assets/right-arrow.png")}/>
@@ -72,7 +72,7 @@ export default function subCategory(props){
        </View>
     :
     <View style={{width:"100%",height:"100%",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
-            <Text style={{fontSize:20,color:"white"}}>no Cagetories Found for this partner</Text>
+            <Text style={{fontFamily:'Poppins',fontSize:20,color:"white"}}>no Cagetories Found for this partner</Text>
     </View>
            
        }
@@ -153,7 +153,7 @@ const styles = StyleSheet.create({
     },
     Title:{
         fontWeight:"700",
-        fontSize: Dimensions.get("window").width * 0.07,
+        fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.07,
     },
     TitleDark:{
         fontWeight:"700",

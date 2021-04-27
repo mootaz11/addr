@@ -4,7 +4,6 @@ import {
     View, StyleSheet, Text, TextInput, TouchableOpacity, Image, FlatList, Platform, ScrollView, LogBox, Modal,
     TouchableHighlight, Dimensions, Alert
 } from 'react-native';
-import { RadioButton } from 'react-native-paper';
 import { Picker } from '@react-native-community/picker';
 import * as ImagePicker from 'expo-image-picker';
 import VariantListItem from '../../common/VariantListItem';
@@ -13,7 +12,7 @@ import MyButton from '../../common/MyButton';
 import Colors from '../../constants/Colors';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AuthContext from '../../navigation/AuthContext'
-import { getPartnerDashboard, addCategory,getPartner,addSubCategory } from '../../rest/partnerApi'
+import {addCategory,getPartner,addSubCategory } from '../../rest/partnerApi'
 import { addProduct } from '../../rest/productApi';
 
 const variants_food = [
@@ -70,15 +69,17 @@ const AddProductScreen = (props) => {
         inputValues: {
             title: '',
             description: '',
-
+            shortDescription:'',
             price: '',
             weight: '',
+            stock:'',
         },
         inputValidities: {
             title: false,
+            shortDescription:'',
             description: false,
             price: false,
-            weight: false
+          
         },
         formIsValid: false
     });
@@ -94,6 +95,8 @@ const AddProductScreen = (props) => {
 
     const [priceTouched, setPriceTouched] = useState(false);
     const [weightTouched, setWeightTouched] = useState(false);
+    const [shortDescriptionTouched, setShortDescriptionTouched] = useState(false);
+    const [stockTouched,setStockTouched]=useState(false);
 
     const [gender, setGender] = useState();
     const [category, setCategory] = useState();
@@ -118,8 +121,7 @@ const AddProductScreen = (props) => {
     const [ModalSousVariantVisible, setModalSousVariantVisible] = useState(false)
     const [nameCategory, setNameCategory] = useState("");
     const [nameSubCategory, setNameSubCategory] = useState("");
-
-    const [service, setService] = useState();
+    const [dimension,setDimension]=useState("");
 
 
     const textChangeHandler = (inputIdentifier, text) => {
@@ -147,9 +149,14 @@ const AddProductScreen = (props) => {
             case 'price':
                 setPriceTouched(true);
                 break;
+                case 'stock':
+                setStockTouched(true);
+                break;
             case 'weight':
                 setWeightTouched(true);
                 break;
+            case 'shortDescription':
+                setShortDescriptionTouched(true)
             default:
                 break;
         }
@@ -251,6 +258,9 @@ const AddProductScreen = (props) => {
 
     const addNewSubCategory=()=>{
         addSubCategory(context.partner._id,category,nameSubCategory).then(newSubCategory => {
+            if(subcategories.length==0){
+                setSubCategory(newSubCategory._id)
+            }
             setSubcategories([...subcategories, newSubCategory]);
             
             var _categories = [...categories];
@@ -268,6 +278,9 @@ const AddProductScreen = (props) => {
 
     const addNewCategory = () => {
         addCategory(context.partner._id, nameCategory).then(newCategory => {
+            if(categories.length==0){
+                setCategory(newCategory._id)
+            }
             setCategories([...categories, newCategory]);
             setModelCategoryVisible(!modalCategoryVisible);
             setNameCategory("");
@@ -494,6 +507,7 @@ const handleCategory =(itemValue)=>{
     const cat_index = categories.findIndex(cat=>{return cat._id==itemValue});
     if(cat_index>=0){
         setSubcategories(categories[cat_index].subCategories);
+
     }
 }
 
@@ -541,13 +555,15 @@ const handleCategory =(itemValue)=>{
                     basePrice: formState.inputValues.price,
                     discount: pourcentage,
                     description: formState.inputValues.description,
+                    shortDescription:formState.inputValues.shortDescription,
                     partner: context.partner._id,
                     weight: formState.inputValues.weight,
                     type: productType.toLowerCase(),
                     gendre: gender ? gender.toLowerCase() : "",
                     name: formState.inputValues.title,
                     pricing: allSousVariantsCombinaisons,
-
+                    dimension:dimension,
+                    stock:formState.inputValues.price
                 }
 
                 const fd = new FormData();
@@ -555,18 +571,24 @@ const handleCategory =(itemValue)=>{
                 selectedImages.forEach(image => {
                     fd.append('productImages', { type: 'image/png', uri: image.uri, name: 'upload.png' });
                 })
+
                 fd.append('product', JSON.stringify({ ...product }));
                 fd.append('variants', JSON.stringify([..._variants]));
                 fd.append('category', category);
                 fd.append('subCategory',subCategory);   
 
-                addProduct(context.partner._id, fd).then(message => {
-                    Alert.alert('Operation Done', message, [{ text: 'Okay' }]);
-
-                }).catch(err=>{
-                    alert("add product failed")
-                })
-
+                if(category&&subCategory&&product&&_variants.length>0){
+                    addProduct(context.partner._id, fd).then(message => {
+                        Alert.alert('Operation Done', message, [{ text: 'Okay' }]);
+    
+                    }).catch(err=>{
+                        alert("add product failed")
+                    })    
+                }
+                else {
+                    alert("please check your missing data");
+                }
+                
             }
         }
 
@@ -628,27 +650,27 @@ const handleCategory =(itemValue)=>{
 
     return (
         <SafeAreaView style={{ flex: 1 }}>
-            <View style={{ flex: 1 }}>
-                <View style={styles.menu}>
+            <View style={context.darkMode ? { flex: 1,backgroundColor:"black" }:{ flex: 1 }}>
+                <View style={context.darkMode ? styles.menuDark : styles.menu}>
                     <View style={styles.leftArrowContainer}>
                         <TouchableOpacity onPress={() => { props.navigation.goBack() }} style={styles.leftArrow}>
-                            <Image style={{ width: "100%", height: "100%", marginLeft: 4 }} source={require("../../assets/left-arrow.png")} />
+                            <Image style={{ width: "100%", height: "100%", marginLeft: 4 }} source={context.darkMode ? require("../../assets/left-arrow-dark.png") : require("../../assets/left-arrow.png")} />
 
                         </TouchableOpacity>
                     </View>
                     <View style={styles.titleContainerMenu}>
-                        <Text style={styles.TitleMenu}>add Product</Text>
+                        <Text style={context.darkMode ? styles.TitleDark: styles.TitleMenu}>add Product</Text>
                     </View>
 
 
                 </View>
-                <View style={styles.mainContainer}>
+                <View style={context.darkMode ? styles.mainContainerDark : styles.mainContainer}>
                     <ScrollView>
                         <View style={styles.titleContainer}>
-                            <Text style={styles.titreStyle}>Title</Text>
+                            <Text style={ context.darkMode  ? styles.titreStyleDark : styles.titreStyle}>Title</Text>
                             <View style={styles.titleInputContainer}>
                                 <TextInput
-                                    style={styles.inputTitle}
+                                    style={context.darkMode ? styles.inputTitleDark :  styles.inputTitle}
                                     placeholder="your product title"
                                     placeholderTextColor={Colors.placeholder}
                                     value={formState.inputValues.title}
@@ -659,10 +681,10 @@ const handleCategory =(itemValue)=>{
                             </View>
                         </View>
                         <View style={styles.descriptionContainer}>
-                            <Text style={styles.titreStyle} >Description</Text>
+                            <Text style={context.darkMode  ? styles.titreStyleDark : styles.titreStyle} >Description</Text>
                             <View style={styles.descriptionInputContainer}>
                                 <TextInput
-                                    style={styles.inputDescription}
+                                    style={context.darkMode ? styles.inputDescriptionDark : styles.inputDescription}
                                     placeholder="your product description"
                                     placeholderTextColor={Colors.placeholder}
                                     multiline
@@ -674,26 +696,42 @@ const handleCategory =(itemValue)=>{
                                 {!formState.inputValidities.description && descriptionTouched && <Text style={styles.errorMessage}>Please enter a description!</Text>}
                             </View>
                         </View>
-
-                        {productType != "food" && <View style={styles.genderContainer}>
-                            <Text style={styles.titreStyle} >Gender</Text>
+                        <View style={styles.descriptionContainer}>
+                            <Text style={context.darkMode  ? styles.titreStyleDark : styles.titreStyle} >short Description</Text>
+                            <View style={styles.descriptionInputContainer}>
+                                <TextInput
+                                    style={context.darkMode ? styles.inputDescriptionDark : styles.inputDescription}
+                                    placeholder="your short description"
+                                    placeholderTextColor={Colors.placeholder}
+                                    multiline
+                                    numberOfLines={10}
+                                    value={formState.inputValues.shortDescription}
+                                    onChangeText={textChangeHandler.bind(this, 'shortDescription')}
+                                    onBlur={lostFocusHandler.bind(this, 'shortDescription')}
+                                />
+                                {!formState.inputValidities.shortDescription && shortDescriptionTouched && <Text style={styles.errorMessage}>Please enter a short Description!</Text>}
+                            </View>
+                        </View>
+                        {productType != "food" && <View style={context.darkMode ? styles.genderContainerDark : styles.genderContainer}>
+                            <Text style={context.darkMode ? styles.titreStyleDark : styles.titreStyle} >Gender</Text>
                             <View style={styles.genderPickerContainer}>
                                 <Picker
                                     selectedValue={gender}
                                     onValueChange={(itemValue, itemIndex) => setGender(itemValue)}
                                     mode="dropdown"
+                                    style={context.darkMode ? {backgroundColor:"black"}:{backgroundColor:"white"}}
                                 >
 
-                                    <Picker.Item label="men" value="Men" />
-                                    <Picker.Item label="women" value="Women" />
-                                    <Picker.Item label="kids" value="Kids" />
+                                    <Picker.Item color={context.darkMode ? "white":"black"} label="men" value="Men" />
+                                    <Picker.Item color={context.darkMode ? "white":"black"} label="women" value="Women" />
+                                    <Picker.Item color={context.darkMode ? "white":"black"} label="kids" value="Kids" />
                                 </Picker>
                             </View>
 
                         </View>
                         }
                         <View style={styles.CategoryContainer}>
-                            <Text style={styles.titreStyle} >Category</Text>
+                            <Text style={ context.darkMode ? styles.titreStyleDark  : styles.titreStyle} >Category</Text>
 
                             <View style={styles.addCAtegoryContainer}>
                                 <TouchableOpacity onPress={()=>{setModelCategoryVisible(!modalCategoryVisible)}} style={{width:10,height:10}}>
@@ -703,21 +741,24 @@ const handleCategory =(itemValue)=>{
                                     />                                
                                     </TouchableOpacity>
                             </View>
+
                             <View style={styles.genderPickerContainer}>
                                 <Picker
                                     selectedValue={category}
+                                    style={context.darkMode ? {backgroundColor:"black"}:{backgroundColor:"white"}}
+
                                     onValueChange={(itemValue, itemIndex) => {handleCategory(itemValue)} }
                                     mode="dropdown">
                                     {
                                         categories &&
                                         categories.map((_category, index) => (
-                                            <Picker.Item  key={index} label={_category.name} value={_category._id} />
+                                            <Picker.Item  color={context.darkMode ? "white":"black"} key={index} label={_category.name} value={_category._id} />
                                         ))
                                     }
                                 </Picker>
                             </View>
                             <View style={styles.CategoryContainer}>
-                            <Text style={styles.titreStyle} >Sub Category</Text>
+                            <Text style={context.darkMode ? styles.titreStyleDark : styles.titreStyle} >Sub Category</Text>
 
                             <View style={styles.addCAtegoryContainer}>
                                 
@@ -733,12 +774,14 @@ const handleCategory =(itemValue)=>{
                                     selectedValue={subCategory}
                                     onValueChange={(itemValue, itemIndex) => {setSubCategory(itemValue);}}
                                     mode="dropdown"
+                                    style={context.darkMode ? {backgroundColor:"black"}:{backgroundColor:"white"}}
+
                                 >    
 
                                     {
                                        subcategories  &&
                                         subcategories.map((_subcategory, index) => (
-                                            <Picker.Item key={index} label={_subcategory.name} value={_subcategory._id} />
+                                            <Picker.Item color={context.darkMode ? "white":"black"} key={index} label={_subcategory.name} value={_subcategory._id} />
                                         ))
                                     }
                                 </Picker>
@@ -747,10 +790,10 @@ const handleCategory =(itemValue)=>{
 
                         </View>
                         </View>
-                        <View style={styles.imagesContainer}>
-                            <Text style={styles.titreStyle}>Images</Text>
-                            <View style={styles.imagesInputContainer}>
-                                <View style={styles.buttonAddContainer}>
+                        <View style={context.darkMode ? styles.imagesContainerDark : styles.imagesContainer}>
+                            <Text style={context.darkMode ? styles.titreStyleDark : styles.titreStyle}>Images</Text>
+                            <View style={ context.darkMode ? styles.imagesInputContainerDark : styles.imagesInputContainer}>
+                                <View style={context.darkMode ? styles.buttonAddContainerDark  : styles.buttonAddContainer}>
                                     <TouchableOpacity onPress={pickImage}>
                                         <Image
                                             source={require('../../assets/images/add.png')}
@@ -770,11 +813,11 @@ const handleCategory =(itemValue)=>{
                             </View>
                             {imagesTouched && selectedImages.length === 0 && <Text style={styles.errorMessage}>Please select minumum an image for the product</Text>}
                         </View>
-                        <View style={styles.pricingContainer}>
-                            <Text style={styles.titreStyle}>Pricing</Text>
+                        <View style={context.darkMode ? styles.priceContainerDark : styles.pricingContainer}>
+                            <Text style={context.darkMode ? styles.titreStyleDark : styles.titreStyle}>Pricing</Text>
                             <View style={styles.priceDiscountContainer}>
                                 <View style={styles.priceContainer}>
-                                    <Text>Price</Text>
+                                    <Text style={context.darkMode ? {color:"white"}:{color:"black"}}>Price</Text>
                                     <TextInput
                                         style={styles.inputPrice}
                                         placeholder="your product price"
@@ -789,10 +832,10 @@ const handleCategory =(itemValue)=>{
                                 <View style={styles.discountContainer}>
                                     <View style={styles.radioButtonItem}>
                                     <TouchableOpacity onPress={() => {setModalDiscountVisible(!modalDiscountVisible)}}>
-                                    <Image style={{ width: 20, height: 20, resizeMode: "cover", marginHorizontal: 6 }} source={modalDiscountVisible  ? require("../../assets/radio_checked.png"):require("../../assets/radio_unchecked.png")} />
+                                    <Image style={{ width: 20, height: 20, resizeMode: "cover", marginHorizontal: 6 }} source={modalDiscountVisible  ? context.darkMode ? require("../../assets/radio_checked_dark.png"):require("../../assets/radio_checked.png"):context.darkMode ?require("../../assets/radio_unchecked_dark.png"): require("../../assets/radio_unchecked.png")} />
                                 </TouchableOpacity>
                                
-                                        <Text> Discount </Text>
+                                        <Text  style={context.darkMode ? {color:"white"}:{color:"black"}}> Discount </Text>
                                     </View>
                                     <Modal
                                         animationType="slide"
@@ -802,7 +845,7 @@ const handleCategory =(itemValue)=>{
                                         <View style={styles.centeredViewModal}>
                                             <View style={styles.modalContainer}>
                                                 <View style={styles.variantInputTitleContainer}>
-                                                    <Text>percentage</Text>
+                                                    <Text  style={context.darkMode ? {color:"white"}:{color:"black"}}>percentage</Text>
                                                 </View>
                                                 <View style={styles.variantInputContainer}>
                                                     <TextInput
@@ -846,7 +889,7 @@ const handleCategory =(itemValue)=>{
                             {
                                 formState.inputValidities.price && newPrice && (<View style={styles.priceDiscountContainer}>
                                     <View style={styles.priceContainer}>
-                                        <Text>New Price</Text>
+                                        <Text  style={context.darkMode ? {color:"white"}:{color:"black"}}>New Price</Text>
                                         <TextInput
                                             style={styles.inputPrice}
                                             placeholder="new price after discount"
@@ -860,13 +903,13 @@ const handleCategory =(itemValue)=>{
                                 </View>)
                             }
                             {!formState.inputValidities.price && priceTouched && <Text style={styles.errorMessage}>Please enter a price !</Text>}
-                            <Text>Charger taxes on this product </Text>
+                            <Text  style={context.darkMode ? {color:"white"}:{color:"black"}}>Charger taxes on this product </Text>
                         </View>
-                        <View style={styles.weightContainer}>
-                            <Text style={styles.titreStyle}>WEIGHT</Text>
-                            <Text>used to calculate shipping rates at checkout and label and prices during fulfillment</Text>
+                       {  productType == "regular"&&<View style={context.darkMode ? styles.weightContainerDark :  styles.weightContainer}>
+                            <Text style={context.darkMode ? styles.titreStyleDark : styles.titreStyle}>WEIGHT</Text>
+                            <Text  style={context.darkMode ? {color:"white"}:{color:"black"}}>used to calculate shipping rates at checkout and label and prices during fulfillment</Text>
                             <View style={styles.inputWeightContainer}>
-                                <Text>Weight</Text>
+                                <Text  style={context.darkMode ? {color:"white"}:{color:"black"}}>Weight</Text>
                                 <View style={styles.weightInputsContainer}>
                                     <TextInput
                                         style={styles.inputWeight}
@@ -882,21 +925,52 @@ const handleCategory =(itemValue)=>{
                                             selectedValue={weightUnit}
                                             onValueChange={(itemValue, itemIndex) => setWeightUnit(itemValue)}
                                             mode="dropdown"
+                                            style={context.darkMode ? {backgroundColor:"black"}:{backgroundColor:"white"}}
+
                                         >
-                                            <Picker.Item label="g" value="g" />
-                                            <Picker.Item label="kg" value="kg" />
+                                            <Picker.Item  color={context.darkMode?"white":"black"} label="g" value="g" />
+                                            <Picker.Item color={context.darkMode?"white":"black"} label="kg" value="kg" />
                                         </Picker>
                                     </View>
                                 </View>
-                                {!formState.inputValidities.weight && weightTouched && <Text style={styles.errorMessage}>Please enter a weight !</Text>}
+                            </View>
+                        </View>}
+
+
+
+                     {  productType == "regular"&& <View style={styles.titleContainer}>
+                            <Text style={ context.darkMode ? styles.titreStyleDark : styles.titreStyle}>Stock</Text>
+                            <View style={styles.titleInputContainer}>
+                                <TextInput
+                                    style={ context.darkMode ? styles.inputTitleDark: styles.inputTitle}
+                                    placeholder="your stock"
+                                    placeholderTextColor={Colors.placeholder}
+                                    value={formState.inputValues.stock}
+                                    onChangeText={textChangeHandler.bind(this, 'title')}
+                                    onBlur={lostFocusHandler.bind(this, 'title')}
+                                />
+                            </View>
+                        </View>}
+                        {productType == "regular"&&
+                        <View style={styles.titleContainer}>
+                            <Text style={context.darkMode ? styles.titreStyleDark : styles.titreStyle}>Dimension</Text>
+                            <View style={styles.titleInputContainer}>
+                                <TextInput
+                                    style={ context.darkMode ? styles.inputTitleDark: styles.inputTitle}
+                                    placeholder="example : 35*54"
+                                    placeholderTextColor={Colors.placeholder}
+                                    value={dimension}
+                                    onChangeText={(text)=>{setDimension(text)}}
+                                />
                             </View>
                         </View>
-                        <View style={styles.variantsContainer}>
+}
+                       <View style={context.darkMode ? styles.variantsContainerDark : styles.variantsContainer}>
                             <View style={styles.variantsTitleContainer}>
-                                <Text style={styles.titreStyle}>Variants</Text>
+                                <Text style={context.darkMode ? styles.titreStyleDark : styles.titreStyle}>Variants</Text>
                             </View >
 
-                            <View style={styles.listVariantsContainer}>
+                            <View style={context.darkMode ?  styles.listVariantsContainerDark :styles.listVariantsContainer}>
                                 {
                                     productType == "regular" ? variantsInputs.map((variant) => renderListVariantsItem(variant))
                                         : foodVariants.map((variant) => renderListVariantsItem(variant))
@@ -1053,25 +1127,25 @@ const handleCategory =(itemValue)=>{
 
 
 
-                            {productType == "regular" && <View style={styles.addOtherOptionContainer}>
+                            {productType == "regular" && <View style={context.darkMode ? styles.addOtherOptionContainerDark :  styles.addOtherOptionContainer}>
                                 <TouchableOpacity onPress={() => {
                                     setModalVariantsVisible(true);
                                 }}>
-                                    <View style={styles.touchableContainer}>
+                                    <View style={context.darkMode ?  styles.touchableContainerDark :  styles.touchableContainer}>
                                         <View style={styles.imageAddOtherOptionContainer}>
                                             <Image
                                                 style={styles.imageAddOtherOption}
                                                 source={require('../../assets/images/add.png')}
                                             />
                                         </View>
-                                        <View style={styles.textAddOtherOptionContainer}>
+                                        <View style={context.darkMode ? styles.textAddOtherOptionContainerDark : styles.textAddOtherOptionContainer}>
                                             <Text style={styles.addOtherOptionTextStyle}>Add Other Option</Text>
                                         </View>
                                     </View>
                                 </TouchableOpacity>
                             </View>
                             }
-                            {variantsTouched && variantsInputs.length === 0 && <Text style={styles.errorMessage}>Please select a variant</Text>}
+                            {variantsTouched &&  ((productType=="regular"&&variantsInputs.length === 0)||(productType=="food"&&foodVariants.length==0))  && <Text style={styles.errorMessage}>Please select a variant</Text>}
                             <View
                                 style={{
                                     borderBottomColor: '#d8d8d8',
@@ -1085,17 +1159,17 @@ const handleCategory =(itemValue)=>{
 
                             {allSousVariantsCombinaisons.length !== 0 ? (<View style={styles.options}>
                                 <View style={styles.textOptionContainer}>
-                                    <Text style={{ fontSize: 16, fontWeight: 'bold' }}>Options</Text>
+                                    <Text style={{ fontFamily:'Poppins',fontSize: 16, fontWeight: 'bold' }}>Options</Text>
                                 </View>
                                 <View style={styles.tableTitlesContainer}>
                                     <View style={styles.variantsTitleTextContainer}>
-                                        <Text style={{ fontSize: 16 }}>Variants</Text>
+                                        <Text style={{ fontFamily:'Poppins',fontSize: 16 }}>Variants</Text>
                                     </View>
                                     <View style={styles.priceTitleTextContainer}>
-                                        <Text style={{ fontSize: 16 }}>Price</Text>
+                                        <Text style={{ fontFamily:'Poppins',fontSize: 16 }}>Price</Text>
                                     </View>
                                     <View style={styles.stockTitleTextContainer} >
-                                        <Text style={{ fontSize: 16 }}>Stock</Text>
+                                        <Text style={{ fontFamily:'Poppins',fontSize: 16 }}>Stock</Text>
                                     </View>
                                 </View>
                                 <View style={styles.listOptionsContainer}>
@@ -1115,7 +1189,7 @@ const handleCategory =(itemValue)=>{
                         <MyButton
                             style={{ ...styles.buttonSubmitStyle, backgroundColor: Colors.primary }}
                             onPress={submitHandler}
-                        //disabled={!formState.formIsValid || selectedImages.length===0 || variantsInputs.length===0}
+                        disabled={!formState.formIsValid || selectedImages.length===0 || variantsInputs.length===0}
                         >publish</MyButton>
 
                     </ScrollView>
@@ -1148,8 +1222,10 @@ const styles = StyleSheet.create({
         justifyContent: "center"
     },
     leftArrow: {
-        width: 30,
-        height: 30
+        width: Dimensions.get("screen").height * 0.04,
+        height: Dimensions.get("screen").height * 0.04
+        ,marginLeft:10
+
     },
 
     titleContainerMenu: {
@@ -1161,7 +1237,8 @@ const styles = StyleSheet.create({
     },
     TitleMenu: {
         fontWeight: "700",
-        fontSize: 28
+        fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.07,
+
     },
     searchContainer: {
         width: "10%",
@@ -1173,7 +1250,7 @@ const styles = StyleSheet.create({
 
     TitleDark: {
         fontWeight: "700",
-        fontSize: 28,
+        fontFamily:'Poppins',fontSize: 28,
         color: "white"
 
     },
@@ -1181,6 +1258,15 @@ const styles = StyleSheet.create({
     mainContainer: {
         flex: 1,
         backgroundColor: Colors.background,
+        //backgroundColor:'red',
+        marginTop: Dimensions.get('window').height * 0.04, //30
+        padding: Dimensions.get('window').height * 0.012 //10
+        //alignItems: 'center',  //crossAxisAlign
+        //justifyContent: 'center' //mainAxisAlign
+    },
+    mainContainerDark: {
+        flex: 1,
+        backgroundColor: "black",
         //backgroundColor:'red',
         marginTop: Dimensions.get('window').height * 0.04, //30
         padding: Dimensions.get('window').height * 0.012 //10
@@ -1204,11 +1290,29 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         paddingHorizontal: 8
     },
-    titreStyle: {
-        fontSize: 18,
-        fontWeight: 'bold'
-    },
+    inputTitleDark:{
 
+        flexDirection: 'row',
+        flex: 1,
+        height: Dimensions.get('window').height * 0.065,//60
+        backgroundColor: 'black',
+        borderColor: Colors.placeholder,
+        borderWidth: 1,
+        borderRadius: 10,
+        paddingHorizontal: 8
+    },
+    
+    titreStyle: {
+        fontFamily:'Poppins',fontSize: 18,
+        fontWeight: 'bold',
+        color:"black"
+    },
+    titreStyleDark:{
+        fontFamily:'Poppins',fontSize: 18,
+        fontWeight: 'bold',
+        color:"white"
+    }
+,
     descriptionContainer: {
         //backgroundColor:'green',
         flex: 1,
@@ -1226,9 +1330,22 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         paddingHorizontal: 8,
     },
+    inputDescriptionDark: {
+        flex: 1,
+        height: Dimensions.get('window').height * 0.103,//80
+        backgroundColor: 'black',
+        borderColor: Colors.placeholder,
+        borderWidth: 1,
+        borderRadius: 10,
+        paddingHorizontal: 8,
+    }
+    ,
 
     genderContainer: {
         //backgroundColor:'#fa382a'
+    },
+    genderContainerDark:{
+        backgroundColor:"black"
     },
     CategoryContainer: {
         //backgroundColor:'#fa382a'
@@ -1244,6 +1361,12 @@ const styles = StyleSheet.create({
         //height: 220,
         marginVertical: 5
     },
+    imagesContainerDark:{
+        backgroundColor: 'black',
+        //backgroundColor:'#fa382a',
+        //height: 220,
+        marginVertical: 5
+    },
     imagesInputContainer: {
         //backgroundColor:'purple',
         flex: 1,
@@ -1251,6 +1374,15 @@ const styles = StyleSheet.create({
         margin: 10,
         flexDirection: 'row-reverse',
         alignItems: 'flex-end'
+    },
+    imagesInputContainerDark: {
+        //backgroundColor:'purple',
+        flex: 1,
+        height: Dimensions.get('window').height * 0.2283,//177
+        margin: 10,
+        flexDirection: 'row-reverse',
+        alignItems: 'flex-end',
+        backgroundColor:"black"
     },
 
     buttonAddContainer: {
@@ -1263,6 +1395,19 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         borderColor: 'white',
+        borderWidth: 5,
+        elevation: 10
+    },
+    buttonAddContainerDark:{
+        backgroundColor: 'black',
+        height: '89%',
+        width: '22%',
+        marginBottom: Dimensions.get('window').height * 0.01, //8
+        marginLeft: 2,
+        borderRadius: 13,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderColor: 'black',
         borderWidth: 5,
         elevation: 10
     },
@@ -1286,6 +1431,13 @@ const styles = StyleSheet.create({
 
     pricingContainer: {
         backgroundColor: 'white',
+        //backgroundColor:'yellow',
+        //flex:2,
+        marginVertical: 3,
+        paddingHorizontal: 3
+    },
+    priceContainerDark:{
+        backgroundColor: 'black',
         //backgroundColor:'yellow',
         //flex:2,
         marginVertical: 3,
@@ -1322,6 +1474,12 @@ const styles = StyleSheet.create({
 
     weightContainer: {
         backgroundColor: 'white',
+        flex: 1.5,
+        marginTop: 3,
+        paddingHorizontal: 3
+    },
+    weightContainerDark : {
+        backgroundColor: 'black',
         flex: 1.5,
         marginTop: 3,
         paddingHorizontal: 3
@@ -1365,6 +1523,15 @@ const styles = StyleSheet.create({
         marginBottom: 10,
         paddingHorizontal: 3
     },
+    variantsContainerDark:{
+        backgroundColor: 'black',
+        //backgroundColor:'brown',
+        flex: 6,
+        //height: 220,
+        marginTop: 8,
+        marginBottom: 10,
+        paddingHorizontal: 3
+    },
     variantsTitleContainer: {
         //backgroundColor:'green',
         flex: 1,
@@ -1374,8 +1541,19 @@ const styles = StyleSheet.create({
         //backgroundColor:'yellow',
         flex: 1
     },
+    listVariantsContainerDark:{
+        flex: 1,
+        backgroundColor:"black"
+
+    },
     addOtherOptionContainer: {
         //backgroundColor:'purple',
+        flexDirection: 'row',
+        justifyContent: 'center',
+        flex: 1
+    },
+    addOtherOptionContainerDark:{
+        backgroundColor:'black',
         flexDirection: 'row',
         justifyContent: 'center',
         flex: 1
@@ -1385,6 +1563,13 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'center'
     },
+    touchableContainerDark:{
+                //backgroundColor:'red',
+                flexDirection: 'row',
+                justifyContent: 'center',
+                backgroundColor:"black"
+        
+    },
     imageAddOtherOptionContainer: {
         //backgroundColor:'green',
     },
@@ -1393,13 +1578,19 @@ const styles = StyleSheet.create({
         marginHorizontal: Dimensions.get('window').width * 0.025, //10
         justifyContent: 'center'
     },
+    textAddOtherOptionContainerDark:{
+        marginHorizontal: Dimensions.get('window').width * 0.025, //10
+        justifyContent: 'center',
+        backgroundColor:"black"
+
+    },
     imageAddOtherOption: {
         //backgroundColor:'orange',
         height: Dimensions.get('window').height * 0.07,//45
         width: Dimensions.get('window').width * 0.125//45
     },
     addOtherOptionTextStyle: {
-        fontSize: 19,
+        fontFamily:'Poppins',fontSize: 19,
         color: '#0862ef'
     },
 
@@ -1501,7 +1692,7 @@ const styles = StyleSheet.create({
     errorMessage: {
         color: 'red',
         fontWeight: "bold",
-        fontSize: 13
+        fontFamily:'Poppins',fontSize: 13
     }
 
 });

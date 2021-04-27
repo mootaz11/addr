@@ -87,7 +87,7 @@ export default function Products(props){
            </View>
            :
            <View style={{height:"90%",width:"100%",justifyContent:"center",alignItems:"center",flexDirection:"column"}}>
-               <Text style={context.darkMode ? {fontSize:16,color:"white"}:{fontSize:16,color:"black"}}>no products in stock</Text>
+               <Text style={context.darkMode ? {fontFamily:'Poppins',fontSize:16,color:"white"}:{fontFamily:'Poppins',fontSize:16,color:"black"}}>no products in stock</Text>
            </View>
            }
         </View>
@@ -97,19 +97,19 @@ export default function Products(props){
 
 const styles = StyleSheet.create({
     productTitle:{
-        fontSize: 16,
+        fontFamily:'Poppins',fontSize: 16,
         color: "black",
         fontWeight: "400",
     },
 
     productTitleDark:{
-        fontSize: 16,
+        fontFamily:'Poppins',fontSize: 16,
         color: "white",
         fontWeight: "400",
 
     },
     price: {
-        fontSize: 14,
+        fontFamily:'Poppins',fontSize: 14,
         color: "grey",
         fontWeight: "100",
     },
@@ -164,12 +164,12 @@ titleContainer:{
 },
 Title:{
     fontWeight:"700",
-    fontSize:28,
+    fontFamily:'Poppins',fontSize:28,
     color:"black",
 },
 TitleDark:{
     fontWeight:"700",
-    fontSize:28,
+    fontFamily:'Poppins',fontSize:28,
     color:"white"
 
 },
@@ -225,7 +225,7 @@ productinfo:{
 
 },
 partnerName:{
-    fontSize:18,
+    fontFamily:'Poppins',fontSize:18,
     color:"black",
     fontWeight:"500"
 }

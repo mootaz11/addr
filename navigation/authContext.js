@@ -10,6 +10,7 @@ export default React.createContext({
     deliveryData:null,
     locationState:false,
     loggedIn:false,
-    bag:[]
-
+    bag:0,
+    total:0,
+    notifications:[],
 }) 

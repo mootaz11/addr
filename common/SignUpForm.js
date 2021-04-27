@@ -128,14 +128,26 @@ const SignUpForm = (props) => {
 
     const signupHandler = () => {
         if (!formState.formIsValid) {
-            Alert.alert('Wrong input!', 'Please check the errors in the form.', [{ text: 'Okay' }]);
+            Alert.alert('Wrong or empty input !', 'Please check the errors in the form.', [{ text: 'Okay' }]);
             return;
         }
         Keyboard.dismiss();
         signup({ ...formState.inputValues,location: { longitude: location ? location.longitude : null, latitude: location ? location.latitude : null }, locationState: location ? true : false }).then(
-             message => {
-                 Alert.alert('', "you have successfully signed up", [{ text: "OK" }],{cancelable:false})
-            }).catch(err => { alert("error during signup")});
+             res => {
+                    Alert.alert('', "you have successfully signed up", [{ text: "OK" }],{cancelable:false})
+                 
+             
+                 
+            }).catch(err => { 
+                if(err.message.includes("409")){
+                    Alert.alert('', "emails or username exists", [{ text: "OK" }],{cancelable:false})
+                }
+                else {
+                    Alert.alert('', "server error", [{ text: "OK" }],{cancelable:false})
+
+                }
+
+            });
     };
     
     return (

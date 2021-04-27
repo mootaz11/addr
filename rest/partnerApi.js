@@ -1,3 +1,4 @@
+import { TapGestureHandler } from "react-native-gesture-handler";
 import axios from "../rest/customAxios";
 
 export const getPartner =(partnerId)=>{
@@ -76,6 +77,22 @@ export const getPartnerWithProducts = (partnerId)=> {
     })
 }
 
+
+export const getAllPartners = (page,limit,service)=>{
+    return new Promise ((resolve,reject)=>{
+        axios.get(`/partner/`,{
+            params: {page: page,limit:limit,service:service}
+        }).then(res=>{
+            if(res.status==200){
+                resolve(res.data.partners)
+            }
+            else {
+                resolve(res.data.message);
+            }
+        }).catch(err=>{reject(err)})
+    })
+}
+
 export const deleteManager = (partnerId,user)=>{
     return new Promise((resolve,reject)=>{
         axios.patch(`/partner/manager/${partnerId}`,{user}).then(res=>{
@@ -86,6 +103,7 @@ export const deleteManager = (partnerId,user)=>{
         })
     })
 }
+
 export const  addPartnerLocalisation =(partnerId,localisation)=>{
 
     return new Promise((resolve,reject)=>{

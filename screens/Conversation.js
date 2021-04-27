@@ -6,6 +6,7 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import QRCode from 'react-native-qrcode-svg';
 import AuthContext from '../navigation/AuthContext';
 import { LogBox } from 'react-native';
+import { Dimensions } from 'react-native';
 LogBox.ignoreLogs(['Warning: ...']); // Ignore log notification by message
 LogBox.ignoreAllLogs();//Ignore all log notifications
 
@@ -77,16 +78,28 @@ export default function Conversation(props) {
 
     const sendMessage = () => {
         if (messages.length == 0)
-        {
-            (" no messages ")
-            const data = {
-                partner:conversation.partner?conversation.partner._id:null,
-                users: conversation.users,
-                title: conversation.title,
-                image: conversation.image,
-                type: conversation.type,
-                content: message,
+        {   let data= {};
+            if(conversation.type=='group'){
+                data = {
+                    partner:conversation.partner._id,
+                    users: conversation.users,
+                    title: conversation.title,
+                    image: conversation.image,
+                    type: conversation.type,
+                    content: message,
+                }
+                console.log("ok");
+            }    
+            else {
+                data = {
+                    users: conversation.users,
+                    title: conversation.title,
+                    image: conversation.image,
+                    type: conversation.type,
+                    content: message,
+                }
             }
+            
             context.startNewConversation(data).then(conversation => {
                 setConversationId(conversation._id)
                 context.handleConversation(conversation);
@@ -112,16 +125,17 @@ export default function Conversation(props) {
     return (
         <View style={context.darkMode ?styles.containerDark : styles.container}>
             <View style={styles.menu}>
-                <FontAwesome color={"white"} style={{ padding: 0, fontSize: 30 }} name="arrow-left" onPress={goBack} />
+                <FontAwesome color={"white"} style={{ padding: 0, fontFamily:'Poppins',fontSize: 30 }} name="arrow-left" onPress={goBack} />
                 <Image style={styles.friendImage} source={
                        props.route.params.conversation.type=="personal"?
                        props.route.params.conversation.users[props.route.params.conversation.users.findIndex(u=>{return u._id != context.user._id})].photo 
                        ? 
                        
                        {uri:props.route.params.conversation.users[props.route.params.conversation.users.findIndex(u=>{return u._id != context.user._id})].photo} :
-                       require("../assets/user_image.png")
+                       props.route.params.conversation.image ? {uri:props.route.params.conversation.image}:require("../assets/user_image.png")
+
                        :
-                       context.partner ? 
+                       context.partner&&context.partner._id==props.route.params.conversation.partner? 
 
                        props.route.params.conversation.users.findIndex(u=> {
                            return context.partner.managers.findIndex(manager=>{return u._id ==manager.user})==-1 
@@ -147,16 +161,22 @@ export default function Conversation(props) {
                             props.route.params.conversation.other :props.route.params.conversation.users.filter(user => user._id != context.user._id)[0].firstName + " " + props.route.params.conversation.users.filter(user => user._id != context.user._id)[0].lastName 
                             : 
 
-                            context.partner ?
-                            props.route.params.conversation.users.findIndex(u => { return context.partner.managers.findIndex(manager => { return u._id === manager.user }) == -1 && context.partner.deliverers.findIndex(deliverer => { return u._id === deliverer }) == -1 && context.partner.owner !== u._id }) >= 0 ?
-                            props.route.params.conversation.users[ props.route.params.conversation.users.findIndex(u => { return context.partner.managers.findIndex(manager => { return u._id === manager.user }) == -1 && context.partner.deliverers.findIndex(deliverer => { return u._id === deliverer }) == -1 && context.partner.owner !== u._id })].firstName
+                         context.partner&& context.partner._id==props.route.params.conversation.partner&&context.partner.managers&& props.route.params.conversation.users.findIndex(u => { return context.partner.managers.findIndex(manager => { return u._id === manager.user }) == -1 && context.partner.deliverers.findIndex(deliverer => { return u._id === deliverer }) == -1 && context.partner.owner !== u._id }) >= 0 ? 
+                          props.route.params.conversation.users[ props.route.params.conversation.users.findIndex(u => { return context.partner.managers.findIndex(manager => { return u._id === manager.user }) == -1 && context.partner.deliverers.findIndex(deliverer => { return u._id === deliverer }) == -1 && context.partner.owner !== u._id })].firstName
                                 + " " +  props.route.params.conversation.users[ props.route.params.conversation.users.findIndex(u => { return context.partner.managers.findIndex(manager => { return u._id === manager.user }) == -1 && context.partner.deliverers.findIndex(deliverer => { return u._id === deliverer }) == -1 && context.partner.owner !== u._id })].lastName
-                                :  props.route.params.conversation.title :  props.route.params.conversation.title}</Text>
+                                :  props.route.params.conversation.title }</Text>
+            
             </View>
+
+
+
+
+
             <ScrollView  ref={scrollViewRef}
                 onContentSizeChange={() => scrollViewRef.current.scrollToEnd({ animated: true })}
                 style={context.darkMode ?styles.ConversationBodyDark : styles.ConversationBody}
             >
+                     
                 {
                     messages ?
                         messages.length > 0 ?
@@ -167,16 +187,9 @@ export default function Conversation(props) {
                                             <Image style={styles.userImage} source={context.user.photo ? { uri: context.user.photo } : require('../assets/user_image.png')} />
                                             <View style={context.darkMode ?styles.messageSentDark : styles.messageSent}>
                                                 <Text style={context.darkMode ?styles.textMessageDark : styles.textMessage}>{message.content}</Text>
-                                                {message.content.includes("mon code est   :") ?
-                                                    (<QRCode
-                                                        value={message.content.substr(16)}
-                                                    />)
-                                                    : null
-                                                }
+                                               
                                             </View>
                                             <Text style={styles.userTime}>{message.date.split('T')[1].split(':')[0] + ":" + message.date.split('T')[1].split(':')[1]}</Text>
-                                          
-                
                                         </View>
                                         ) :
                                         (
@@ -184,12 +197,7 @@ export default function Conversation(props) {
                                                 <Text style={styles.FriendTime}>{message.date.split('T')[1].split(':')[0] + ":" + message.date.split('T')[1].split(':')[1]}</Text>
                                                 <View style={context.darkMode ?styles.FriendmessageSentDark : styles.FriendmessageSent}>
                                                     <Text style={context.darkMode ?styles.textMessageDark : styles.textMessage}>{message.content}</Text>
-                                                    {message.content.includes("mon code est   :") ?
-                                                        (<QRCode
-                                                            value={message.content.substr(16)}
-                                                        />)
-                                                        : null
-                                                    }
+                                                 
 
                                                 </View>
                                                 <Image style={styles.FriendImage} source={conversation.users[conversation.users.findIndex(user=>{return user._id==message.sender._id})].photo?{uri:conversation.users[conversation.users.findIndex(user=>{return user._id==message.sender._id})].photo}:require('../assets/user_image.png')}/>
@@ -220,20 +228,27 @@ export default function Conversation(props) {
                         onChangeText={(text) => { setMessage(text); }}
 
                     />
-                    {message.length > 0 &&
-                        <TouchableOpacity style={styles.sendMessageTouchable} onPress={sendMessage}>
-                            <View style={context.darkMode ?styles.sendMessageButtonContainerDark : styles.sendMessageButtonContainer}>
-                                <Image style={styles.sendIcon} source={require("../assets/sendMessage.png")} />
-                            </View>
-                        </TouchableOpacity>
-                    }
+                 
                 </View>
+               
+               
                 <View style={context.darkMode ?styles.sentCodeContainerDark : styles.sentCodeContainer}>
-                    <TouchableOpacity onPress={sendQrCode} style={{ width: "80%", height: "100%", }}>
+                   
+
+                    {
+                        message.length>0 ? 
+                        <TouchableOpacity onPress={sendMessage} style={{ width: "100%", height: "100%", }}>
                         <View style={context.darkMode ?styles.monCodecontainerDark : styles.monCodecontainer}>
-                            <Text style={styles.moncode}>MON CODE</Text>
+                            <Image style={{width:"60%",height:"60%",resizeMode:"contain"}} source={require("../assets/logo_message.png")}/>
                         </View>
-                    </TouchableOpacity>
+                    </TouchableOpacity>:
+                     <TouchableOpacity onPress={sendQrCode} style={{ width: "100%", height: "100%", }}>
+                     <View style={context.darkMode ?styles.monCodecontainerDark : styles.monCodecontainer}>
+                         <Image style={{width:"70%",height:"70%",resizeMode:"contain"}} source={require("../assets/images/logoBlue.png")}/>
+                     </View>
+                 </TouchableOpacity>
+
+                    }
                 </View>
             </View>
         
@@ -245,8 +260,8 @@ const styles = StyleSheet.create({
     sentCodeContainer:
     {
         backgroundColor: "white"
-        , width: "30%", 
-        height: 40,
+        , width: "25%", 
+        height: Dimensions.get("screen").height*0.07,
         flexDirection: "column",
         justifyContent: "center",
         alignItems: "center"
@@ -254,22 +269,20 @@ const styles = StyleSheet.create({
     sentCodeContainerDark:
     {
         backgroundColor: "#292929"
-        , width: "30%", height: 40,
+        , width: Dimensions.get("screen").width*0.25,         
+        height: Dimensions.get("screen").height*0.07,
         flexDirection: "column",
         justifyContent: "center",
         alignItems: "center"
     },
     monCodecontainer: {
-        backgroundColor: "#2474F1",
         width: "100%",
         height: "100%",
-        borderRadius: 25,
         flexDirection: "column",
         justifyContent: "center",
         alignItems: "center"
     },
     monCodecontainerDark: {
-        backgroundColor: "#242424",
         width: "100%",
         height: "100%",
         borderRadius: 25,
@@ -283,7 +296,7 @@ const styles = StyleSheet.create({
     {
         color: "white",
         alignSelf: "stretch",
-        fontSize: 12,
+        fontFamily:'Poppins',fontSize: 12,
         fontWeight: "bold",
         textAlign: "center"
     },
@@ -300,7 +313,7 @@ const styles = StyleSheet.create({
     menu: {
 
         position: "absolute",
-        marginTop: Platform.OS == 'ios' ? 30 : 20,
+        marginTop: Platform.OS == 'ios' ? 30 : 50,
         flexDirection: "row",
         alignSelf: "flex-start",
         alignContent: "space-between",
@@ -318,7 +331,7 @@ const styles = StyleSheet.create({
 
     },
     Title: {
-        fontSize: 20,
+        fontFamily:'Poppins',fontSize: 20,
         fontWeight: "600",
         color: "white"
     },
@@ -346,7 +359,7 @@ const styles = StyleSheet.create({
     },
     sendMessageContainer: {
         width: "100%",
-        height: "13%",
+        height: Dimensions.get("screen").height*0.13,
         position: "absolute",
         top: "89%",
         elevation: 10,
@@ -358,8 +371,8 @@ const styles = StyleSheet.create({
     },
     sendMessageContainerDark: {
         width: "100%",
-        height: "13%",
-        position: "absolute",
+        height: Dimensions.get("screen").height*0.13,
+                position: "absolute",
         top: "89%",
         elevation: 10,
         flexDirection: "row",
@@ -371,10 +384,10 @@ const styles = StyleSheet.create({
 
 
     messageBodyContainer: {
-        width: "64%",
-        height: 40,
+        width: "75%",
+        height: Dimensions.get("screen").height*0.07,
         borderRadius: 25,
-        margin: "2%",
+        margin: Dimensions.get("screen").width*0.02,
         backgroundColor: "#e6e6e6",
         flexDirection: "row",
         alignItems: "center",
@@ -382,23 +395,24 @@ const styles = StyleSheet.create({
         alignContent: "center"
     },
     messageBodyContainerDark: {
-        width: "64%",
-        height: 40,
+        width: "75%",
+        height: Dimensions.get("screen").height*0.07,
         borderRadius: 25,
-        margin: "2%",
+        margin: Dimensions.get("screen").width*0.02,
         backgroundColor: "#292929",
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "flex-start",
-        alignContent: "center"
+        alignContent: "center",
+
     },
     message: {
-        width: "80%",
-        height:40,
+        width: "100%",
+        height:Dimensions.get("screen").height*0.07,
         margin: 5,
         borderColor: "#e6e6e6",
         color: "#e6e6e6",
-        fontSize: 12,
+        fontFamily:'Poppins',fontSize: 12,
         borderTopStartRadius: 25,
         borderBottomStartRadius: 25,
         borderBottomEndRadius: 25,
@@ -406,12 +420,12 @@ const styles = StyleSheet.create({
 
     },
     messageDark: {
-        width: "80%",
-        height: 40,
+        width: "100%",
+        height:Dimensions.get("screen").height*0.07,
         margin: 5,
         borderColor: "#303030",
         color: "#303030",
-        fontSize: 12,
+        fontFamily:'Poppins',fontSize: 12,
         borderTopStartRadius: 25,
         borderBottomStartRadius: 25,
         borderBottomEndRadius: 25,
@@ -434,7 +448,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#2474F1",
         justifyContent: "center",
         alignItems: "center",
-        margin: "1%"
+        margin: Dimensions.get("screen").width*0.02
     },
     sendMessageButtonContainerDark: {
         width: 25,
@@ -443,7 +457,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#303030",
         justifyContent: "center",
         alignItems: "center",
-        margin: "1%"
+        margin: Dimensions.get("screen").width*0.02
     },
     sendIcon: {
         width: "60%",
@@ -451,7 +465,6 @@ const styles = StyleSheet.create({
         resizeMode: "contain"
     },
     FriendmessageSentContainer: {
-        width: "90%",
         flexDirection: "row",
         alignItems: "flex-start",
         margin: 8,
@@ -464,7 +477,6 @@ const styles = StyleSheet.create({
     },
 
     messageSentContainer: {
-        width: "90%",
         flexDirection: "row",
         alignItems: "flex-start",
         margin: 8,
@@ -474,7 +486,7 @@ const styles = StyleSheet.create({
 
     },
     FriendmessageSent: {
-        width: "70%",
+        
         flexDirection: "row",
         backgroundColor: '#E6E6E6',
         alignItems: "flex-start",
@@ -499,7 +511,7 @@ const styles = StyleSheet.create({
     },
     messageSent:
     {
-        width: "70%",
+        
         flexDirection: "row",
         backgroundColor: '#CFE0FC',
         alignItems: "flex-start",
@@ -512,7 +524,6 @@ const styles = StyleSheet.create({
     },
     messageSentDark:
     {
-        width: "70%",
         flexDirection: "row",
         backgroundColor: '#2474F1',
         alignItems: "flex-start",
@@ -526,13 +537,13 @@ const styles = StyleSheet.create({
 
     textMessage: {
         color: 'black',
-        fontSize: 12,
+        fontFamily:'Poppins',fontSize: 12,
         margin: 5,
     }
     ,
     textMessageDark: {
         color: 'white',
-        fontSize: 12,
+        fontFamily:'Poppins',fontSize: 12,
         margin: 5,
     },
     userImageContainer:
@@ -572,8 +583,8 @@ const styles = StyleSheet.create({
         alignSelf: 'flex-end',
         position: "absolute",
         left: "9%",
-        bottom: "1%",
-        fontSize: 12,
+        top:"90%",
+        fontFamily:'Poppins',fontSize: Dimensions.get("screen").width*0.025,
         color: "grey"
 
     },
@@ -581,8 +592,8 @@ const styles = StyleSheet.create({
         alignSelf: 'flex-end',
         position: "absolute",
         left: "72%",
-        bottom: 0,
-        fontSize: 12,
+        top:"90%",
+        fontFamily:'Poppins',fontSize: Dimensions.get("screen").width*0.025,
         color: "grey"
 
     }

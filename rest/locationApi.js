@@ -10,6 +10,18 @@ export const addLocation =(location)=>{
 }
 
 
+export const getUserLocation=(code)=>{
+    return new Promise((resolve,reject)=>{
+        axios.get(`/location/${code}`).then(res=>{
+            if(res.status==200){
+                resolve(res.data.location);
+            }
+        }).catch(err=>{reject(err)})
+    })
+}
+
+
+
 export const getLocation = ()=>{
     return new Promise ((resolve ,reject)=>{
         axios.get(`/location/`).then(res=>{

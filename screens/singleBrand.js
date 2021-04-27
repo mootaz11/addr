@@ -94,14 +94,12 @@ export default function SingleBrand(props) {
 
 
     return (
+
         <View style={!context.darkMode ?styles.container : styles.containerDark}>
-            <SafeAreaView>
             <View style={styles.headerImageContainer}>
 
                 <Image style={styles.headerImage} blurRadius={0.5}  source={partner && partner.services.isFood?partner.backgroundImage ?{uri:partner.backgroundImage}: require("../assets/fast_food.jpg"):partner &&partner.backgroundImage ?{uri:partner.backgroundImage}: require("../assets/shop.jpg")} />
                 <View style={styles.titleContainer}>
-                    <Text numberOfLines={2} style={styles.title}>{partner && partner.description ? partner.description :"Make Yourself Comfortable"}</Text>
-
                 </View>
                 <Text style={styles.description}>The customer has always driven the business model</Text>
                 <TouchableOpacity style={styles.leftArrow} onPress={goBack}>
@@ -109,8 +107,8 @@ export default function SingleBrand(props) {
 
                 </TouchableOpacity>
 
-                <TouchableOpacity onPress={checkBasket}  style={{ position: "absolute",width:30,height:30 ,top: "8%", right: "2%" ,elevation:10,zIndex:50}}>
-                <FontAwesome color={"white"} style={{ padding: 0, fontSize: 24, position: "absolute", top: "8%", right: "2%" }} name="shopping-bag" />
+                <TouchableOpacity onPress={checkBasket}  style={{ position: "absolute",width: Dimensions.get("screen").height * 0.03, height: Dimensions.get("screen").height * 0.03,top: "10%", right: "4%" ,elevation:10,zIndex:50}}>
+                <FontAwesome color={"white"} style={{ padding: 0, fontFamily:'Poppins',fontSize: Dimensions.get("screen").height * 0.03,}} name="shopping-bag" />
 
 
                 </TouchableOpacity>
@@ -142,13 +140,13 @@ export default function SingleBrand(props) {
             <View style={styles.newArrivals}>
                 <View style={styles.newArrivalsHeader}>
                     <View style={{ marginLeft: 5 }}>
-                        <Text style={context.darkMode ?{ fontSize: 24, color: "white", fontWeight: "500" } : { fontSize: 24, color: "black", fontWeight: "500" }}>New Arrivals</Text>
+                        <Text style={context.darkMode ?{ fontFamily:'PoppinsBold',fontSize: Dimensions.get("screen").width*0.05, color: "white", fontWeight: "500" } : { fontFamily:'PoppinsBold',fontSize: Dimensions.get("screen").width*0.05, color: "black", fontWeight: "500" }}>New Arrivals</Text>
                     </View>
                    
                    { newArrivals&&<TouchableOpacity  onPress={()=>{showallNewArrivals()}} >
                         <View style={{ flexDirection: "row", alignItems: "center", alignContent: "center", justifyContent: "space-between", marginRight: 5 }}>
-                            <Text style={context.darkMode ?{ fontSize: 15, color: "white" } : { fontSize: 15, color: "black" }}>show all</Text>
-                            <FontAwesome color={context.darkMode ?"white" : "black"} style={{ marginHorizontal: 3, fontSize: 15 }} name="caret-right" />
+                            <Text style={context.darkMode ?{ fontFamily:'Poppins',fontSize: Dimensions.get("screen").width*0.035, color: "white" } : { fontFamily:'Poppins',fontSize: Dimensions.get("screen").width*0.035, color: "black" }}>show all</Text>
+                            <FontAwesome color={context.darkMode ?"white" : "black"}  style={{marginHorizontal: 3, fontFamily:'Poppins',fontSize: Dimensions.get("screen").width*0.035 }} name="caret-right" />
 
 
                         </View>
@@ -176,7 +174,7 @@ export default function SingleBrand(props) {
                     </FlatList>
                         :
                         <View style={{ justifyContent: "center", flex: 1 }}>
-                            <Text style={context.darkMode  ? { textAlign: "center", color: "white", fontSize: 16 }: { textAlign: "center", color: "black", fontSize: 16 }}>no new Arrivals yet</Text>
+                            <Text style={context.darkMode  ? { textAlign: "center", color: "white", fontFamily:'Poppins',fontSize: 16 }: { textAlign: "center", color: "black", fontFamily:'Poppins',fontSize: 16 }}>no new Arrivals yet</Text>
 
                         </View>}
                 </View>
@@ -184,12 +182,12 @@ export default function SingleBrand(props) {
             <View style={styles.newArrivals}>
                 <View style={styles.newArrivalsHeader}>
                     <View style={{ marginLeft: 5 }}>
-                        <Text style={context.darkMode ?{ fontSize: 24, color: "white", fontWeight: "500" } : { fontSize: 24, color: "black", fontWeight: "500" }}>Top Trends</Text>
+                        <Text style={context.darkMode ?{ fontFamily:'PoppinsBold',fontSize: Dimensions.get("screen").width*0.05, color: "white", fontWeight: "500" } : { fontFamily:'PoppinsBold',fontSize: Dimensions.get("screen").width*0.05, color: "black", fontWeight: "500" }}>Top Trends</Text>
                     </View>
                {   topTrends&&  <TouchableOpacity onPress={()=>{showallTopTrends()}}>
                         <View style={{ flexDirection: "row", alignItems: "center", alignContent: "center", justifyContent: "space-between", marginRight: 5 }}>
-                            <Text style={context.darkMode ?{ fontSize: 15, color: "white" } : { fontSize: 15, color: "black" }}>show all</Text>
-                            <FontAwesome color={context.darkMode ?"white" : "black"} style={{ marginHorizontal: 3, fontSize: 15 }} name="caret-right"  />
+                            <Text style={context.darkMode ?{ fontFamily:'Poppins', fontSize: Dimensions.get("screen").width*0.035, color: "white" } : { fontFamily:'Poppins',fontSize: Dimensions.get("screen").width*0.035, color: "black" }}>show all</Text>
+                            <FontAwesome color={context.darkMode ?"white" : "black"} style={{ marginHorizontal: 3, fontFamily:'Poppins',fontSize: 15 }} name="caret-right"  />
 
 
                         </View>
@@ -215,16 +213,16 @@ export default function SingleBrand(props) {
                         </FlatList>
                         :
                         <View style={{ justifyContent: "center", flex: 1 }}>
-                            <Text style={context.darkMode  ? { textAlign: "center", color: "white", fontSize: 16 }: { textAlign: "center", color: "black", fontSize: 16 }}>no Trends yet</Text>
+                            <Text style={context.darkMode  ? { textAlign: "center", color: "white", fontFamily:'Poppins',fontSize: 16 }: { textAlign: "center", color: "black", fontFamily:'Poppins',fontSize: 16 }}>no Trends yet</Text>
 
                         </View>
                     }
                 </View>
             </View>
 
-            </SafeAreaView>
 
         </View>
+
     );
                 }
 
@@ -247,10 +245,10 @@ const styles = StyleSheet.create({
 
 
     leftArrow: {
-        width: 30,
-        height: 30,
+        width: Dimensions.get("screen").height * 0.03,
+        height: Dimensions.get("screen").height * 0.03,
         position: "absolute",
-        top: "8%",
+        top: "10%",
         left: "2%",
         zIndex: 50,
         elevation: 10,
@@ -273,7 +271,7 @@ const styles = StyleSheet.create({
     },
     title: {
         color: "white",
-        fontSize: Dimensions.get("window").width*0.09,
+        fontFamily:'Poppins',fontSize: Dimensions.get("window").width*0.09,
         fontWeight: "600",
         textShadowColor:"black",
         textShadowOffset:{width:1,height:1},
@@ -283,7 +281,7 @@ const styles = StyleSheet.create({
     },
     description: {
         color: "white",
-        fontSize: Dimensions.get("window").width*0.05,
+        fontFamily:'Poppins',fontSize: Dimensions.get("window").width*0.04,
         fontWeight: "300",
         position: "absolute",
         top: "80%",
@@ -300,18 +298,19 @@ const styles = StyleSheet.create({
     },
     category: {
         height: "70%",
-        width: 100,
+        width: Dimensions.get("screen").width*0.2,
         backgroundColor: "#2474F1",
         borderRadius: 24,
-        margin: 10,
+        margin: 4,
         flexDirection: "column",
         justifyContent: "center",
         alignItems: "center"
 
     },
     categoryTitle: {
-        fontSize: 18,
-        fontWeight: "500",
+        fontFamily:'Poppins'
+        ,fontSize: Dimensions.get("screen").width*0.03,
+        textAlign:"center",
         color: "white"
     }
     ,
@@ -330,7 +329,7 @@ const styles = StyleSheet.create({
 
     newArrivalsBody: {
         width: "100%",
-        height: "78%",
+        height: "79%",
 
 
     },
@@ -359,19 +358,19 @@ const styles = StyleSheet.create({
         resizeMode: "cover"
     },
     productTitle: {
-        fontSize: 16,
+        fontFamily:'Poppins',fontFamily:'PoppinsBold',fontSize: Dimensions.get("screen").width*0.035,
         color: "black",
         fontWeight: "400",
 
     },
     productTitleDark: {
-        fontSize: 16,
+        fontFamily:'Poppins',fontFamily:'PoppinsBold',fontSize: Dimensions.get("screen").width*0.035,
         color: "white",
         fontWeight: "400",
-
+        
     },
     price: {
-        fontSize: 14,
+        fontFamily:'Poppins',fontFamily:'PoppinsBold',fontSize: Dimensions.get("screen").width*0.035,
         color: "grey",
         fontWeight: "100",
     }

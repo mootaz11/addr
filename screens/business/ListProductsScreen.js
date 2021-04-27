@@ -27,15 +27,13 @@ const ListProductsScreen = (props) => {
 
 
     useEffect(() => {
-        if(context.partner._id){
+        if(context.partner&&context.partner._id){
         getPartnerProducts(context.partner._id).then(data => {
-            console.log(data)
-            console.log(data.products);
             setProducts(data.products)
             setSearchResult(data.products)
 
         })}
-    }, [])
+    }, [context.partner])
     const addProductHandle =()=>{
         props.navigation.navigate("addProduct")
     }
@@ -62,7 +60,7 @@ const ListProductsScreen = (props) => {
         <View style={context.darkMode ? styles.mainContainerDark: styles.mainContainer}>
             <View style={context.darkMode ? styles.menuDark : styles.menu}>
             <View style={styles.leftArrowContainer} >
-                     <TouchableOpacity onPress={openDrawer} style={{height:30,width:30}}>
+                     <TouchableOpacity onPress={openDrawer} style={{height:Dimensions.get("screen").width*0.04,width:Dimensions.get("screen").width*0.04}}>
                         <Image source={context.darkMode ?  require("../../assets/menu_dark.png"):require("../../assets/menu.png")} style={{height:"100%",width:"100%",resizeMode:"cover"}}/>
                         </TouchableOpacity>
                      </View>
@@ -94,11 +92,21 @@ const ListProductsScreen = (props) => {
                     keyExtractor={item=>item._id}
                 />
             </View>
-            <View style={styles.partThree}>
+            {
+                 (context.partner
+                    && (context.partner.owner == context.user._id || 
+                        (context.partner.managers.length>0&&context.partner.managers.findIndex(manager => { return manager.user == context.user._id }) >= 0&& (context.partner.delivery.regions.length == 0 && context.partner.delivery.cities.length == 0 )&&context.partner.managers.length>0
+                            && context.partner.managers[context.partner.managers.findIndex(manager => { return manager.user == context.user._id })].access.businessAccess.addProduct == true
+                        )
+                    ))
+                &&
+                <View style={styles.partThree}>
                 <MyButton onPress={addProductHandle} style={styles.buttonStyle}>
                     Add product
                 </MyButton>
             </View>
+            }
+         
         </View>
         </SafeAreaView>
     );
@@ -139,7 +147,7 @@ const styles = StyleSheet.create({
     },
     Title: {
         fontWeight: "700",
-        fontSize: Dimensions.get("window").width * 0.07,
+        fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.07,
         color:"black"
     },
     searchContainer: {
@@ -152,7 +160,7 @@ const styles = StyleSheet.create({
 
     TitleDark: {
         fontWeight: "700",
-        fontSize: Dimensions.get("window").width * 0.07,
+        fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.07,
         color: "white"
 
     },

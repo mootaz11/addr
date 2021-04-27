@@ -38,6 +38,8 @@ export default function Settings({ navigation }) {
 
     useEffect(() => {
         setProfile(context.user);
+      context.setPartner(null);
+
     }, [context.user])
 
     const toggleSwitch = () => {
@@ -298,9 +300,8 @@ export default function Settings({ navigation }) {
             textStyle: {
                 marginHorizontal: 100,
                 textAlign: "center",
-                alignItems: 'center',
                 color: '#2474F1',
-                fontSize: 16,
+                fontFamily:'Poppins',fontSize: 16,
                 fontWeight: 'bold',
                 fontStyle: 'italic'
             },
@@ -325,8 +326,9 @@ export default function Settings({ navigation }) {
         <SafeAreaView style={{ flex: 1, marginTop: 35 }}>
             <View style={context.darkMode ? styles.containerdark : styles.Container}>
                 <View style={styles.menuContainer}>
-                    <TouchableOpacity onPress={() => { openDrawer() }} style={{ height: 30, width: 30, marginLeft: 2 }}>
-                        <Image source={context.darkMode ? require("../assets/menu_dark.png") : require("../assets/menu.png")} style={{ height: "100%", width: "100%", resizeMode: "cover", marginHorizontal: 4 }} />
+                 
+                    <TouchableOpacity onPress={() => { openDrawer() }} style={{ height: Dimensions.get("screen").height * 0.03, width: Dimensions.get("screen").height * 0.03, marginLeft: 2 }}>
+                        <Image source={context.darkMode ? require("../assets/menu_dark.png") : require("../assets/menu.png")} style={{ height: "80%", width: "80%", resizeMode: "cover", marginHorizontal: 4 }} />
                     </TouchableOpacity>
 
                     <Text style={context.darkMode ? styles.TitleDark : styles.Title}>My Account</Text>
@@ -336,18 +338,18 @@ export default function Settings({ navigation }) {
                         <TouchableOpacity disabled={context.user.photo} onPress={changePicture}>
                             <Image style={context.user.photo ? styles.addImage : {}} source={context.user.photo ? { uri: context.user.photo } : require("../assets/add-image.png")} />
                         </TouchableOpacity>
-                        <TouchableOpacity style={{ position: 'absolute', bottom: "0%", right: "0%", }} onPress={changePicture}>
+                        <TouchableOpacity style={{ position: 'absolute', bottom: "0%", left: "22%", }} onPress={changePicture}>
                             {context.user.photo && <Image style={styles.editImage} source={require("../assets/pencil.png")} />}
                         </TouchableOpacity>
                     </View>
                     <View style={{ marginTop: 5 }}>
-                        <Text style={{ fontSize: Dimensions.get("window").width * 0.09, color: "#828282", textAlign: "center" }}>{context.user.lastName && context.user.firstName ? context.user.lastName[0].toUpperCase() + context.user.lastName.slice(1) + " " + context.user.firstName : ""}</Text>
+                        <Text style={{ fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.09, color: "#828282", textAlign: "center" }}>{context.user.lastName && context.user.firstName ? context.user.lastName[0].toUpperCase() + context.user.lastName.slice(1) + " " + context.user.firstName : ""}</Text>
                         <Text style={{ textAlign: "center", color: "#828282" }}>joined: {new Date(context.user.joined).toLocaleString().split(':')[0] + ":" + new Date(context.user.joined).toLocaleString().split(':')[1]}</Text>
                     </View>
                 </View>
 
                 <ScrollView style={styles.infosContainer}>
-                    <Text style={context.darkMode ? { fontSize: Dimensions.get("window").width * 0.06, marginLeft: 10, color: "white" } : { fontSize: Dimensions.get("window").width * 0.06, marginLeft: 10, color: "#828282" }}>Username :</Text>
+                    <Text style={context.darkMode ? { fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.06, marginLeft: 10, color: "white" } : { fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.06, marginLeft: 10, color: "#828282" }}>Username :</Text>
 
                     <View style={context.darkMode ? styles.infoDark : styles.info}>
                         <Image style={styles.infoImage} source={require("../assets/loginProfile.png")} />
@@ -360,7 +362,7 @@ export default function Settings({ navigation }) {
                     </View>
 
 
-                    <Text style={context.darkMode ? { fontSize: Dimensions.get("window").width * 0.06, marginLeft: 10, color: "white" } : { fontSize: Dimensions.get("window").width * 0.06, marginLeft: 10, color: "#828282" }}>First Name :</Text>
+                    <Text style={context.darkMode ? { fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.06, marginLeft: 10, color: "white" } : { fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.06, marginLeft: 10, color: "#828282" }}>First Name :</Text>
 
 
                     <View style={context.darkMode ? styles.infoDark : styles.info}>
@@ -376,7 +378,7 @@ export default function Settings({ navigation }) {
 
 
 
-                    <Text style={context.darkMode ? { fontSize: Dimensions.get("window").width * 0.06, marginLeft: 10, color: "white" } : { fontSize: Dimensions.get("window").width * 0.06, marginLeft: 10, color: "#828282" }}>Last Name :</Text>
+                    <Text style={context.darkMode ? { fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.06, marginLeft: 10, color: "white" } : { fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.06, marginLeft: 10, color: "#828282" }}>Last Name :</Text>
 
                     <View style={context.darkMode ? styles.infoDark : styles.info}>
                         <Image style={styles.infoImage} source={require("../assets/loginProfile.png")} />
@@ -390,7 +392,7 @@ export default function Settings({ navigation }) {
 
 
 
-                    <Text style={context.darkMode ? { fontSize: Dimensions.get("window").width * 0.06, marginLeft: 10, color: "white" } : { fontSize: Dimensions.get("window").width * 0.06, marginLeft: 10, color: "#828282" }}>Phone Number :</Text>
+                    <Text style={context.darkMode ? { fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.06, marginLeft: 10, color: "white" } : { fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.06, marginLeft: 10, color: "#828282" }}>Phone Number :</Text>
 
                     <View style={context.darkMode ? styles.infoDark : styles.info}>
                         <Image style={styles.infoImage} source={require("../assets/phone_profile.png")} />
@@ -403,14 +405,14 @@ export default function Settings({ navigation }) {
                     </View>
 
 
-                    <Text style={context.darkMode ? { fontSize: Dimensions.get("window").width * 0.06, marginLeft: 10, color: "white" } : { fontSize: Dimensions.get("window").width * 0.06, marginLeft: 10, color: "#828282" }}>E-mail :</Text>
+                    <Text style={context.darkMode ? { fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.06, marginLeft: 10, color: "white" } : { fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.06, marginLeft: 10, color: "#828282" }}>E-mail :</Text>
 
                     <View style={context.darkMode ? styles.infoDark : styles.info}>
                         <Image style={styles.infoImage} source={require("../assets/mail_profile.png")} />
                         <Text style={context.darkMode ? styles.userInfoDark : styles.userInfo}>{context.user.email}</Text>
                         <View style={styles.buttonEdit}></View>
                     </View>
-                    <Text style={context.darkMode ? { fontSize: Dimensions.get("window").width * 0.06, marginLeft: 10, color: "white" } : { fontSize: Dimensions.get("window").width * 0.06, marginLeft: 10, color: "#828282" }}>Password :</Text>
+                    <Text style={context.darkMode ? { fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.06, marginLeft: 10, color: "white" } : { fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.06, marginLeft: 10, color: "#828282" }}>Password :</Text>
 
 
                     <View style={context.darkMode ? styles.infoDark : styles.info}>
@@ -426,7 +428,7 @@ export default function Settings({ navigation }) {
 
                         context.user && context.user.building && context.user.building.floor.length > 0 &&
                         <View>
-                            <Text style={context.darkMode ? { fontSize: Dimensions.get("window").width * 0.06, marginLeft: 10, color: "white" } : { fontSize: Dimensions.get("window").width * 0.06, marginLeft: 10, color: "#828282" }}>Floor :</Text>
+                            <Text style={context.darkMode ? { fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.06, marginLeft: 10, color: "white" } : { fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.06, marginLeft: 10, color: "#828282" }}>Floor :</Text>
                             <View style={context.darkMode ? styles.infoDark : styles.info}>
                                 <Image style={styles.infoImage} source={require("../assets/floor.png")} />
                                 {!editFloor && <Text style={context.darkMode ? styles.userInfoDark : styles.userInfo}>{profile ? profile.building.floor : ""}</Text>}
@@ -441,7 +443,7 @@ export default function Settings({ navigation }) {
                     {
                         context.user && context.user.building && context.user.building.door.length > 0 &&
                         <View>
-                            <Text style={context.darkMode ? { fontSize: Dimensions.get("window").width * 0.06, marginLeft: 10, color: "white" } : { fontSize: Dimensions.get("window").width * 0.06, marginLeft: 10, color: "#828282" }}>Door :</Text>
+                            <Text style={context.darkMode ? { fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.06, marginLeft: 10, color: "white" } : { fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.06, marginLeft: 10, color: "#828282" }}>Door :</Text>
 
                             <View style={context.darkMode ? styles.infoDark : styles.info}>
                                 <Image style={styles.infoImage} source={require("../assets/door.png")} />
@@ -457,7 +459,7 @@ export default function Settings({ navigation }) {
 
                     <TouchableOpacity style={{ width: "60%", height: 50,flexDirection: "column", justifyContent: "center", alignSelf:"center",marginVertical:15 }} onPress={() => {setOpenModal(!openModal)}}>
                         <View style={{ width: "100%", height: 50, backgroundColor: "#2474F1", borderRadius: 24 ,flexDirection: "column", justifyContent: "center", alignItems:"center" }}>
-                            <Text style={{ color: "white", fontSize: Dimensions.get("window").width * 0.05 }}>Change Location</Text>
+                            <Text style={{ color: "white", fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.05 }}>Change Location</Text>
                         </View>
                     </TouchableOpacity>
 
@@ -515,7 +517,7 @@ export default function Settings({ navigation }) {
                                     <TouchableOpacity style={{ width: "50%", height: 50, }} onPress={() => { saveAdress() }}>
 
                                         <View style={{ width: "100%", height: 50, backgroundColor: "#2474F1", borderRadius: 24, flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
-                                            <Text style={{ color: "white", fontSize: Dimensions.get("window").width * 0.05 }}>save Address</Text>
+                                            <Text style={{ color: "white", fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.05 }}>save Address</Text>
                                         </View>
                                     </TouchableOpacity>
 
@@ -563,7 +565,7 @@ const styles = StyleSheet.create({
 
     },
     Title: {
-        fontSize: 22,
+        fontFamily:'Poppins',fontSize: Dimensions.get("screen").width*0.05,
 
         color: "black",
         fontWeight: "600",
@@ -572,7 +574,7 @@ const styles = StyleSheet.create({
         marginHorizontal: 8
     },
     TitleDark: {
-        fontSize: 22,
+        fontFamily:'Poppins',fontSize: Dimensions.get("screen").width*0.05,
         color: "white",
         fontWeight: "600",
         letterSpacing: 1,
@@ -619,7 +621,6 @@ const styles = StyleSheet.create({
         width: 30,
         height: 30,
         resizeMode: "contain",
-        color: "white"
     },
     infosContainer: {
         //backgroundColor:'yellow',
@@ -674,7 +675,7 @@ const styles = StyleSheet.create({
         width: "74%",
         height: "90%", //90%
         margin: "2%",
-        fontSize: 18,
+        fontFamily:'Poppins',fontSize: 18,
         textAlign: "center",
         paddingTop: 5,
         color: "white",
@@ -685,7 +686,7 @@ const styles = StyleSheet.create({
         width: "88%",
         height: "90%", //90%
         margin: "2%",
-        fontSize: 18,
+        fontFamily:'Poppins',fontSize: 18,
         textAlign: "center",
         paddingTop: 5,
         color: "grey",
@@ -696,7 +697,7 @@ const styles = StyleSheet.create({
         width: "88%",
         height: "90%", //90%
         margin: "2%",
-        fontSize: 18,
+        fontFamily:'Poppins',fontSize: 18,
         textAlign: "center",
         paddingTop: 5,
         color: "white",
@@ -706,7 +707,7 @@ const styles = StyleSheet.create({
         width: "74%",
         height: "90%", //90%
         margin: "2%",
-        fontSize: 18,
+        fontFamily:'Poppins',fontSize: 18,
         textAlign: "center",
         paddingTop: 5,
         color: "grey",

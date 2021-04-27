@@ -215,15 +215,15 @@ const Contact = (props) => {
 }}>
                     <Image
                     style={styles.icon} 
-                    source={require("../assets/images/youtube.png")} 
+                    source={context.darkMode ? require("../assets/images/youtube_dark.png"):require("../assets/images/youtube.png")} 
                     />
                   </TouchableOpacity>
-                  <TouchableOpacity onPress={openInstagram} style={{        height:Dimensions.get('window').height*0.06, //48
+                  <TouchableOpacity onPress={openInstagram} style={{height:Dimensions.get('window').height*0.06, //48
         width:'13%',
 }}>
                     <Image
                     style={styles.icon} 
-                    source={require("../assets/images/instagram.png")} 
+                    source={context.darkMode ?  require("../assets/images/instagram_dark.png") :require("../assets/images/instagram.png")} 
                     />
                     </TouchableOpacity>
                     <TouchableOpacity onPress={openFacebook} style={{        height:Dimensions.get('window').height*0.06, //48
@@ -231,7 +231,7 @@ const Contact = (props) => {
 }}>
                     <Image
                     style={styles.icon} 
-                    source={require("../assets/images/facebook.png")} 
+                    source={ context.darkMode ? require("../assets/images/facebook_dark.png") : require("../assets/images/facebook.png")} 
                     />
 </TouchableOpacity>
 
@@ -266,8 +266,8 @@ const styles = StyleSheet.create({
         justifyContent: "center"
     },
     leftArrow: {
-        width: 30,
-        height: 30
+        width: Dimensions.get("screen").height * 0.04,
+        height: Dimensions.get("screen").height * 0.04,
     },
 
     titleContainer: {
@@ -279,11 +279,11 @@ const styles = StyleSheet.create({
     },
     Title: {
         fontWeight: "700",
-        fontSize: 28
+        fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.07,
     },
     TitleDark:{
         fontWeight: "700",
-        fontSize: 28,
+        fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.07,
         color:"white"
 
     },
@@ -317,11 +317,11 @@ const styles = StyleSheet.create({
         padding:10
     },
     titre:{
-        fontSize:45,
+        fontFamily:'Poppins',fontSize:45,
         fontWeight: 'bold',
     },
     titreDark : {
-        fontSize:45,
+        fontFamily:'Poppins',fontSize:45,
         fontWeight:'bold',
         color:"white"
     },
@@ -329,10 +329,10 @@ const styles = StyleSheet.create({
         width:'75%'
     },
     questionStyle:{
-        fontSize:13
+        fontFamily:'Poppins',fontSize:13
     },
     questionStyleDark:{
-        fontSize:13,
+        fontFamily:'Poppins',fontSize:13,
         color:"white"
     },
     inputStyle:{
@@ -363,7 +363,7 @@ const styles = StyleSheet.create({
         elevation: 6
     },
     buttonText:{
-        fontSize: 16,
+        fontFamily:'Poppins',fontSize: 16,
         fontWeight: '700',
         color:'black'
     },
