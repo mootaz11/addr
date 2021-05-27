@@ -127,20 +127,23 @@ const SignUpForm = (props) => {
     }
 
     const signupHandler = () => {
+
         if (!formState.formIsValid) {
             Alert.alert('Wrong or empty input !', 'Please check the errors in the form.', [{ text: 'Okay' }]);
             return;
         }
         Keyboard.dismiss();
+        formState.inputValues.email=formState.inputValues.email.replace( /\s/g, '')
+        console.log( formState.inputValues.email)
         signup({ ...formState.inputValues,location: { longitude: location ? location.longitude : null, latitude: location ? location.latitude : null }, locationState: location ? true : false }).then(
              res => {
                     Alert.alert('', "you have successfully signed up", [{ text: "OK" }],{cancelable:false})
-                 
-             
+                    props.turntoSignIn(false);
+
                  
             }).catch(err => { 
                 if(err.message.includes("409")){
-                    Alert.alert('', "emails or username exists", [{ text: "OK" }],{cancelable:false})
+                    Alert.alert('', "emails or username exists", [{ text: "OK"}],{cancelable:false})
                 }
                 else {
                     Alert.alert('', "server error", [{ text: "OK" }],{cancelable:false})
@@ -199,7 +202,6 @@ const SignUpForm = (props) => {
                             autoCapitalize="none"
                             onInputChange={inputChangeHandler}
                             required
-                            email
                         />
                     </View>
                     <View style={styles.listItem}>
@@ -338,8 +340,8 @@ inBuilding&&
                                 initialRegion={{
                                     latitude: location ? Number(location.latitude) : 0,
                                     longitude: location ? Number(location.longitude) : 0
-                                    ,latitudeDelta: 0.5,
-                                    longitudeDelta: 0.5// * (Dimensions.get("window").width / Dimensions.get("window").height )
+                                    ,latitudeDelta: 0.05,
+                                    longitudeDelta: 0.05// * (Dimensions.get("window").width / Dimensions.get("window").height )
                           
 
                                 }}

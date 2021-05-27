@@ -38,8 +38,7 @@ export default function Settings({ navigation }) {
 
     useEffect(() => {
         setProfile(context.user);
-      context.setPartner(null);
-
+        
     }, [context.user])
 
     const toggleSwitch = () => {
@@ -298,7 +297,7 @@ export default function Settings({ navigation }) {
                 marginHorizontal: 100
             },
             textStyle: {
-                marginHorizontal: 100,
+                marginHorizontal: 10,
                 textAlign: "center",
                 color: '#2474F1',
                 fontFamily:'Poppins',fontSize: 16,

@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react'
-import { View, Text, StyleSheet, Dimensions, Image, TouchableOpacity, SafeAreaView, Modal, TextInput } from 'react-native'
+import { View, Text, StyleSheet, Dimensions, Image, TouchableOpacity, SafeAreaView, Modal, TextInput,TouchableWithoutFeedback } from 'react-native'
 import MapView, { Marker } from 'react-native-maps';
 import { Icon } from 'react-native-elements';
 import AuthContext from '../../navigation/AuthContext';

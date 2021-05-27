@@ -21,17 +21,14 @@ export default function Products(props){
             if(props.route.params.last_screen=="topTrends"){
                 setProducts(props.route.params.topTrends);
             }
-
-            
-            if(props.route.params.last_screen!="topTrends"&&props.route.params.last_screen!="newArrivals"){  
-                
+            if(props.route.params.last_screen=='food'){
                 setProducts(props.route.params.products)    
             }
-            
-            
+            if(props.route.params.last_screen!="topTrends"&&props.route.params.last_screen!="newArrivals"){     
+                setProducts(props.route.params.products)    
+            }
             return () =>{ isMounted=false;setProducts(null);}
             },[props.route.params])
-
 
     const goBack = ()=> {
         setProducts(null);
@@ -53,7 +50,7 @@ export default function Products(props){
                         <View style={context.darkMode ?  styles.menuDark  : styles.menu}>
                 <TouchableOpacity  style={styles.leftArrowContainer} onPress={goBack}>
                     <View>
-                    <Image style={styles.leftArrow} source={context.darkMode ? require("../assets/left-arrow-dark.png") : require("../assets/left-arrow.png")}/>
+                    <Image style={{height:Dimensions.get("screen").height * 0.03,width:Dimensions.get("screen").height * 0.03}}source={context.darkMode ? require("../assets/left-arrow-dark.png") : require("../assets/left-arrow.png")}/>
                     </View>
                     </TouchableOpacity>
                  <View style={styles.titleContainer}>
@@ -69,7 +66,7 @@ export default function Products(props){
                    data={products}
                    numColumns={2}
                    renderItem={({item})=>
-                   <TouchableOpacity style={{width:"45%",height:250,margin:8}} onPress={()=>{checkSingleProduct(item)}} onMagicTap={()=>{setmagicTap(magictap=>!magictap)}}>
+                   <TouchableOpacity style={{width:"45%",height:250,margin:4}} onPress={()=>{checkSingleProduct(item)}} onMagicTap={()=>{setmagicTap(magictap=>!magictap)}}>
                    <View style={ magictap ? styles.partnerContainerTapped :(context.darkMode ?  styles.partnerContainerDark :  styles.partnerContainer)} >
                        <Image style={styles.partnerImage} source={{uri:item.mainImage}}/>    
                        <View style={styles.productinfo}>
@@ -97,13 +94,13 @@ export default function Products(props){
 
 const styles = StyleSheet.create({
     productTitle:{
-        fontFamily:'Poppins',fontSize: 16,
+        fontFamily:'PoppinsBold',fontSize: Dimensions.get("screen").width*0.03,
         color: "black",
         fontWeight: "400",
     },
 
     productTitleDark:{
-        fontFamily:'Poppins',fontSize: 16,
+        fontFamily:'PoppinsBold',fontSize: Dimensions.get("screen").width*0.03,
         color: "white",
         fontWeight: "400",
 
@@ -118,7 +115,7 @@ container : {
     flexDirection:"column",
     height:Dimensions.get("window").height,
     width:Dimensions.get("window").width,
-    backgroundColor:"#F2F6FF",
+    backgroundColor:"white",
 },       
 
 containerDark : {
@@ -129,31 +126,37 @@ containerDark : {
     backgroundColor: "#121212",
 
 },
-menuDark:{
-    width:"100%",
-    height:"10%",
-    flexDirection:"row",
+menu: {
+    width: "100%",
+    height: "8%",
+    backgroundColor: "white",
+    flexDirection: "row",
+    marginBottom: 8,
+    marginTop:10
+},
+menuDark: {
+    width: "100%",
+    height: "8%",
     backgroundColor: "#121212",
+    flexDirection: "row",
+    marginBottom: 8,
+    marginTop:10
 
 
 },
-menu:{
-    width:"100%",
-    height:"10%",
-    backgroundColor:"white",
-    flexDirection:"row",
+leftArrowContainer: {
+    width: "10%",
+    height: "100%",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop:5
 },
-leftArrowContainer:{
-    width:"10%",
-    height:"100%",
-    flexDirection:"column",
-    alignItems:"center",
-    justifyContent:"center"
+leftArrow: {
+    width: 30,
+    height: 30
 },
-leftArrow:{
-    width:30,
-    height:30
-},
+
 
 titleContainer:{
     width:"80%",
@@ -162,15 +165,14 @@ titleContainer:{
     alignItems:"center",
     justifyContent:"center"
 },
-Title:{
-    fontWeight:"700",
-    fontFamily:'Poppins',fontSize:28,
-    color:"black",
+Title: {
+    fontWeight: "700",
+    fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.05,
 },
-TitleDark:{
-    fontWeight:"700",
-    fontFamily:'Poppins',fontSize:28,
-    color:"white"
+TitleDark: {
+    fontWeight: "700",
+    fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.05,
+    color: "white"
 
 },
 searchContainer:{
@@ -187,7 +189,6 @@ partners:{
 partnerContainer:{
     width:"100%",
     height:"100%",
-    backgroundColor:"white",
     borderRadius:8,
     flexDirection:"column",
     alignItems:"center",
@@ -217,6 +218,9 @@ partnerImage:{
     height:"80%",
     borderTopLeftRadius:8,
     borderTopRightRadius:8,
+    borderBottomLeftRadius:8,
+    borderBottomRightRadius:8,
+    
     resizeMode:"cover"
 },
 productinfo:{

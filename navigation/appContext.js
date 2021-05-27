@@ -3,13 +3,17 @@ import AuthContext from './AuthContext';
 import io from 'socket.io-client';
 import AsyncStorageService from '../rest/AsyncStorageService'
 import { createConversation, getUserConversations, sendMessage, markAsreadConversationApi } from '../rest/conversationApi';
-import { getLocation, updateLocation, addTemporarlyLocation } from '../rest/locationApi';
+import {updateLocation, addTemporarlyLocation } from '../rest/locationApi';
 import { getConnectedUser, updateLocationState, setNotifToken, userLogout } from '../rest/userApi';
+import * as Location from 'expo-location';
+
 import Loading from '../screens/Loading';
 import {useFonts}  from "expo-font";
 import * as Permissions from 'expo-permissions';
 import { Notifications } from 'expo';
 import Constants from 'expo-constants';
+import { Alert } from 'react-native';
+import {getduringClientDeliveryorders } from '../rest/ordersApi'
 
 
 const customFonts = {
@@ -19,6 +23,7 @@ const customFonts = {
  
   
 export default function AppContext(props) {
+
     const [socket, setSocket] = useState(io('https://addresti-backend.herokuapp.com'));    
     const [location, setLocation] = useState(null);
     const [user, setUser] = useState(null)
@@ -32,8 +37,50 @@ export default function AppContext(props) {
     const [notifications,setNotifications]=useState(null);
     const [total,setTotal]=useState(0);
     const [isLoaded,setIsLoaded] = useFonts(customFonts);
-    
+    const [notread,setNotRead]=useState(0);    
+    const [homeLocation,setHomeLocation]=useState(null);
+    const [profile,setProfile]=useState(null);
 
+
+    
+  useEffect(()=>{
+
+    const interval = setInterval(()=>{
+
+      getLocation();
+
+
+    },5000)
+    return () => clearInterval(interval); 
+
+  },[])
+
+ 
+
+  const getLocation = () => {
+    if (user && partner) {
+      if (partner.delivery.cities.length > 0 || partner.delivery.regions.length > 0 || partner.delivery.localRegions.length > 0) {
+        if(partner.deliverers.length>0 &&  partner.deliverers[partner.deliverers.findIndex(d => { return d.user == user._id })]){
+          getduringClientDeliveryorders(user._id,partner._id).then(_orders=>{
+            if(_orders.length>0){
+              _orders.map(async _order=>{
+                let gpsServiceStatus = await Location.hasServicesEnabledAsync();
+                if (gpsServiceStatus) {
+                  let location = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
+                  sendLocalisation(_order.client._id, partner, _order, location);
+                }
+                else {
+                  alert("Enable Location service");
+                }
+              })
+
+            }
+          })
+
+        }        
+      }
+    }
+  }
 
     const registerForPushNotificationsAsync = async () => {
         if (Constants.isDevice) {
@@ -72,13 +119,16 @@ export default function AppContext(props) {
             if (token) {
                 getConnectedUser().then(res => {
                     getLocation().then(async location => {
-                        
                         setBag(res.data.orders.length);
                         setLocation(location);
-                        setDarkMode(false);
-                        setUser(res.data.connectedUser);
-                        setTotal(res.data.notificationsLength);
 
+                        AsyncStorageService.getDarkMode(darkmode => { 
+                            setDarkMode(darkmode)
+                        })
+
+                        setUser(res.data.connectedUser);
+                        setProfile(res.data.connectedUser)
+                        setTotal(res.data.notificationsLength);
                         async function fetchData() {
                             await registerForPushNotificationsAsync();
                           }
@@ -99,6 +149,15 @@ export default function AppContext(props) {
         })
     }, [loggedIn])
 
+
+       
+
+
+
+
+
+
+
     useEffect(() => {
         if (user) {
             getUserConversations().then(_conversations => {
@@ -113,10 +172,18 @@ export default function AppContext(props) {
                     conv.notSeen = notSeenSum;
                     conv.last = conv.messages[conv.messages.length - 1].date;
                 })
-                
+
                 let _convs = [..._conversations];
                 const _convSorted = _convs.sort((a, b) => a.last - b.last);
                 setConversations(_convSorted);
+                let _notread=0
+              let  _notifs=[...user.notifications]
+                _notifs.map(notif=>{
+                    if(notif.read==false){
+                        _notread+=1
+                    }    
+                })
+                setNotRead(_notread);
                 setNotifications(user.notifications)
                 setIsloading(false);
                 setLoggedIn(true);
@@ -142,10 +209,13 @@ export default function AppContext(props) {
         if(notifications){
             socket.off('send-notification')
             socket.on('send-notification',(notification)=>{
+
                 let _notifications = [...notifications];
                 const _notif_index = _notifications.findIndex(notif => { return notif._id == notification._id });
                 if(_notif_index==-1){
-                    _notifications = [notification,..._notifications]
+                    Alert.alert('', 'New Notification!', [{ text: 'Okay' }]);
+                    setNotRead(notread=>notread+1);
+                    _notifications.unshift(notification)
                     setNotifications(_notifications);
                 }
             })     
@@ -179,7 +249,7 @@ export default function AppContext(props) {
                     _conversations.splice(conv_index, 1);
                     _convReal.notSeen = notSeenSum;
 
-                    _conversations.push(_convReal);
+                    _conversations.unshift(_convReal);
                     setConversations(_conversations)
                 }
             })
@@ -314,7 +384,7 @@ export default function AppContext(props) {
 
                 _conv.users.map(_user=>{
                     if(_user._id!=user._id&&_user.NotificationToken!=""){
-                       let response = fetch('https://exp.host/--/api/v2/push/send', {
+                        let response = fetch('https://exp.host/--/api/v2/push/send', {
                             method: 'POST',
                             headers: {
                               Accept: 'application/json',
@@ -339,9 +409,9 @@ export default function AppContext(props) {
 
 
 
-    const modifyDarkModeHandler = () => {
+    const modifyDarkModeHandler =  async   () => {
+       // await AsyncStorageService.setDarkMode(!darkMode);        
         setDarkMode(darkMode => !darkMode);
-
     }
 
     const LoginHandler = async ({ user, token }) => {
@@ -355,7 +425,6 @@ export default function AppContext(props) {
         AsyncStorageService.getAccessToken().then(t=>{
             userLogout({ token: t }).then( async (res) => {
                 if (res) {
-                    
                          await  AsyncStorageService.clearToken();
                             setConversations(null);
                             setLoggedIn(false);   
@@ -375,7 +444,7 @@ export default function AppContext(props) {
     const _createOrder = (body) =>{
     }
 
-
+   
 
 
     const updateUserLocation = (_location, isHome) => {
@@ -412,9 +481,16 @@ export default function AppContext(props) {
             isloading: isloading,
             isLoaded:isLoaded,
             total:total,
+            notread:notread,
+            homeLocation:homeLocation,
+            profile:profile,
+
+            setProfile:setProfile,
             setUser: setUser,
             setBag:setBag,
+            setNotRead:setNotRead,
             setLocation: setLocation,
+            setHomeLocation:setHomeLocation,
             setNotifications:setNotifications,
             setPartner: setPartner,
             LoginHandler: LoginHandler,

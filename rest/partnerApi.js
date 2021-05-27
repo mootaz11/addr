@@ -95,7 +95,7 @@ export const getAllPartners = (page,limit,service)=>{
 
 export const deleteManager = (partnerId,user)=>{
     return new Promise((resolve,reject)=>{
-        axios.patch(`/partner/manager/${partnerId}`,{user}).then(res=>{
+        axios.patch(`/partner/${partnerId}/manager/delete`,{user:user}).then(res=>{
             resolve(res.data.message);
         })
         .catch(err=>{
@@ -142,7 +142,7 @@ export const addView =(partnerId)=>{
 }
 export const deleteDeliverer = (partnerId,deliverer)=>{
     return new Promise((resolve,reject)=>{
-        axios.patch(`/partner/deliverer/${partnerId}`,{deliverer}).then(res=>{
+        axios.patch(`/partner/${partnerId}/deliverer/delete`,{user:deliverer}).then(res=>{
             resolve(res.data.message);
         })
         .catch(err=>{
@@ -178,3 +178,13 @@ export const getPartnersByServiceName = (serviceName)=>{
 
 
 
+
+export const getDeliverers =(partnerId)=>{
+    return new Promise((resolve,reject)=>{
+        axios.get(`/partner/active-deliverers/${partnerId}`).then(res=>{
+            resolve(res.data.deliverers);
+        }).catch(err=>{
+            reject(err);
+        })
+    })
+}

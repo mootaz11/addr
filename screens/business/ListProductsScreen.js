@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { View, StyleSheet, Image, TextInput, FlatList,Dimensions,TouchableOpacity,Text } from 'react-native';
+import { View, StyleSheet, Image, TextInput, FlatList,Dimensions,TouchableOpacity,Animated,Text } from 'react-native';
 import ProductListItem from '../../common/ProductListItem';
 import MyButton from '../../common/MyButton';
 import Colors from '../../constants/Colors';
@@ -14,6 +14,7 @@ const ListProductsScreen = (props) => {
     const context = useContext(AuthContext)
     const [search, setSearch] = useState("");
     const [searchResult, setSearchResult] = useState([]);
+    const [positionModal,setPositionModal]=useState(new Animated.ValueXY({x:0,y:0}))
 
     const filtreList = (text) => {
         setSearch(text)
@@ -33,7 +34,7 @@ const ListProductsScreen = (props) => {
             setSearchResult(data.products)
 
         })}
-    }, [context.partner])
+    }, [context.partner,props.route.params])
     const addProductHandle =()=>{
         props.navigation.navigate("addProduct")
     }

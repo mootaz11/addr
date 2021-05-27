@@ -2,11 +2,10 @@ import axios from 'axios'
 import AsyncStorageService from '../rest/AsyncStorageService'
 const production = true;
 
-const host = production ? 'https://addresti-backend.herokuapp.com':'http://192.168.1.11:5000'
+const host = production ? 'https://addresti-backend.herokuapp.com':'http://192.168.1.4:5000'
 const custom_axios = axios.create({
     baseURL: host,
 })
-
 
 
 custom_axios.interceptors.request.use(
@@ -20,6 +19,8 @@ custom_axios.interceptors.request.use(
     error => {
         Promise.reject(error)
     });
+
+
 
     custom_axios.interceptors.response.use((response) => {
         return response
@@ -37,17 +38,15 @@ custom_axios.interceptors.request.use(
                     if (res.status === 200) {
                         // 1) put token to LocalStorage
                         await AsyncStorageService.setAccessToken(res.data.accessToken);
-
                         // 2) Change Authorization header
                         axios.defaults.headers.common['Authorization'] = 'Bearer ' + await AsyncStorageService.getAccessToken();
                         originalRequest.headers['Authorization'] = 'Bearer ' + await AsyncStorageService.getAccessToken();
-                        
                         // 3) return originalRequest object with Axios.
                         return axios(originalRequest);
                     }
                 })
         } else return Promise.reject(error)
+    
     });
-
 
 export default custom_axios;

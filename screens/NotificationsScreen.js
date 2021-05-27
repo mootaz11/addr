@@ -4,16 +4,20 @@ import { Platform } from 'react-native';
 import { Dimensions, StyleSheet, View, TouchableOpacity, Image, Text } from 'react-native'
 import { FlatList } from 'react-native-gesture-handler';
 import AuthContext from '../navigation/AuthContext';
-import {getUserNotifications} from '../rest/userApi';
+import {getUserNotifications,readNotifications} from '../rest/userApi';
 
 
 export default function Notifications(props){
     const context = useContext(AuthContext);
     const [limite,setLimite]=useState(20);
 
-        console.log(context.notifications[0])
     const goBack = () => {props.navigation.goBack()}
+useEffect(()=>{
+readNotifications().then(message=>{
+    context.setNotRead(0);
+}).catch (err=>{console.log(err)});
 
+},[])
 
 const handleloadMore =()=>{
     setLimite(limite=>limite+10);
@@ -22,8 +26,6 @@ const handleloadMore =()=>{
             context.setNotifications(new_notif);
         });
 }
-
-
 
 
     return (
@@ -87,8 +89,8 @@ const handleloadMore =()=>{
                     
                     onEndReachedThreshold={100}
 
-                    keyExtractor={item => item._id}
-                >
+                    keyExtractor={(item, index) => (index + item._id).toString()}
+                    >
 
                 </FlatList>
             </View>
@@ -163,7 +165,7 @@ const styles = StyleSheet.create({
         borderWidth:3,
         shadowOffset: { width: 1, height: 2},
         borderColor:"white",
-        elevation:Platform.OS=='android'?1:0,
+        elevation:Platform.OS=='android'?3:0,
         shadowRadius:2,
         
     },

@@ -11,11 +11,25 @@ import partner from '../common/Partner';
 
 
 
+import { 
+     markOrderAsDuringClientDelivery,
+    getTobepickedUpOrders
+   } 
+   from '../rest/ordersApi'
+
+
+
+
 export default function CustomDrawer(props) {
     const [isEnabled, setIsEnabled] = useState(false);
     const context = React.useContext(AuthContext);
 
 
+
+
+    if(context.partner){
+        console.log(context.partner.delivery)
+    }
 
     const toggleSwitch = () => {
 
@@ -30,20 +44,20 @@ export default function CustomDrawer(props) {
                     <View style={styles.drawerContent}>
                         <TouchableOpacity onPress={() => {
                             if (context.partner) {
-                                if(context.partner.delivery.cities.length==0&&context.partner.delivery.regions.length==0){
+                                if(context.partner.delivery.cities.length==0&&context.partner.delivery.regions.length==0&&context.partner.delivery.localRegions.length==0){
                                     if(context.partner.owner==context.user._id){
                                         props.navigation.navigate("businessDash");
                                     }
                                     if(context.partner.managers.length>0
                                         &&context.partner.managers.findIndex(manager=>{return manager.user == context.user._id})>=0&&
-                                        context.partner.managers[context.partner.managers.findIndex(manager=>{return manager.user == context.user._id})].businessAccess.dashboard
+                                        context.partner.managers[context.partner.managers.findIndex(manager=>{return manager.user == context.user._id})].access.businessAccess.dashboard
                                     )
                                     {
                                         props.navigation.navigate("businessDash");
                                     }
                                     if(context.partner.managers.length>0
                                         &&context.partner.managers.findIndex(manager=>{return manager.user == context.user._id})>=0&&
-                                        context.partner.managers[context.partner.managers.findIndex(manager=>{return manager.user == context.user._id})].businessAccess.products
+                                        context.partner.managers[context.partner.managers.findIndex(manager=>{return manager.user == context.user._id})].access.businessAccess.products
                                     )
                                     {
                                         props.navigation.navigate("products");
@@ -63,7 +77,12 @@ export default function CustomDrawer(props) {
                                         }
 
 
+
+
                                     if (context.partner.deliverers.length>0&&context.partner.deliverers.findIndex(del => { return del.user == context.user._id && del.type == "both" }) >= 0) { props.navigation.navigate("collecting") }
+
+
+
                                     if (context.partner.deliverers.length>0&&context.partner.deliverers.findIndex(del => { return del.user == context.user._id && del.type == "collect" }) >= 0) { props.navigation.navigate("collecting") }
                                     if (context.partner.deliverers.length>0&&context.partner.deliverers.findIndex(del => { return del.user == context.user._id && del.type == "delivery" }) >= 0) {
                                         props.navigation.navigate("livraisons", { last_screen: "delivery" })
@@ -84,7 +103,7 @@ export default function CustomDrawer(props) {
                         </TouchableOpacity>
                     </View>
                     {(context.partner
-                        && (context.partner.owner == context.user._id ||
+                        && ((context.partner.owner == context.user._id&& (context.partner.delivery.cities.length > 0 || context.partner.delivery.regions.length > 0 || context.partner.delivery.localRegions.length>0)) ||
                             (context.partner.managers.length>0&&context.partner.managers.findIndex(manager => { return manager.user == context.user._id }) >= 0
                                 && context.partner.managers[context.partner.managers.findIndex(manager => { return manager.user == context.user._id })].access.businessAccess.dashboard == true
                             )
@@ -97,7 +116,7 @@ export default function CustomDrawer(props) {
                                 labelStyle={{ color: "white" }}
                                 label="Dashboard"
                                 onPress={() => {
-                                    if(context.partner.delivery.cities.length==0&&context.partner.delivery.regions.length==0){
+                                    if(context.partner.delivery.cities.length==0&&context.partner.delivery.regions.length==0&&context.partner.delivery.localRegions.length==0){
                                         props.navigation.navigate("businessDash")
                                     }
                                     else 
@@ -114,8 +133,9 @@ export default function CustomDrawer(props) {
 
 
                     {
-                        (context.partner
-                            && (context.partner.owner == context.user._id || 
+                        (context.partner && (!context.partner.serviceImages || context.partner.serviceImages.length==0)
+
+                            && ((context.partner.owner == context.user._id&& (context.partner.delivery.cities.length == 0 && context.partner.delivery.regions.length == 0&& context.partner.delivery.localRegions.length == 0))   || 
                                 (context.partner.managers.length>0&&context.partner.managers.findIndex(manager => { return manager.user == context.user._id }) >= 0&& (context.partner.delivery.regions.length == 0 && context.partner.delivery.cities.length == 0 )&&context.partner.managers.length>0
                                     && context.partner.managers[context.partner.managers.findIndex(manager => { return manager.user == context.user._id })].access.businessAccess.products == true
                                 )
@@ -134,8 +154,8 @@ export default function CustomDrawer(props) {
 
                     {
                         (context.partner
-                            && (context.partner.owner == context.user._id ||
-                                ((context.partner.delivery.cities.length > 0 || context.partner.delivery.regions.length > 0)&&context.partner.managers.length>0 && context.partner.managers.findIndex(manager => { return manager.user == context.user._id }) >= 0
+                            && ((context.partner.owner == context.user._id&& (context.partner.delivery.cities.length > 0 || context.partner.delivery.regions.length > 0|| context.partner.delivery.localRegions.length>0)) ||
+                                ((context.partner.delivery.cities.length > 0 || context.partner.delivery.regions.length > 0|| context.partner.delivery.localRegions.length>0)&&context.partner.managers.length>0 && context.partner.managers.findIndex(manager => { return manager.user == context.user._id }) >= 0
                                     && context.partner.managers[context.partner.managers.findIndex(manager => { return manager.user == context.user._id })].access.deliveryAccess.deposit
                                 )
                             )) &&
@@ -157,9 +177,9 @@ export default function CustomDrawer(props) {
                     {
 
 (context.partner
-    && (context.partner.owner == context.user._id ||
-        ((context.partner.delivery.cities.length > 0 || context.partner.delivery.regions.length > 0) &&context.partner.managers.length>0 && context.partner.managers.findIndex(manager => { return manager.user == context.user._id }) >= 0
-            && context.partner.managers[context.partner.managers.findIndex(manager => { return manager.user == context.user._id })].access.deliveryAccess.followDeliveries
+    && ((context.partner.owner == context.user._id && (context.partner.delivery.cities.length > 0 || context.partner.delivery.regions.length > 0|| context.partner.delivery.localRegions.length>0) ) ||
+        ((context.partner.delivery.cities.length > 0 || context.partner.delivery.regions.length > 0|| context.partner.delivery.localRegions.length>0) &&context.partner.managers.length>0 && context.partner.managers.findIndex(manager => { return manager.user == context.user._id }) >= 0
+            && context.partner.managers[context.partner.managers.findIndex(manager => { return manager.user == context.user._id })].access.deliveryAccess.deliverers
         )
     )) &&
 
@@ -168,41 +188,85 @@ export default function CustomDrawer(props) {
                                 <Image source={require("../assets/menu/next.png")} style={{ marginLeft: 20, width: size, height: size }} />
                             )}
                             labelStyle={{ fontFamily: 'Poppins', color: "white" }}
-                            label={ "follow packages"}
+                            label={ "follow deliverers"}
 
                             onPress={() => {
-                               props.navigation.navigate("followPackages", { user: "partner" }) 
+                               props.navigation.navigate("followDeliverers", { user: "partner" }) 
                             }}
                         />
                     }
                     {
-                        context.user.isVendor && context.partner &&context.partner.deliverers.length>0&& context.partner.deliverers.findIndex(deliv => { return deliv.user == context.user._id }) >= 0 &&
+
+                        context.user.isVendor && context.partner &&context.partner.deliverers.length>0&& (context.partner.deliverers.findIndex(deliv => { return deliv.user == context.user._id && deliv.type == "both"}) >= 0
+                        || context.partner.deliverers.findIndex(deliv => { return deliv.user == context.user._id && deliv.type == "collect"}) >= 0 )&&
+
                         <DrawerItem icon={({ color, size }) => (
                             <Image source={require("../assets/menu/next.png")} style={{ marginLeft: 20, width: size, height: size }} />
                         )} labelStyle={{ fontFamily: 'Poppins', color: "white" }}
-                            label="livraisons"
+                            label="collecting"
                             onPress={() => {
-                                if (context.partner.deliverers.findIndex(del => { return del.user == context.user._id && del.type == "both" }) >= 0) { props.navigation.navigate("collecting") }
-                                if (context.partner.deliverers.findIndex(del => { return del.user == context.user._id && del.type == "collect" }) >= 0) { props.navigation.navigate("collecting") }
-                                if (context.partner.deliverers.findIndex(del => { return del.user == context.user._id && del.type == "delivery" }) >= 0) {
-                                    props.navigation.navigate("livraisons", { last_screen: "delivery" })
-                                }
+                                 props.navigation.navigate("collecting") 
                             }}
                         />
+
+
                     }
+                      {
+
+
+context.user.isVendor && context.partner &&context.partner.deliverers.length>0&&(context.partner.deliverers.findIndex(deliv => { return deliv.user == context.user._id && deliv.type == "delivery" }) >= 0||
+context.partner.deliverers.findIndex(deliv => { return deliv.user == context.user._id && deliv.type == "both" }) >= 0
+) &&
+
+<DrawerItem icon={({ color, size }) => (
+    <Image source={require("../assets/menu/next.png")} style={{ marginLeft: 20, width: size, height: size }} />
+)} labelStyle={{ fontFamily: 'Poppins', color: "white" }}
+    label="livraisons"
+    onPress={() => { 
+
+            if(context.partner.delivery.localRegions.length>0 && ( (context.partner.deliverers.length>0&&
+                context.partner.deliverers.findIndex(del => { return del.user == context.user._id && del.type == "both" }) >= 0) )){
+                
+                    
+                    getTobepickedUpOrders(context.user._id,context.partner._id).then(_orders=>{
+                    _orders.map(_order=>{
+                        markOrderAsDuringClientDelivery(context.partner._id, _order._id,
+                            {lat:context.location.location.latitude,lng:context.location.location.longitude}, 
+                            {lng:_order.client.location.location.longitude,
+                            lat:_order.client.location.location.latitude})
+                            .then(message => {
+                            }).catch(err=>{alert("failed while updating order")})                    })
+                
+                            props.navigation.navigate('delivering', { last_screen: "menu to  delivering" })
+
+                })
+            }
+            else {
+                props.navigation.navigate("livraisons", { last_screen: "delivery" })
+
+            }
+       
+    }}
+/>
+
+
+}
 
 
 
                     {
                         
-                        context.partner 
+                       context.partner && (!context.partner.serviceImages || context.partner.serviceImages.length==0)
                         &&( 
-                            ((context.partner.delivery.regions.length == 0 && context.partner.delivery.cities.length == 0 )
-                   
-                        &&  context.partner.managers.length>0 && context.partner.managers.findIndex(manager=>{return manager.user==context.user._id})>=0 &&
-                        context.partner.managers[ context.partner.managers.findIndex(manager=>{return manager.user==context.user._id})].access.businessAccess.orders)
-                            || context.partner.owner==context.user._id
-                        )
+                (   
+        (context.partner.delivery.regions.length == 0 && context.partner.delivery.cities.length == 0 && context.partner.delivery.localRegions.length == 0 )&&context.partner.managers.length>0 && context.partner.managers.findIndex(manager=>{return manager.user==context.user._id})>=0 &&
+                        context.partner.managers[ context.partner.managers.findIndex(manager=>{return manager.user==context.user._id})].access.businessAccess.orders)           
+
+
+
+                            || ((context.partner.delivery.regions.length == 0 && context.partner.delivery.cities.length == 0&& context.partner.delivery.localRegions.length == 0 ) &&context.partner.owner==context.user._id)
+                        
+                            )
                         
                         
                         &&
@@ -240,13 +304,15 @@ export default function CustomDrawer(props) {
                         </Drawer.Section>
                     }
 
+
+
                     <Drawer.Section style={styles.drawerSection} >
                         <DrawerItem icon={({ color, size }) => (
-                            <Image source={require("../assets/menu/notifications.png")} style={{ width: size, height: size }} />
+                            <Image source={ context.notread==0 ? require("../assets/menu/notifications.png") : require("../assets/menu/notification_notread.png")} style={{ width: size, height: size }} />
                         )}
-                            labelStyle={{ fontFamily: 'Poppins', color: "white" }}
+                            labelStyle={{ fontFamily: 'Poppins', color: context.notread==0 ? "white": "#FF0000" }}
 
-                            label="Notifications"
+                            label={`Notifications (${context.notread})`}
                             onPress={() => {
                                 props.navigation.navigate("notifications", { activation: "activation" })
                             }}

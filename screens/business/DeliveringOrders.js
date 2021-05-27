@@ -1,9 +1,9 @@
 import React, { useState, useContext, useEffect } from 'react'
-import { View, Text, StyleSheet, TouchableOpacity, Image, SafeAreaView, Dimensions,Modal } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, Image, SafeAreaView, Dimensions,Animated,Modal,TouchableWithoutFeedback } from 'react-native'
 import AuthContext from '../../navigation/AuthContext';
 import _ from 'lodash';
 import { FlatList } from 'react-native-gesture-handler';
-import { getduringClientDeliveryorders } from '../../rest/ordersApi'
+import { getduringClientDeliveryorders,markOrderAsDelivered } from '../../rest/ordersApi'
 import MapView, { Marker } from 'react-native-maps';
 import MapViewDirections from 'react-native-maps-directions';
 import {ScrollView} from 'react-native-gesture-handler';
@@ -23,10 +23,12 @@ export default function delivering(props) {
     const [pathmodal,setPathmodal]=useState(false);
     const [targetLocation,setTargetLocation]=useState(null);
     const [modalListPartners, setModalListPartners] = useState(false)
-    const [profile, setProfile] = useState(null);
     const [profiles, setProfiles] = useState([]);
     const [profileChecked, setProfileChecked] = useState(false);
-
+    const [positionModal,setPositionModal]=useState(new Animated.ValueXY({x:0,y:0}))
+    const [order_id,setOrderId]=useState(null);
+    const [showDeleteOrder, setShowDeleteOrder] = useState(false);
+    const [showPopup,setShowPopup]=useState(false);
 
 
 
@@ -35,7 +37,7 @@ export default function delivering(props) {
         if(context.partner&&context.user){
             getduringClientDeliveryorders(context.user._id,context.partner._id).then(
                 duringClientdeliveries=>{setDuringClientDeliveries(duringClientdeliveries)
-                console.log(duringClientdeliveries.length);}
+                }
             ).catch(
                 err=> console.log(err)
             )
@@ -43,15 +45,37 @@ export default function delivering(props) {
         }
     
     
-    }, [context.partner])
-
+    }, [context.partner,props.route.params])
+    const modalDown =()=>{
+      console.log(positionModal);
+      Animated.timing(positionModal, {
+        toValue: { x: 0, y:0},
+        duration: 200,
+        useNativeDriver: true
+      }).start(()=>{
+        setModalListPartners(!modalListPartners)
+  
+      });
+  
+   
+  
+  }
+  
+    const modalUp =()=>{
+      Animated.timing(positionModal, {
+        toValue: { x: 0, y:200},
+        duration: 200,
+        useNativeDriver: true
+      }).start();
+    }
+  
 
     const checkAccount = (item) => {
-      setProfile(item);
+      context.setProfile(item);
       if (!item.firstName) {
         context.setPartner(item);
           
-          if(item.delivery.cities.length>0 || item.delivery.regions.length>0){
+          if(item.delivery.cities.length>0 || item.delivery.regions.length>0 || item.delivery.localRegions.length>0){
               if(item.owner ==context.user._id){
                   props.navigation.navigate('deliveryDash');
               }
@@ -61,15 +85,27 @@ export default function delivering(props) {
             }
               if(item.deliverers.findIndex(d=>{return d.user==context.user._id})>=0){
                 if(item.deliverers[item.deliverers.findIndex(d=>{return d.user==context.user._id})].type=="delivery"){
-                    props.navigation.navigate("livraisons",{last_screen:""});
+                  props.navigation.navigate("livraisons", { last_screen: "delivery" });
                 }
                 if(item.deliverers[item.deliverers.findIndex(d=>{return d.user==context.user._id})].type=="collect"){
                   props.navigation.navigate("collecting");
                 }
+                if (item.delivery.localRegions.length > 0 && item.deliverers[item.deliverers.findIndex(d => { return d.user == context.user._id })].type == "both") {
+            
+                  getTobepickedUpOrders(context.user._id,context.partner._id).then(_orders=>{
+                    _orders.map(_order=>{
+                        markOrderAsDuringClientDelivery(context.partner._id, _order._id,
+                            {lat:context.location.location.latitude,lng:context.location.location.longitude}, 
+                            {lng:_order.client.location.location.longitude,
+                            lat:_order.client.location.location.latitude})
+                            .then(message => {
+                            }).catch(err=>{alert("failed while updating order")})                    })
       
-                if(item.deliverers[item.deliverers.findIndex(d=>{return d.user==context.user._id})].type=="both"){
-                  props.navigation.navigate("collecting");
-                }
+                
+                            props.navigation.navigate('delivering', { last_screen: "menu to  delivering" })
+      
+                })          
+              }
                 
       
               }
@@ -78,7 +114,7 @@ export default function delivering(props) {
           }
   
   
-          if(item.delivery.cities.length==0 && item.delivery.regions.length==0)
+          if(item.delivery.cities.length==0 && item.delivery.regions.length==0&& item.delivery.localRegions.length==0)
             {
             if(item.managers.findIndex(m=>{return m.manager==context.user._id})>=0 &&item.managers[item.managers.findIndex(m=>{return m.manager==context.user._id})].access.businessAccess.dashboard){
               props.navigation.navigate("businessDash");
@@ -116,29 +152,21 @@ export default function delivering(props) {
       }
     }
   
-  
     const checkProfile = () => {
-      let _profiles = [];
-  
-      if (context.user.isVendor) {
-        _profiles = context.user.workPlaces;
-  
-        if(context.partner && context.user.workPlaces.findIndex(partner=>{return partner._id == context.partner._id})){
-          setProfile(context.partner);
-      }
 
+      let _profiles = [];
+
+      if (context.user.isVendor) {
+        _profiles =_profiles.concat(context.user.workPlaces);
       }
+  
       if (context.user.isPartner) {
-          _profiles = context.user.partners;
-          if(context.partner && context.user.partners.findIndex(partner=>{return partner._id == context.partner._id})){
-            setProfile(context.partner);
-        }
+          _profiles = _profiles.concat(context.user.partners);
+       
         }
       if (_profiles.findIndex(p => { return p._id == context.user._id }) == -1) {
         _profiles.push(context.user);
-        if(!context.partner){
-            setProfile(context.user);
-        }
+     
   
       }
       setProfiles(_profiles);
@@ -146,8 +174,19 @@ export default function delivering(props) {
       // setProfiles([context.user,...profiles]);
       setProfileChecked(!profileChecked);
       setModalListPartners(!modalListPartners)
-    }
+      modalUp();
   
+    }
+    
+  const confirmDeliveringOrder =()=>{
+    markOrderAsDelivered(order_id,context.partner._id).then(message=>{
+      let _duringDelivery=[...duringClientDeliveries];
+      _duringDelivery[_duringDelivery.findIndex(order=>{return order._id==order_id})].status="delivered";
+      setDuringClientDeliveries(_duringDelivery)
+     
+   
+        }).catch(err=>{console.log(err)})
+  }
 
   const seePath =(order)=>{
         setTargetLocation({partner_image:order.client.photo?order.client.photo:null ,location:{lat:order.client.location.location.latitude,lng:order.client.location.location.longitude}})
@@ -161,12 +200,6 @@ export default function delivering(props) {
 
     }
         
-        
-
-
-
-
-
     return (
         <SafeAreaView style={{ flex: 1 }}>
             <View style={context.darkMode ? styles.containerDark : styles.container}>
@@ -207,10 +240,10 @@ export default function delivering(props) {
                             <TouchableOpacity disabled={true}>
                                 <View style={context.darkMode ? styles.deliveryDark : styles.delivery}>
                                     <View style={styles.clientImageContainer}>
-                                        <Image style={{ width: "80%", height: "80%", resizeMode: "contain" }} source={require("../../assets/images/clock.png")} />
+                                        <Image style={{ width: "80%", height: "80%", resizeMode: "contain" }} source={item.status !="delivered" ? require("../../assets/images/clock.png"):require("../../assets/images/tick_order.png")} />
                                     </View>
-                                    <View style={{ width: "85%", height: "100%", flexDirection: "column" }}>
-                                        <View style={{ width: "100%", height: "100%", flexDirection: "row" }}>
+                                    <View style={{ width: "85%", height: "100%" ,flexDirection: "column" }}>
+                                        <View style={{ width: "100%", height: "80%", flexDirection: "row" }}>
                                             <View style={styles.deliveryInfo}>
                                                 <View style={{ width: "100%", height: "25%", flexDirection: "row" }}>
                                                     <Text style={{ fontSize: Dimensions.get("screen").width * 0.04, color: "black" }}>Nom de client:</Text>
@@ -236,20 +269,65 @@ export default function delivering(props) {
                                                 <TouchableOpacity  onPress={()=>{start_conversation(item.client)}} style={{ width: "80%", height: "40%" }}>
                                                     <Image style={{ width: "100%", height: "100%", resizeMode: "contain" }} source={require("../../assets/images/messenger.png")} />
                                                 </TouchableOpacity>
+                                                
                                             </View>
+                                  
                                         </View>
-                                      
+                                        {
+                    item.status !="delivered"&&
+                                        
+                                        <View style={{ width: "100%", height: "20%", flexDirection: "row", justifyContent: "flex-end" }}>
+                                    <TouchableOpacity onPress={()=>{setShowPopup(!showPopup),setShowDeleteOrder(false);setOrderId(item._id)}} style={{ width: "30%", height: "80%", backgroundColor: "#73e340", marginHorizontal: 3, borderRadius: 8, flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+                                        <Text style={{ color: "white" }}>Confirm</Text></TouchableOpacity>
+                                </View>
+                        }    
                                     </View>
                                 </View>
 
                             </TouchableOpacity>
                         }
-                        keyExtractor={item => item.id}
+                        keyExtractor={item => item._id}
                     >
                     </FlatList>
                 </View>
                
+                {showPopup&&
+                 <View style={{ width: "90%", borderRadius: 12, flexDirection: "column", height: "60%", top: "30%", position: "absolute", backgroundColor: "white" }}>
+                 <View style={{ width: "100%", height: "80%", flexDirection: "column", alignItems: "center", }}>
+                     <Text style={showDeleteOrder ? { color: "red", fontFamily:'Poppins',fontSize: Dimensions.get("screen").width * 0.06, margin: 10 } : { color: "#46EB24", fontFamily:'Poppins',fontSize: Dimensions.get("screen").width * 0.06, margin: 10 }}>{"Order during client delivery"}</Text>
+                     <View style={{ width: Dimensions.get("screen").width * 0.3, borderRadius: Dimensions.get("screen").width * 0.3, height: Dimensions.get("screen").width * 0.3, flexDirection: "column", backgroundColor: "#EBEBEB", alignItems: "center", justifyContent: "center" }}>
+                         <Image style={{ width: "60%", height: "60%", resizeMode: "cover" }} source={showDeleteOrder ? require("../../assets/images/order_warning.png") : require("../../assets/images/check_order.png")} />
+                     </View>
+                     <Text style={{ color: "black", fontFamily:'Poppins',fontSize: Dimensions.get("screen").width * 0.04, margin: 10, textAlign: "center" }}>{"Are you sure,you want to confirm delivering order ?"}</Text>
+                     <Text style={{ color: "grey", fontFamily:'Poppins',fontSize: Dimensions.get("screen").width * 0.04, textAlign: "center", margin: 10 }}>{showDeleteOrder ? "Please becareful while removing order this action can't be undone !" : "Please make sure that item delivered this action can't be undone !"}</Text>
+                 </View>
 
+
+                 <View style={{ width: "100%", height: "15%", flexDirection: "row" }}>
+
+
+                     <View  style={showDeleteOrder ? { width: "50%", height: "100%", backgroundColor: "#384068", borderBottomLeftRadius: 12, borderTopLeftRadius: 12 } : { width: "50%", height: "100%", backgroundColor: "#46EB24", borderBottomLeftRadius: 12, borderTopLeftRadius: 12 }}>
+                       <TouchableOpacity onPress={()=>{setShowPopup(!showPopup),setShowDeleteOrder(false);confirmDeliveringOrder()}} style={{ width: "100%", height: "100%", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
+                             <Text style={{ fontFamily:'Poppins',fontSize: Dimensions.get("screen").width * 0.06, color: "white" }}>
+                                 {showDeleteOrder ? "Yes,remove it" : "Confirm"}
+                             </Text>
+                         </TouchableOpacity>
+
+
+                     </View>
+
+                     <View style={showDeleteOrder ? { width: "50%", height: "100%", backgroundColor: "red", borderBottomRightRadius: 12, borderTopRightRadius: 12 }:{ width: "50%", height: "100%", backgroundColor: "#384068", borderBottomRightRadius: 12, borderTopRightRadius: 12 }}>
+                         <TouchableOpacity onPress={()=>{setShowPopup(!showPopup)}} style={{ width: "100%", height: "100%", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
+                             <Text style={{ fontFamily:'Poppins',fontSize: Dimensions.get("screen").width * 0.06, color: "white" }}>
+                                 {showDeleteOrder ? "No,Keep it":"cancel"}
+                             </Text>
+                         </TouchableOpacity>
+
+                     </View>
+                 </View>
+
+             </View>
+                }
 
          
             </View>
@@ -355,53 +433,59 @@ export default function delivering(props) {
                     </Modal>
                     <Modal
 
-transparent={true}
-animationType={'slide'}
-visible={modalListPartners}
+        transparent={true}
+        visible={modalListPartners}
 
->
-<View style={{ backgroundColor: "#000000aa", flex: 1 }}>
-  <View style={{ width: Dimensions.get("screen").width, height: 200, alignSelf: "center", backgroundColor: "white" }}>
-    <View style={{ width: "100%", height: "95%" }}>
-      <FlatList
-        data={profiles}
-        renderItem={({ item }) =>
-        (
-          <TouchableOpacity key={item._id} onPress={() => { checkAccount(item) }}>
-            <View style={{ flexDirection: "row", width: "100%", height: 60 }}>
-              <View style={{ width: "20%", height: "100%", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-                <Image style={{ width: 50, height: 50, borderRadius: 50, resizeMode: "contain" }} source={item.photo ? { uri: item.photo } : item.profileImage ? { uri: item.profileImage } : require("../../assets/user_image.png")} />
-              </View>
-              <View style={{
-                width: "60%", height: "100%", flexDirection: "column",
-                justifyContent: "center"
-              }}>
-
-                <Text style={{ marginHorizontal: 15, fontFamily: 'Poppins', fontSize: 15 }}>{item.firstName ? item.firstName + " " + item.lastName : item.partnerName}</Text>
-              </View>
-              <View style={{ width: "20%", height: "100%", flexDirection: "column", justifyContent: "center" }}>
-                <View style={profile === item ? { width: 30, height: 30, borderRadius: 30, borderColor: "#2474F1", borderWidth: 8, alignSelf: "center" } : { width: 30, height: 30, borderRadius: 30, borderColor: "#dbdbdb", borderWidth: 1, alignSelf: "center" }}></View>
-              </View>
-
-            </View>
-          </TouchableOpacity>
-
-        )
-        }
-        keyExtractor={item => item._id}
       >
-      </FlatList>
-      <View style={{ width: "100%", height: "5%", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-        <ScrollView  onScroll={() => { setModalListPartners(!modalListPartners) }}>
-          <View style={{ width: 50, height: 3, backgroundColor: "black", borderRadius: 5 }}></View>
-        </ScrollView>
-      </View>
-    </View>
+        <View style={{ backgroundColor: "#000000aa", flex: 1 }}>
+          <Animated.View style={{ width: Dimensions.get("screen").width,position:"absolute",top:-200,transform: [{ translateX: positionModal.x }, { translateY: positionModal.y }]
+ ,height: 200, alignSelf: "center", backgroundColor: "white" }}>
+            <View style={{ width: "100%", height: "95%" }}>
+              <FlatList
+                data={profiles}
+                renderItem={({ item }) =>
+                (
+                  <TouchableOpacity key={item._id} onPress={() => { checkAccount(item) }}>
+                    <View style={{ flexDirection: "row", width: "100%", height: 60 }}>
+                      <View style={{ width: "20%", height: "100%", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+                        <Image style={{ width: 50, height: 50, borderRadius: 50, resizeMode: "contain" }} source={item.photo ? { uri: item.photo } : item.profileImage ? { uri: item.profileImage } : require("../../assets/user_image.png")} />
+                      </View>
+                      <View style={{
+                        width: "60%", height: "100%", flexDirection: "column",
+                        justifyContent: "center"
+                      }}>
 
-  </View>
-</View>
+                        <Text style={{ marginHorizontal: 15, fontFamily: 'Poppins', fontSize: 15 }}>{item.firstName ? item.firstName + " " + item.lastName : item.partnerName}</Text>
+                      </View>
+                      <View style={{ width: "20%", height: "100%", flexDirection: "column", justifyContent: "center" }}>
+                        <View style={context.profile._id === item._id ? { width: 30, height: 30, borderRadius: 30, borderColor: "#2474F1", borderWidth: 8, alignSelf: "center" } : { width: 30, height: 30, borderRadius: 30, borderColor: "#dbdbdb", borderWidth: 1, alignSelf: "center" }}></View>
+                      </View>
 
-</Modal>
+                    </View>
+                  </TouchableOpacity>
+
+                )
+                }
+                keyExtractor={item => item._id}
+              >
+              </FlatList>
+              <View style={{ width: "100%", height: "10%", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+                <ScrollView onScrollBeginDrag={() => {modalDown(); }}>
+                  <View style={{ width: 50, height: 3, backgroundColor: "black", borderRadius: 5 }}></View>
+                </ScrollView>
+              </View>
+            </View>
+
+          </Animated.View>
+
+          <View style={{width:"100%",position:"absolute",top:200,height:Dimensions.get("screen").height-200}}>
+<TouchableWithoutFeedback style={{width:"100%",height:"100%"}} onPress={()=>{modalDown()}}>
+                <View style={{width:"100%",height:"100%"}}></View>
+</TouchableWithoutFeedback>
+          </View>
+        </View>
+
+      </Modal>
 
         </SafeAreaView>
     );
@@ -452,7 +536,7 @@ const styles = StyleSheet.create({
 
     delivery: {
         width: "100%",
-        height: 100,
+        height: 120,
         backgroundColor: "white",
         shadowColor: "grey",
         shadowOffset: { width: 1, height: 1 },
@@ -468,7 +552,7 @@ const styles = StyleSheet.create({
     deliveryDark: {
         backgroundColor: "#292929",
         width: "100%",
-        height: 100,
+        height: 120,
         shadowColor: "grey",
         shadowOffset: { width: 1, height: 1 },
         shadowOpacity: 0.5,
@@ -562,17 +646,16 @@ const styles = StyleSheet.create({
         justifyContent: "center"
     },
     Title: {
-        fontWeight: "400",
-        color: "#cccccc",
-        fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.07,
-    },
-    TitleDark: {
-        fontWeight: "400",
-        color: "#fff",
-        fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.07,
+      fontWeight: "400",
+      color: "#cccccc",
+      fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.05,
+  },
+  TitleDark: {
+      fontWeight: "400",
+      color: "#fff",
+      fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.05,
 
-    },
-    headerElements: {
+  },    headerElements: {
         width: "94%",
         height: "18%",
         alignSelf: "center"

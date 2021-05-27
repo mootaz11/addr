@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback, useReducer, useContext } from 'react';
-
 import {
-    View, StyleSheet, Text, TextInput, TouchableOpacity, Image, FlatList, Platform, ScrollView, LogBox, Modal,
+    View, StyleSheet, Text, TextInput, TouchableOpacity, Image, FlatList, Platform, ScrollView, LogBox, Modal,ActivityIndicator,
     TouchableHighlight, Dimensions, Alert
 } from 'react-native';
 import { Picker } from '@react-native-community/picker';
@@ -76,7 +75,7 @@ const AddProductScreen = (props) => {
         },
         inputValidities: {
             title: false,
-            shortDescription:'',
+            shortDescription:false,
             description: false,
             price: false,
           
@@ -98,7 +97,6 @@ const AddProductScreen = (props) => {
     const [shortDescriptionTouched, setShortDescriptionTouched] = useState(false);
     const [stockTouched,setStockTouched]=useState(false);
 
-    const [gender, setGender] = useState();
     const [category, setCategory] = useState();
     const [subCategory,setSubCategory]=useState();
     const [productType, setProductType] = useState("food");
@@ -122,7 +120,6 @@ const AddProductScreen = (props) => {
     const [nameCategory, setNameCategory] = useState("");
     const [nameSubCategory, setNameSubCategory] = useState("");
     const [dimension,setDimension]=useState("");
-
 
     const textChangeHandler = (inputIdentifier, text) => {
         let isValid = false;
@@ -177,8 +174,10 @@ const AddProductScreen = (props) => {
     }, []);
 
     useEffect(() => {
-        getPartner(context.partner._id).then(partner=>{
+        if(context.partner){
 
+      
+        getPartner(context.partner._id).then(partner=>{
             if (partner.services.isFood) {
                 setProductType("food");
             }
@@ -189,11 +188,11 @@ const AddProductScreen = (props) => {
             setCategories(partner.categories)
         })
        .catch(err=>{alert("error while getting partner")})
-
+    }
     }, [])
     useEffect(() => {
         LogBox.ignoreLogs(['VirtualizedLists should never be nested']);
-    }, []);
+    }, [context.partner]);
 
     useEffect(() => {
         if (productType == "regular") {
@@ -420,10 +419,10 @@ const AddProductScreen = (props) => {
         const _indexPricingItem = allSousVariantsCombinaisons.findIndex(item => { return item.id === idCombination });
         if (_indexPricingItem >= 0) {
             const _allSousVariantsCombinaisons = [...allSousVariantsCombinaisons];
-            let _pricingItem = { ...allSousVariantsCombinaisons[_indexPricingItem] }
+            let _pricingItem = { ...allSousVariantsCombinaisons[_indexPricingItem]}
             _pricingItem.isActive = !_pricingItem.isActive;
             _allSousVariantsCombinaisons.splice(_indexPricingItem, 1);
-            _allSousVariantsCombinaisons.push(_pricingItem);
+            _allSousVariantsCombinaisons.unshift(_pricingItem);
             setSousVariantsCombinaisons(_allSousVariantsCombinaisons);
         }
 
@@ -436,7 +435,7 @@ const AddProductScreen = (props) => {
             let _pricingItem = { ...allSousVariantsCombinaisons[_indexPricingItem] }
             _pricingItem.stock = text;
             _allSousVariantsCombinaisons.splice(_indexPricingItem, 1);
-            _allSousVariantsCombinaisons.push(_pricingItem);
+            _allSousVariantsCombinaisons.splice(_indexPricingItem, 0, _pricingItem);
             setSousVariantsCombinaisons(_allSousVariantsCombinaisons);
 
         }
@@ -449,7 +448,7 @@ const AddProductScreen = (props) => {
             let _pricingItem = { ...allSousVariantsCombinaisons[_indexPricingItem] }
             _pricingItem.price = text;
             _allSousVariantsCombinaisons.splice(_indexPricingItem, 1);
-            _allSousVariantsCombinaisons.push(_pricingItem);
+            _allSousVariantsCombinaisons.splice(_indexPricingItem, 0, _pricingItem);
             setSousVariantsCombinaisons(_allSousVariantsCombinaisons);
         }
 
@@ -529,7 +528,8 @@ const handleCategory =(itemValue)=>{
         setModalDiscountVisible(!modalDiscountVisible);
     };
 
-    const submitHandler = useCallback(() => {
+    const submitHandler = ()=>{
+        
         if (productType == "regular") {
             if (!formState.formIsValid || selectedImages.length === 0 || variantsInputs.length === 0) {
                 setImagesTouched(true);
@@ -559,11 +559,10 @@ const handleCategory =(itemValue)=>{
                     partner: context.partner._id,
                     weight: formState.inputValues.weight,
                     type: productType.toLowerCase(),
-                    gendre: gender ? gender.toLowerCase() : "",
                     name: formState.inputValues.title,
                     pricing: allSousVariantsCombinaisons,
                     dimension:dimension,
-                    stock:formState.inputValues.price
+                    stock:formState.inputValues.stock
                 }
 
                 const fd = new FormData();
@@ -579,9 +578,10 @@ const handleCategory =(itemValue)=>{
 
                 if(category&&subCategory&&product&&_variants.length>0){
                     addProduct(context.partner._id, fd).then(message => {
-                        Alert.alert('Operation Done', message, [{ text: 'Okay' }]);
-    
+                    Alert.alert('Operation Done', message, [{ text: 'Okay' }]);
+                        
                     }).catch(err=>{
+
                         alert("add product failed")
                     })    
                 }
@@ -602,6 +602,8 @@ const handleCategory =(itemValue)=>{
             }
 
             else {
+
+
                 // where you find title,description, productType, price, weight values
                 let _variants = []
                 let pricing = []
@@ -622,7 +624,6 @@ const handleCategory =(itemValue)=>{
                     partner: context.user._id,
                     weight: formState.inputValues.weight,
                     type: productType.toLowerCase(),
-                    gender: gender.toLowerCase(),
                     name: formState.inputValues.title,
                     pricing: allSousVariantsCombinaisons
                 }
@@ -637,23 +638,24 @@ const handleCategory =(itemValue)=>{
                 fd.append('category', category);
 
                 addProduct(context.partner._id,fd).then(message=>{
-                    
+
                     Alert.alert('Operation Done', message, [{ text: 'Okay' }]);
                 }
-                ).catch(err=>{alert("operation failed")})
+                ).catch(err=>{
+                    alert("operation failed")})
             }
         }
 
 
 
-    }, [formState, selectedImages, variantsInputs]);
+    }
 
     return (
         <SafeAreaView style={{ flex: 1 }}>
             <View style={context.darkMode ? { flex: 1,backgroundColor:"black" }:{ flex: 1 }}>
                 <View style={context.darkMode ? styles.menuDark : styles.menu}>
                     <View style={styles.leftArrowContainer}>
-                        <TouchableOpacity onPress={() => { props.navigation.goBack() }} style={styles.leftArrow}>
+                        <TouchableOpacity onPress={() => { props.navigation.navigate("listProducts",{message:"done"}) }} style={styles.leftArrow}>
                             <Image style={{ width: "100%", height: "100%", marginLeft: 4 }} source={context.darkMode ? require("../../assets/left-arrow-dark.png") : require("../../assets/left-arrow.png")} />
 
                         </TouchableOpacity>
@@ -712,24 +714,7 @@ const handleCategory =(itemValue)=>{
                                 {!formState.inputValidities.shortDescription && shortDescriptionTouched && <Text style={styles.errorMessage}>Please enter a short Description!</Text>}
                             </View>
                         </View>
-                        {productType != "food" && <View style={context.darkMode ? styles.genderContainerDark : styles.genderContainer}>
-                            <Text style={context.darkMode ? styles.titreStyleDark : styles.titreStyle} >Gender</Text>
-                            <View style={styles.genderPickerContainer}>
-                                <Picker
-                                    selectedValue={gender}
-                                    onValueChange={(itemValue, itemIndex) => setGender(itemValue)}
-                                    mode="dropdown"
-                                    style={context.darkMode ? {backgroundColor:"black"}:{backgroundColor:"white"}}
-                                >
-
-                                    <Picker.Item color={context.darkMode ? "white":"black"} label="men" value="Men" />
-                                    <Picker.Item color={context.darkMode ? "white":"black"} label="women" value="Women" />
-                                    <Picker.Item color={context.darkMode ? "white":"black"} label="kids" value="Kids" />
-                                </Picker>
-                            </View>
-
-                        </View>
-                        }
+                     
                         <View style={styles.CategoryContainer}>
                             <Text style={ context.darkMode ? styles.titreStyleDark  : styles.titreStyle} >Category</Text>
 
@@ -741,7 +726,6 @@ const handleCategory =(itemValue)=>{
                                     />                                
                                     </TouchableOpacity>
                             </View>
-
                             <View style={styles.genderPickerContainer}>
                                 <Picker
                                     selectedValue={category}
@@ -946,8 +930,9 @@ const handleCategory =(itemValue)=>{
                                     placeholder="your stock"
                                     placeholderTextColor={Colors.placeholder}
                                     value={formState.inputValues.stock}
-                                    onChangeText={textChangeHandler.bind(this, 'title')}
-                                    onBlur={lostFocusHandler.bind(this, 'title')}
+                                    onChangeText={textChangeHandler.bind(this, 'stock')}
+                                    onBlur={lostFocusHandler.bind(this, 'stock')}
+
                                 />
                             </View>
                         </View>}
@@ -1124,7 +1109,26 @@ const handleCategory =(itemValue)=>{
                                 </View>
 
                             </Modal>
+                            {/* <Modal
+                                        animationType="slide"
+                                        transparent={true}
+                                        visible={loading}
+                                    >
+                                               <View style={{ backgroundColor: "#000000aa", flex: 1,justifyContent:"center" }}>
+          <View style={{ width: Dimensions.get("screen").width*0.8, height: 200, alignSelf: "center" }}>
+            <View style={{ width: "100%", height: "100%",flexDirection:"column" ,justifyContent:"center",alignItems:"center"}}>
 
+            <ActivityIndicator color="#2474F1" size="large" />
+
+
+                                                    </View>
+                                                    
+                                                    
+                                                    </View>
+                                                    
+                                                    </View>
+
+                                    </Modal> */}
 
 
                             {productType == "regular" && <View style={context.darkMode ? styles.addOtherOptionContainerDark :  styles.addOtherOptionContainer}>
@@ -1586,11 +1590,12 @@ const styles = StyleSheet.create({
     },
     imageAddOtherOption: {
         //backgroundColor:'orange',
+        resizeMode:"contain",
         height: Dimensions.get('window').height * 0.07,//45
-        width: Dimensions.get('window').width * 0.125//45
+        width: Dimensions.get('window').width * 0.135//45
     },
     addOtherOptionTextStyle: {
-        fontFamily:'Poppins',fontSize: 19,
+        fontFamily:'Poppins',fontSize: Dimensions.get("screen").width*0.05,
         color: '#0862ef'
     },
 
@@ -1649,7 +1654,7 @@ const styles = StyleSheet.create({
 
     options: {
         //backgroundColor:'#fa382a',
-        height: Dimensions.get('window').height * 0.388, //300
+        height: Dimensions.get('window').height * 0.5, //300
         padding: Dimensions.get('window').height * 0.013,//10
     },
     textOptionContainer: {

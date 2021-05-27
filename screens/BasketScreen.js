@@ -12,7 +12,9 @@ export default function Basket(props){
 
     const checkBag=(item)=>{props.navigation.navigate("bag",{order:item})}
     
-    const goBack = () => {props.navigation.goBack()}
+    const openDrawer = () => {
+        props.navigation.openDrawer()
+    }
 
     useEffect(() => {
         let mounted=true;
@@ -29,18 +31,19 @@ export default function Basket(props){
     }, [props.route.params])
 
     return (
-        <SafeAreaView>
+        <SafeAreaView style={{flex:1}}>
         <View style={context.darkMode ? styles.containerDark : styles.container}>
-            <View style={context.darkMode ? styles.menuDark : styles.menu}>
-                <TouchableOpacity style={styles.leftArrowContainer} onPress={goBack}>
-                    <View >
-                        <Image style={styles.leftArrow} source={context.darkMode ? require("../assets/left-arrow-dark.png") : require("../assets/left-arrow.png")} />
+        <View style={context.darkMode ? styles.menuDark : styles.menu}>
+                        <View style={styles.leftArrowContainer} >
+                        <TouchableOpacity onPress={openDrawer} style={{height:Dimensions.get("screen").height * 0.03,width:Dimensions.get("screen").height * 0.03}}>
+                        <Image source={context.darkMode ?  require("../assets/menu_dark.png"):require("../assets/menu.png")} style={{height:"80%",width:"80%",resizeMode:"cover",marginHorizontal:4}}/>
+                        </TouchableOpacity>
+                        </View>
+                    <View style={styles.titleContainer}>
+                        <Text style={context.darkMode ? styles.TitleDark : styles.Title}>Basket</Text>
                     </View>
-                </TouchableOpacity>
-                <View style={styles.titleContainer}>
-                    <Text style={context.darkMode ? styles.TitleDark : styles.Title}>Basket</Text>
                 </View>
-            </View>
+
             {
                 baskets&&baskets.length>0 ? 
                 <View style={styles.bagContainer}>
@@ -73,7 +76,7 @@ export default function Basket(props){
                                         <Text style={context.darkMode ? {textAlign:"left",fontFamily:'Poppins',fontSize:Dimensions.get("screen").width*0.03,fontWeight:"500",color:"white"} : {textAlign:"left",fontFamily:'Poppins',fontSize:Dimensions.get("screen").width*0.03,fontWeight:"500",color:"black"}}>{item.date.toString().split('T')[0]}</Text>
                                     </View>
                                     <View style={{margin:5}}>
-                                        <Text style={context.darkMode ? {textAlign:"left",fontFamily:'Poppins',fontSize:Dimensions.get("screen").width*0.03,fontWeight:"500",color:"white"} : {textAlign:"left",fontFamily:'Poppins',fontSize:Dimensions.get("screen").width*0.03,fontWeight:"500",color:"black"}}>{item.price} DT</Text>
+                                        <Text style={context.darkMode ? {textAlign:"left",fontFamily:'Poppins',fontSize:Dimensions.get("screen").width*0.03,fontWeight:"500",color:"white"} : {textAlign:"left",fontFamily:'Poppins',fontSize:Dimensions.get("screen").width*0.03,fontWeight:"500",color:"black"}}>{item.price.toFixed(2)} DT</Text>
                                     </View>
                     
                                 </View>
@@ -219,15 +222,14 @@ const styles = StyleSheet.create({
         height: "100%",
         flexDirection: "column",
         alignItems: "center",
-        justifyContent: "center"
+        justifyContent: "center",
+        marginTop:5
     },
     leftArrow: {
-        width: Dimensions.get("screen").height * 0.04,
-        height: Dimensions.get("screen").height * 0.04
-        ,marginLeft:10
-        
-
+        width: 30,
+        height: 30
     },
+
 
     titleContainer: {
         width: "80%",

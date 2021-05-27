@@ -23,7 +23,6 @@ export default function Conversation(props) {
 
 
 
-
     useEffect(() => {
         let mounted=true;
         if(mounted){
@@ -39,6 +38,8 @@ export default function Conversation(props) {
         if (index >= 0 ) {
             let _conversation = _conversations[index];
             (_conversation.messages)
+
+            
             setMessages(_conversation.messages);
             setConversation(_conversation);
         }
@@ -47,8 +48,10 @@ export default function Conversation(props) {
             let _conversation = _conversations[index_first];
             setMessages(_conversation.messages);
             setConversation(_conversation);
+    
         }
     }
+
         return () =>{ mounted=false;setMessages([]);setConversation(null);}
     }, [context.conversations,props.route.params])
 
@@ -127,44 +130,63 @@ export default function Conversation(props) {
             <View style={styles.menu}>
                 <FontAwesome color={"white"} style={{ padding: 0, fontFamily:'Poppins',fontSize: 30 }} name="arrow-left" onPress={goBack} />
                 <Image style={styles.friendImage} source={
-                       props.route.params.conversation.type=="personal"?
-                       props.route.params.conversation.users[props.route.params.conversation.users.findIndex(u=>{return u._id != context.user._id})].photo 
-                       ? 
-                       
-                       {uri:props.route.params.conversation.users[props.route.params.conversation.users.findIndex(u=>{return u._id != context.user._id})].photo} :
-                       props.route.params.conversation.image ? {uri:props.route.params.conversation.image}:require("../assets/user_image.png")
+                        props.route.params.conversation.type == "personal" ?
+                        props.route.params.conversation.users[props.route.params.conversation.users.findIndex(u => { return u._id != context.user._id })].photo?
+                            { uri: props.route.params.conversation.users[props.route.params.conversation.users.findIndex(u => { return u._id != context.user._id })].photo }
+                            :require('../assets/user_image.png')
+                            :
 
-                       :
-                       context.partner&&context.partner._id==props.route.params.conversation.partner? 
+                            props.route.params.conversation.partner?
+                                  (  (props.route.params.conversation.partner.managers.length>0&&props.route.params.conversation.partner.managers.findIndex(manager=>{return context.user._id ==manager.user})>=0)
+                                ||  (props.route.params.conversation.partner.deliverers.length>0&&props.route.params.conversation.partner.deliverers.findIndex(deliverer=>{return context.user._id ==deliverer})>=0)
+                                ||  props.route.params.conversation.partner.owner == context.user._id )? 
+                                 
+                                props.route.params.conversation.users[props.route.params.conversation.users.findIndex(user=>{return (props.route.params.conversation.partner.managers.findIndex(manager=>{return manager.user==user._id})==-1
+                                     &&props.route.params.conversation.partner.deliverers.findIndex(del=>{return del==user._id})==-1) && props.route.params.conversation.partner.owner != user._id})] ?
 
-                       props.route.params.conversation.users.findIndex(u=> {
-                           return context.partner.managers.findIndex(manager=>{return u._id ==manager.user})==-1 
-                           && context.partner.deliverers.findIndex(deliverer=>{return u._id ==deliverer})==-1
-                            && context.partner.owner !== u._id })>=0?
-
-
-                       
-                            props.route.params.conversation.users[props.route.params.conversation.users.findIndex(u => { return context.partner.managers.findIndex(manager => { return u._id == manager.user }) == -1 && context.partner.deliverers.findIndex(deliverer => { return u._id === deliverer }) == -1 && context.partner.owner !== u._id })].photo
-                       ?
-                       {
-                           uri: props.route.params.conversation.users[props.route.params.conversation.users.findIndex(u => { return context.partner.managers.findIndex(manager => { return u._id === manager.user }) == -1 && context.partner.deliverers.findIndex(deliverer => { return u._id === deliverer }) == -1 && context.partner.owner !== u._id })].photo}
-                           :
-                           require("../assets/user_image.png")
-                           :
-                           {uri:item.image} 
-                           :
-                           props.route.params.conversation.image ?  {uri:props.route.params.conversation.image} : require("../assets/user_image.png")
+                                     props.route.params.conversation.users[props.route.params.conversation.users.findIndex(user=>{return (props.route.params.conversation.partner.managers.findIndex(manager=>{return manager.user==user._id})==-1
+                                        &&props.route.params.conversation.partner.deliverers.findIndex(del=>{return del==user._id})==-1) && props.route.params.conversation.partner.owner != user._id})].photo
+                        ?
+                            {
+                                uri:  
+                                props.route.params.conversation.users[props.route.params.conversation.users.findIndex(user=>{return (props.route.params.conversation.partner.managers.findIndex(manager=>{return manager.user==user._id})==-1
+                                   &&props.route.params.conversation.partner.deliverers.findIndex(del=>{return del==user._id})==-1) && props.route.params.conversation.partner.owner != user._id})].photo}
+                                :
+                                require("../assets/user_image.png")
+                                :
+                          
+                          
+                                {uri:props.route.params.conversation.image} 
+                                :
+                                {uri:props.route.params.conversation.image} 
+                 :{uri:props.route.params.conversation.image}           
                 } />
                 <Text style={styles.Title}>{
-                props.route.params.conversation.type == "personal" ?
-                    props.route.params.conversation.other ? 
-                            props.route.params.conversation.other :props.route.params.conversation.users.filter(user => user._id != context.user._id)[0].firstName + " " + props.route.params.conversation.users.filter(user => user._id != context.user._id)[0].lastName 
-                            : 
-
-                         context.partner&& context.partner._id==props.route.params.conversation.partner&&context.partner.managers&& props.route.params.conversation.users.findIndex(u => { return context.partner.managers.findIndex(manager => { return u._id === manager.user }) == -1 && context.partner.deliverers.findIndex(deliverer => { return u._id === deliverer }) == -1 && context.partner.owner !== u._id }) >= 0 ? 
-                          props.route.params.conversation.users[ props.route.params.conversation.users.findIndex(u => { return context.partner.managers.findIndex(manager => { return u._id === manager.user }) == -1 && context.partner.deliverers.findIndex(deliverer => { return u._id === deliverer }) == -1 && context.partner.owner !== u._id })].firstName
-                                + " " +  props.route.params.conversation.users[ props.route.params.conversation.users.findIndex(u => { return context.partner.managers.findIndex(manager => { return u._id === manager.user }) == -1 && context.partner.deliverers.findIndex(deliverer => { return u._id === deliverer }) == -1 && context.partner.owner !== u._id })].lastName
-                                :  props.route.params.conversation.title }</Text>
+                 props.route.params.conversation.type == "personal" ?
+                 props.route.params.conversation.users[props.route.params.conversation.users.findIndex(u => { return u._id != context.user._id })].firstName ?
+                     props.route.params.conversation.users[props.route.params.conversation.users.findIndex(u => { return u._id != context.user._id })].firstName+" "
+                     +props.route.params.conversation.users[props.route.params.conversation.users.findIndex(u => { return u._id != context.user._id })].lastName : "" 
+                     
+                     
+                     
+                     :
+                     
+                     props.route.params.conversation.partner ? 
+                     (  (props.route.params.conversation.partner.managers.length>0&&props.route.params.conversation.partner.managers.findIndex(manager=>{return context.user._id ==manager.user})>=0)
+                   ||  (props.route.params.conversation.partner.deliverers.length>0&&props.route.params.conversation.partner.deliverers.findIndex(deliverer=>{return context.user._id ==deliverer})>=0)
+                   ||  props.route.params.conversation.partner.owner == context.user._id )? 
+                    
+                   props.route.params.conversation.users[props.route.params.conversation.users.findIndex(user=>{return (props.route.params.conversation.partner.managers.findIndex(manager=>{return manager.user==user._id})==-1
+                        &&props.route.params.conversation.partner.deliverers.findIndex(del=>{return del==user._id})==-1) && props.route.params.conversation.partner.owner != user._id})] ?
+                        
+                        props.route.params.conversation.users[props.route.params.conversation.users.findIndex(user=>{return (props.route.params.conversation.partner.managers.findIndex(manager=>{return manager.user==user._id})==-1
+                         &&props.route.params.conversation.partner.deliverers.findIndex(del=>{return del==user._id})==-1) && props.route.params.conversation.partner.owner != user._id})].firstName+" " +  
+                         
+                         props.route.params.conversation.users[props.route.params.conversation.users.findIndex(user=>{return (props.route.params.conversation.partner.managers.findIndex(manager=>{return manager.user==user._id})==-1
+                         &&props.route.params.conversation.partner.deliverers.findIndex(del=>{return del==user._id})==-1) && props.route.params.conversation.partner.owner != user._id})].lastName
+                         
+                         :
+                         props.route.params.conversation.title:props.route.params.conversation.title:props.route.params.conversation.title }</Text>
             
             </View>
 
@@ -200,7 +222,7 @@ export default function Conversation(props) {
                                                  
 
                                                 </View>
-                                                <Image style={styles.FriendImage} source={conversation.users[conversation.users.findIndex(user=>{return user._id==message.sender._id})].photo?{uri:conversation.users[conversation.users.findIndex(user=>{return user._id==message.sender._id})].photo}:require('../assets/user_image.png')}/>
+                                                <Image style={styles.FriendImage} source={message.sender.photo ? {uri:message.sender.photo}:require('../assets/user_image.png')}/>
 
                                             </View>
                                         )

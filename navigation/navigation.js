@@ -32,6 +32,8 @@ import collecting from '../screens/business/CollectingDeliveries';
 import delivering from '../screens/business/DeliveringOrders';
 import debouItems from '../screens/business/DebouOrders';
 import Notifications from '../screens/NotificationsScreen';
+import partner from '../common/Partner';
+import followDeliverers from '../screens/business/followDeliverers';
 
 
 
@@ -100,11 +102,13 @@ return(
             <drawerStack.Screen name="listProducts" component={ListProductsScreen}/>
             <drawerStack.Screen name="deliveryDash" component={DeliveryDashboardScreen}/>
             <drawerStack.Screen name="followPackages" component={followPackages}/>
+            <drawerStack.Screen name="followDeliverers" component={followDeliverers}/>
+
             <drawerStack.Screen name="contact" component={Contact}/>
             <drawerStack.Screen name="livraisons" component={qrScanner}/>
             <drawerStack.Screen name="debou" component={debouItems}/>
             <drawerStack.Screen name="notifications" component={Notifications}/>
-
+            <drawerStack.Screen name="partner" component={partner}/>
 
           </drawerStack.Navigator>
       </NavigationContainer>

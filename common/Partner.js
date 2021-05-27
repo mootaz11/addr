@@ -9,10 +9,17 @@ import Product from './singleProduct';
 const  partner = (props)=>{
     const context= useContext(AuthContext);
     
-
+    const checkProduct = (item)=>{
+      if(item.type=="food"){
+          props.navigation.navigate("food",{product:item,last:"Home",partner:props.partner})
+                      }
+      else {
+      props.navigation.navigate("singleProduct",{product:item,last:"Home"})
+      }
+  }
 
     return (
-        <View    style={{width: "100%",height: Dimensions.get("screen").height / 3}}>
+        <View    style={{width: "100%",height: Dimensions.get("screen").height / 2.86}}>
         <View style={{ width: "100%", height: "25%",  flexDirection: "row"}}>
          
          <TouchableOpacity style={{ width: "50%", height: "100%"}} onPress={props.checkPartner.bind(this,props.partner)}>
@@ -38,11 +45,15 @@ const  partner = (props)=>{
             showsHorizontalScrollIndicator={false}
             renderItem={
               ({ item }) =>
+                        
                         <Product
+                          checkProduct={checkProduct}
                           mainImage={item.mainImage ? {uri:item.mainImage} : require("../assets/imagenotyet.jpg")}
+                          
                           name={item.name}
                           description={item.description}
                           basePrice={item.basePrice}
+                          product={item}
                             />   
             }
 
@@ -79,14 +90,14 @@ const styles = StyleSheet.create({
   },
     product: {
       height: "100%",
-      width: 140,
+      width: 160,
       marginHorizontal: 8,
       backgroundColor: "white",
       borderRadius: 8
     },
     productDark: {
       height: "100%",
-      width: 140,
+      width: 160,
       marginHorizontal: 8,
       borderRadius: 8,
       backgroundColor: "black",

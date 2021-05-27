@@ -6,6 +6,7 @@ import { createOrder } from '../rest/ordersApi';
 import AuthContext from '../navigation/AuthContext';
 import { setIn } from 'formik';
 
+import {getDeliveryOptions} from '../rest/ordersApi';
 
 
 export default function foodProduct(props) {
@@ -15,24 +16,48 @@ export default function foodProduct(props) {
     const [choice, setChoice] = useState(null);
     const [supplements, setSupplements] = useState([]);
     const [ingredients, setIngredients] = useState([]);
+    const [others,setOthers]=useState([]);
     const [food_data,setFoodData]=useState(null);
+    const [location,setLocation] =useState(null)
+    const [deliveryPartner,setDeliverypartner]=useState(null);
+
 
     useEffect(() => {
+        if(context.location&&context.location.location){
+            setLocation({
+                lat:context.location.location.latitude,
+                lng:context.location.location.longitude
+            })
+    
+    
+            let _location = {lat:context.location.location.latitude,
+                lng:context.location.location.longitude
+    }
+            getDeliveryOptions(props.route.params.partner._id,{location:_location}).then(data=>{
+
+                setDeliverypartner(data.deliveryPartner)
+            }).catch(err=>{
+                console.log(err)
+            })   
+        }
+
         if (props.route.params.product) {
             getProduct(props.route.params.product._id).then(product=>{
                 let _food_data=[];
-               let _ingredients =[ ];
+               let _ingredients =[];
+
                 product.variants.map(variant=>{
                     let data = variant.options.map(option=>{
+                       
                        let index_pricing = product.pricing.findIndex(pricing=>{
                            return pricing.variantOptions.findIndex(Pricing_option=>{return Pricing_option._id==option._id})>=0
                        });
-                       return {title:variant.name,choix:option.name,price:product.pricing[index_pricing].price,_id:product.pricing[index_pricing]._id}
+                       return {max: variant.maxSelectedOptions,min:variant.minSelectedOptions
+                       ,title:variant.name,choix:option.name,price:product.pricing[index_pricing].price,_id:product.pricing[index_pricing]._id}
                     })
                     if(variant.name=='ingredient'){
                         setIngredients(data);
                         }
-                
                     _food_data.push({data,title:variant.name})
                  })
                 
@@ -41,28 +66,30 @@ export default function foodProduct(props) {
                 setProduct(product);  
             })
             .catch(err=>{
+                console.log(err)
                 alert("error while getting product")
             })
         }
-        return ()=>{setProduct(null),setChecked('');setChoice(null);setIngredients([]);setSupplements([])}
+        return ()=>{setProduct(null),setChecked('');setChoice(null);setIngredients([]);setOthers([]);setSupplements([])}
     }, [props.route.params])
 
     const addChoice = (item) =>{
+        
        if(choice&&choice._id==item._id){
             let _product={...product};
-            _product.total+=item.price;
+            _product.total=item.price;
             setProduct(_product);
         }
         if(choice&& choice._id!=item._id){
             let _product={...product};
-            _product.total-=choice.price;
-            _product.total+=item.price;
+            _product.total=choice.price;
+            _product.total=item.price;
             setProduct(_product);
 
         }
         if(!choice){
             let _product={...product};
-            _product.total+=item.price;
+            _product.total=item.price;
             setProduct(_product);
 
         }
@@ -89,6 +116,36 @@ export default function foodProduct(props) {
 
     }
 
+    const addOthers =(item)=>{
+            console.log(item)
+            if (others.findIndex(i => { return i._id == item._id }) >= 0) {
+                if(item.min>=others.length+1){
+                    setOthers(others.filter(i => i._id != item._id))
+                    let _product ={...product};
+                    _product.total-=item.price
+                    setProduct(_product)
+                }
+                else {
+                    alert(`minimum required is ${others.minSelectedOptions}`)
+                }
+              
+            }
+            else {
+                if(others.length < item.max){
+
+                setOthers(others => [...others, item])
+                let _product ={...product};
+                _product.total+=item.price
+                setProduct(_product)
+
+            }
+            else {
+                alert("you can't add more")
+            }
+        }
+
+        
+    }
     const addSupplements = (item) => {
 
         if (supplements.length > 26) {
@@ -117,47 +174,63 @@ export default function foodProduct(props) {
 
 
     const addProduct = () => {
-        let _ingredients = [];
+if (props.route.params.partner.workingHours.from <= new Date().toUTCString().split(' ')[4].split(':')[0]+":00" &&props.route.params.partner.workingHours.to>= new Date().toUTCString().split(' ')[4].split(':')[0]+":00")
+
+
+{
+    let _ingredients = [];
         
-        supplements.forEach(supp=>{_ingredients.push(supp._id)})
-        ingredients.forEach(ingr=>{_ingredients.push(ingr._id)})
-        if(choice){
-        _ingredients.push(choice._id);
+    supplements.forEach(supp=>{_ingredients.push(supp._id)})
+    ingredients.forEach(ingr=>{_ingredients.push(ingr._id)})
+    others.forEach(ingr=>{_ingredients.push(ingr._id)})
+    if(choice){
+    _ingredients.push(choice._id);
+    }
+    if(_ingredients.length>0){ 
+    createOrder({
+        product:{...product},
+        ingredients:_ingredients,
+        quantity:1
+    }).then(createdOrder=>{
+        if(createdOrder){
+            context.setBag(bag=>bag+1)
+
+            Alert.alert(
+                "",
+                "food order created done !",
+                [
+                  { text: "OK" }
+                ],
+                { cancelable: false }
+              );
         }
-        if(_ingredients.length>0){ 
-        createOrder({
-            product:{...product},
-            ingredients:_ingredients,
-            quantity:1
-        }).then(createdOrder=>{
-            if(createdOrder){
-                Alert.alert(
-                    "",
-                    "food order created done !",
-                    [
-                      { text: "OK" }
-                    ],
-                    { cancelable: false }
-                  );
-            }
-        })
-        .catch(err=>{
-            alert("error occured")
-        })}
-       
-        else {
-            alert("please choose at least one option")
-        }
+    })
+    .catch(err=>{
+        alert("error occured")
+    })}
+   
+    else {
+        alert("please choose at least one option")
+    }
+
+
+}
+
+
     }
 
 const checkBasket =()=>{
     props.navigation.navigate("basket",{last_screen:"singleBrand"});
 }
-
-
 const goBack = () => {
-        props.navigation.goBack();
+    if(props.route.params.last=="Home"){
+        props.navigation.navigate("Home",{product:product})
     }
+    else {
+        props.navigation.goBack()
+
+    }    }
+
     if (product) {
         return (
             <View style={context.darkMode ? styles.containerDark : styles.container}>
@@ -166,8 +239,8 @@ const goBack = () => {
                     <TouchableOpacity style={styles.leftArrow} onPress={goBack}>
                         <Image style={{ width: "100%", height: "100%" }} source={require("../assets/left-arrow-dark.png")} />
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={checkBasket}  style={{ position: "absolute",width: Dimensions.get("screen").height * 0.03, height: Dimensions.get("screen").height * 0.03,top: "10%", right: "2%" ,elevation:10,zIndex:50}}>
-                <FontAwesome color={"white"} style={{ padding: 0, fontFamily:'Poppins',fontSize: 24, position: "absolute", top: "10%", right: "2%" }} name="shopping-bag" />
+                    <TouchableOpacity onPress={checkBasket}  style={{ position: "absolute",width: Dimensions.get("screen").height * 0.03, height: Dimensions.get("screen").height * 0.03,top: "8%", right: "2%" ,elevation:10,zIndex:50}}>
+                <FontAwesome color={"white"} style={{ padding: 0, fontFamily:'Poppins',fontSize: Dimensions.get("screen").height * 0.03, }} name="shopping-bag" />
 
 
                 </TouchableOpacity>
@@ -180,31 +253,31 @@ const goBack = () => {
                             <View style={styles.itemContainer}>
                                 <View style={styles.itemInfo}>
                                     {
-                                        item.title == "CHOIX" ?
+                                        item.title == "choice" ?
                                             <TouchableOpacity key={item.choix} onPress={() => addChoice(item)}>
                                                 <View style={styles.RadioButton}>
-                                                    <Image style={{ width: "90%", height: "90%", resizeMode: "cover" }} source={item == checked ? context.darkMode ? require("../assets/radio_checked_dark.png"):  require("../assets/button_checked.png")  :context.darkMode ? require("../assets/radio_unchecked_dark.png"):  require("../assets/button_unchecked.png")} />
+                                                    <Image style={{ width: "90%", height: "90%", resizeMode: "cover" }} source={item == checked ?  require("../assets/choice_checked.png"):  require("../assets/choice_unchecked.png") } />
                                                 </View>
                                             </TouchableOpacity>
                                             :
-                                            <TouchableOpacity key={item.choix} onPress={() => item.title == "ingredient" ? addIngredients(item) : addSupplements(item)}>
+                                            <TouchableOpacity key={item.choix} onPress={() => item.title == "ingredient" ? addIngredients(item) : item.title == "supplement" ? addSupplements(item):addOthers(item)}>
                                                 <View style={styles.RadioButton}>
-                                                    <Image style={{ width: "90%", height: "90%", resizeMode: "cover" }} source={item.title == "ingredient" ? ingredients.findIndex(i => { return i == item }) >= 0 ? require("../assets/checkbox_checked.png") : require("../assets/checkbox_unchecked.png") : supplements.findIndex(i => { return i == item }) >= 0 ? require("../assets/checkbox_checked.png") : require("../assets/checkbox_unchecked.png")} />
+                                                    <Image style={{ width: "90%", height: "90%", resizeMode: "cover" }} source={item.title == "ingredient" ? ingredients.findIndex(i => { return i == item }) >= 0 ? require("../assets/checkbox_checked.png") : require("../assets/checkbox_unchecked.png") : item.title == "supplement" ? supplements.findIndex(i => { return i == item }) >= 0 ? require("../assets/checkbox_checked.png") : require("../assets/checkbox_unchecked.png") :others.findIndex(i => { return i == item }) >= 0 ? require("../assets/checkbox_checked.png") : require("../assets/checkbox_unchecked.png")    } />
                                                 </View>
                                             </TouchableOpacity> 
                                     }
-                                    <Text style={context.darkMode ?{ fontFamily:'Poppins',fontSize: 17 ,color:"white"} : { fontFamily:'Poppins',fontSize: 17,color:"black" }}>{item.choix}</Text>
+                                    <Text style={context.darkMode ?{ fontFamily:'Poppins',fontSize: Dimensions.get("screen").width*0.04 ,color:"white"} : { fontFamily:'Poppins',fontSize: Dimensions.get("screen").width*0.04,color:"black" }}>{item.choix} </Text>
                                 </View >
-                                <Text style={context.darkMode ?{ fontFamily:'Poppins',fontSize: 17 ,color:"white"} : { fontFamily:'Poppins',fontSize: 17 }}>{item.price} dt</Text>
+                                <Text style={context.darkMode ?{ fontFamily:'Poppins',fontSize:Dimensions.get("screen").width*0.04 ,color:"white"} : { fontFamily:'Poppins',fontSize: Dimensions.get("screen").width*0.04 }}>{item.price} dt</Text>
                             </View>}
                         renderSectionHeader={({ section: { title } }) => (
                             <View style={context.darkMode ? styles.headerSectionDark : styles.headerSection}>
                                 <Text style={context.darkMode ? styles.sectionHeaderTitleDark : styles.sectionHeaderTitle}>{title}</Text>
                                 {
                                     title === "SUPPLEMENTS" ?
-                                        <Text style={context.darkMode ? { fontFamily:'Poppins',fontSize: 15, fontWeight: "700", color: "white", backgroundColor: "#787878" }:{ fontFamily:'Poppins',fontSize: 15, fontWeight: "700", color: "white", backgroundColor: "#787878" }}>MAX 16</Text> :
+                                        <Text style={context.darkMode ? { fontFamily:'Poppins',fontSize: Dimensions.get("screen").width*0.04, fontWeight: "700", color: "white", backgroundColor: "#787878" }:{ fontFamily:'Poppins',fontSize: Dimensions.get("screen").width*0.04, fontWeight: "700", color: "white", backgroundColor: "#787878" }}>MAX 16</Text> :
                                         title === "CHOIX" ?
-                                            <Text style={context.darkMode ?{ fontFamily:'Poppins',fontSize: 15, fontWeight: "700", color: "white", backgroundColor: "#404040" }: { fontFamily:'Poppins',fontSize: 15, fontWeight: "700", color: "white", backgroundColor: "#787878" }}>Obligatoire</Text> :
+                                            <Text style={context.darkMode ?{ fontFamily:'Poppins',fontSize:Dimensions.get("screen").width*0.04, fontWeight: "700", color: "white", backgroundColor: "#404040" }: { fontFamily:'Poppins',fontSize: Dimensions.get("screen").width*0.04, fontWeight: "700", color: "white", backgroundColor: "#787878" }}>Obligatoire</Text> :
                                             null
                                 }
                             </View>
@@ -215,19 +288,41 @@ const goBack = () => {
                 <View style={styles.addProductContainer}>
                     <View style={styles.cost}>
                         <View >
-                            <Text style={context.darkMode ? { fontFamily:'Poppins',fontSize: 20, fontWeight: "600",color:"white" }:{ fontFamily:'Poppins',fontSize: 20, fontWeight: "600" }}>Cost</Text>
+                            <Text style={context.darkMode ? { fontFamily:'Poppins',fontSize: Dimensions.get("screen").width*0.06, fontWeight: "600",color:"white" }:{ fontFamily:'Poppins',fontSize: Dimensions.get("screen").width*0.06, fontWeight: "600" }}>Cost</Text>
                         </View>
                         <View >
-                            <Text style={context.darkMode ? { fontFamily:'Poppins',fontSize: 20, fontWeight: "600" ,color:"white"}:{ fontFamily:'Poppins',fontSize: 20, fontWeight: "600" }}>{product.total} DT</Text>
+                            <Text style={context.darkMode ? { fontFamily:'Poppins',fontSize: Dimensions.get("screen").width*0.06 ,fontWeight: "600" ,color:"white"}:{ fontFamily:'Poppins',fontSize: Dimensions.get("screen").width*0.06, fontWeight: "600" }}>{product.total} DT</Text>
                         </View>
                     </View>
 
                     <View style={styles.buttonContainer}>
-                        <TouchableOpacity style={styles.addButton} onPress={addProduct}>
+                        <TouchableOpacity disabled={!((props.route.params.partner && 
+                            (props.route.params.partner.workingHours.from <= new Date().toUTCString().split(' ')[4].split(':')[0]+":00" &&props.route.params.partner.workingHours.to>= new Date().toUTCString().split(' ')[4].split(':')[0]+":00"))
+                            
+                            &&
+                            (deliveryPartner && 
+                                (deliveryPartner.workingHours.from <= new Date().toUTCString().split(' ')[4].split(':')[0]+":00" &&deliveryPartner.workingHours.to>= new Date().toUTCString().split(' ')[4].split(':')[0]+":00"))
+                            )
+
+    
+                            
+                            } style={!((props.route.params.partner && 
+                                (props.route.params.partner.workingHours.from <= new Date().toUTCString().split(' ')[4].split(':')[0]+":00" &&props.route.params.partner.workingHours.to>= new Date().toUTCString().split(' ')[4].split(':')[0]+":00"))
+                                
+                                &&
+                                (deliveryPartner && 
+                                    (deliveryPartner.workingHours.from <= new Date().toUTCString().split(' ')[4].split(':')[0]+":00" &&deliveryPartner.workingHours.to>= new Date().toUTCString().split(' ')[4].split(':')[0]+":00"))
+                                ) ? styles.addBlocked : styles.addButton} onPress={addProduct}>
 
                             <View style={{ height: "100%", height: "100%", flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
                                 <FontAwesome color={"white"} style={{ marginRight: 8, padding: 0, fontFamily:'Poppins',fontSize: Dimensions.get("screen").width*0.03, fontWeight: "700" }} name="shopping-bag" />
-                                <Text style={{ fontFamily:'Poppins',fontSize: Dimensions.get("screen").width*0.04, fontWeight: "700", color: "white" }}>ADD</Text>
+                                <Text style={{ fontFamily:'Poppins',fontSize: Dimensions.get("screen").width*0.04, fontWeight: "700", color: "white" }}>{((props.route.params.partner && 
+                            (props.route.params.partner.workingHours.from <= new Date().toUTCString().split(' ')[4].split(':')[0]+":00" &&props.route.params.partner.workingHours.to>= new Date().toUTCString().split(' ')[4].split(':')[0]+":00"))
+                            
+                            &&
+                            (deliveryPartner && 
+                                (deliveryPartner.workingHours.from <= new Date().toUTCString().split(' ')[4].split(':')[0]+":00" &&deliveryPartner.workingHours.to>= new Date().toUTCString().split(' ')[4].split(':')[0]+":00"))
+                            ) ? "ADD":"partner out of service"}</Text>
                             </View>
                         </TouchableOpacity>
 
@@ -274,6 +369,13 @@ const styles = StyleSheet.create({
         width: "94%",
         borderRadius: 8,
         backgroundColor: "#2474F1",
+
+    },
+    addBlocked:{
+        height: "80%",
+        width: "94%",
+        borderRadius: 8,
+        backgroundColor: "red",
 
     },
     cost: {

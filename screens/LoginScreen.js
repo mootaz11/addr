@@ -54,6 +54,10 @@ export default function Login(props) {
     const [isKeyboardVisible, setKeyboardVisible] = useState(false);
     const context = useContext(AuthContext);
 
+    const turntoLogin = (value)=>{
+        console.log(value);
+        setSignupClicked(value);
+    }
 
     useEffect(() => {
 
@@ -144,7 +148,7 @@ export default function Login(props) {
 
                                 {signupClicked ?
 
-                                    <SignUpForm />
+                                    <SignUpForm turntoSignIn ={turntoLogin} />
                                     :
                                     <LoginForm  isKeyboardVisible={isKeyboardVisible} />
                                 }

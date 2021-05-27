@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react'
-import { View, Text, StyleSheet, Dimensions, Button, Alert, TouchableOpacity, SafeAreaView, TextInput, Image } from 'react-native'
+import { View, Text, StyleSheet, Dimensions, Button, Alert, TouchableOpacity,Animated, SafeAreaView, TextInput, Image,TouchableWithoutFeedback } from 'react-native'
 import { BarCodeScanner } from 'expo-barcode-scanner';
 import * as Permissions from 'expo-permissions';
 import AuthContext from '../../navigation/AuthContext';
@@ -29,10 +29,9 @@ export default function qrScanner(props) {
     const [notArrivedOrders, setNotArrivedOrders] = useState([]);
     const [completed, setCompleted] = useState(false);
     const [modalListPartners, setModalListPartners] = useState(false)
-    const [profile, setProfile] = useState(null);
     const [profiles, setProfiles] = useState([]);
     const [profileChecked, setProfileChecked] = useState(false);
-
+    const [positionModal,setPositionModal]=useState(new Animated.ValueXY({x:0,y:0}))
 
 
     useEffect(() => {
@@ -42,12 +41,15 @@ export default function qrScanner(props) {
                 if(_notArrivedOrders.length>0){
                     setCompleted(false);
                 }
+                
                 setNotArrivedOrders(_notArrivedOrders)
             
             }).catch();
 
 
             getTobeDeliveredOrders(context.user._id,context.partner._id).then(todayTobedeliveredupOrders=>{
+
+
                 if(todayTobedeliveredupOrders.length>0){
                     setCompleted(false);
                 }
@@ -56,7 +58,6 @@ export default function qrScanner(props) {
 
 
             getTobepickedUpOrders(context.user._id,context.partner._id).then(todayTobepickedupOrders=>{
-                            
                 setTobepickeduporders(todayTobepickedupOrders)
             }).catch();
 
@@ -66,13 +67,34 @@ export default function qrScanner(props) {
 
 
     }, [props.route.params]);
-
+    const modalDown =()=>{
+      Animated.timing(positionModal, {
+        toValue: { x: 0, y:0},
+        duration: 200,
+        useNativeDriver: true
+      }).start(()=>{
+        setModalListPartners(!modalListPartners)
+  
+      });
+  
+   
+  
+  }
+  
+    const modalUp =()=>{
+      Animated.timing(positionModal, {
+        toValue: { x: 0, y:200},
+        duration: 200,
+        useNativeDriver: true
+      }).start();
+    }
+  
     const checkAccount = (item) => {
-        setProfile(item);
+        context.setProfile(item);
         if (!item.firstName) {
           context.setPartner(item);
             
-            if(item.delivery.cities.length>0 || item.delivery.regions.length>0){
+            if(item.delivery.cities.length>0 || item.delivery.regions.length>0|| item.delivery.localRegions.length>0){
                 if(item.owner ==context.user._id){
                     props.navigation.navigate('deliveryDash');
                 }
@@ -100,7 +122,7 @@ export default function qrScanner(props) {
             }
     
     
-            if(item.delivery.cities.length==0 && item.delivery.regions.length==0)
+            if(item.delivery.cities.length==0 && item.delivery.regions.length==0 && item.delivery.localRegions.length==0)
               {
               if(item.managers.findIndex(m=>{return m.manager==context.user._id})>=0 &&item.managers[item.managers.findIndex(m=>{return m.manager==context.user._id})].access.businessAccess.dashboard){
                 props.navigation.navigate("businessDash");
@@ -197,37 +219,30 @@ export default function qrScanner(props) {
     };
 
     const checkProfile = () => {
-        let _profiles = [];
-    
-        if (context.user.isVendor) {
-          _profiles = context.user.workPlaces;
-    
-          if(context.partner && context.user.workPlaces.findIndex(partner=>{return partner._id == context.partner._id})){
-            setProfile(context.partner);
-        }
+      let _profiles = [];
 
-        }
-        if (context.user.isPartner) {
-            _profiles = context.user.partners;
-            if(context.partner && context.user.partners.findIndex(partner=>{return partner._id == context.partner._id})){
-              setProfile(context.partner);
-          }
-          }
-        if (_profiles.findIndex(p => { return p._id == context.user._id }) == -1) {
-          _profiles.push(context.user);
-          if(!context.partner){
-              setProfile(context.user);
-          }
-    
-        }
-        setProfiles(_profiles);
-    
-        // setProfiles([context.user,...profiles]);
-        setProfileChecked(!profileChecked);
-        setModalListPartners(!modalListPartners)
+      if (context.user.isVendor) {
+        _profiles =_profiles.concat(context.user.workPlaces);
       }
-    
-
+  
+      if (context.user.isPartner) {
+          _profiles = _profiles.concat(context.user.partners);
+       
+        }
+      if (_profiles.findIndex(p => { return p._id == context.user._id }) == -1) {
+        _profiles.push(context.user);
+     
+  
+      }
+      setProfiles(_profiles);
+  
+      // setProfiles([context.user,...profiles]);
+      setProfileChecked(!profileChecked);
+      setModalListPartners(!modalListPartners)
+      modalUp();
+  
+    }
+  
 
     const checkDebou =()=>{
         props.navigation.navigate('debou')
@@ -235,17 +250,19 @@ export default function qrScanner(props) {
     const _handleBarcodeScanned = (result) => {
         setScanned(true);
         setCount(count + 1);
-        Alert.alert(`Scanned! code :${result.data}`, 'press OK to continue scanning', [{
+        Alert.alert(`code Scanned!  :${result.data}`, 'press OK to continue scanning', [{
             text: 'OK', onPress: () => {
                 setScanned(false);
-
 
                 if (props.route.params.last_screen && props.route.params.last_screen == "debou_items") {
                         if (notArrivedOrders.length > 0) {
                             if (notArrivedOrders.findIndex(order => { return order._id == result.data }) >= 0) {
+
+
                                 markOrderArrivedInDeposit(context.partner._id, result.data).then(message => {
+                                  Alert.alert('', 'Order Scanned !', [{ text: 'Okay' }]);
                                     setNotArrivedOrders(notArrivedOrders.filter(order => order._id != result.data));
-                                })
+                                }).catch(err=>{console.log(err);alert("failed while updating order")})
                             }
                         }
 
@@ -254,29 +271,45 @@ export default function qrScanner(props) {
 
                         }
                      }
-
-
-                
                 if (props.route.params.last_screen && props.route.params.last_screen == "collecting" && props.route.params.order_id) {
-                    if (result.data == props.route.params.order_id) {
-                        markOrderAsDuringCollectDelivery(
-                            context.partner._id, result.data,
-                            tobepickeduporders[tobepickeduporders.findIndex(order => { return order._id == props.route.params.order_id })].client.location,
-                            context.location.location
-                        ).then(message => {
-                            setTobepickeduporders(tobepickeduporders.filter(order => order._id != props.route.params.order_id));
-                        })
-                    }
-                }
+                    if (result.data == props.route.params.order_id){
+                      if(tobepickeduporders.findIndex(order => { return order._id == props.route.params.order_id })>=0)
+                     {
+                      markOrderAsDuringCollectDelivery(
+                        context.partner._id, result.data,
+                        {lng:tobepickeduporders[tobepickeduporders.findIndex(order => { return order._id == props.route.params.order_id })].purchaseOrder.partner.localisation.lng,
+                        lat:tobepickeduporders[tobepickeduporders.findIndex(order => { return order._id == props.route.params.order_id })].purchaseOrder.partner.localisation.lat
+                      },  
+                        {lng:context.location.location.longitude,lat:context.location.location.latitude}
+                    ).then(message => {
+                      Alert.alert('', 'Order Scanned !', [{ text: 'Okay' }]);
 
-                if (!props.route.params.last_screen) {
+                        setTobepickeduporders(tobepickeduporders.filter(order => order._id != props.route.params.order_id));
+                      }).catch(err=>{
+                        
+                        console.log(err);
+                        alert("failed while updating order")})
+                     }
+                        }}
+
+                if (props.route.params.last_screen&&props.route.params.last_screen=='delivery'){
                     if (tobedeliveredorders.length > 0 && tobedeliveredorders.findIndex(order => { return order._id == result.data }) >= 0) {
 
-                        markOrderAsDuringClientDelivery(context.partner._id, result.data,context.location.location, 
-                            tobedeliveredorders[tobedeliveredorders.findIndex(order => { return order._id == props.route.params.order_id })].client.location).then(message => {
+                      markOrderAsDuringClientDelivery(context.partner._id, result.data,{lat:context.location.location.latitude,lng:context.location.location.longitude}, 
+                          {lng:tobedeliveredorders[tobedeliveredorders.findIndex(order => { return order._id == result.data })].client.location.location.longitude,
+                          lat:tobedeliveredorders[tobedeliveredorders.findIndex(order => { return order._id == result.data })].client.location.location.latitude})
+                          
+                          .then(message => {
+                          Alert.alert('', 'Order Scanned !', [{ text: 'Okay' }]); 
+
                             setTobedeliveredorders(tobedeliveredorders.filter(order => order._id != result.data));
-                        })
-                    }}}}]);};
+                          }).catch(err=>{alert("failed while updating order")})
+
+                          
+                        }}}}])
+                        
+                        ;
+                      };
 
 
     return (
@@ -292,8 +325,8 @@ export default function qrScanner(props) {
                         : <BarCodeScanner
                             onBarCodeScanned={scanned ? undefined : _handleBarcodeScanned}
                             style={{
-                                height: Dimensions.get('screen').height,
-                                width: Dimensions.get('screen').width,
+                                height:"100%",
+                                width: "100%",
                                 flexDirection: "column",
                                 alignItems: "center",
                                 justifyContent: "center"
@@ -313,6 +346,7 @@ export default function qrScanner(props) {
         flexDirection: "row",
         borderRadius: 12
       }}>
+     
         <View style={{
           width: "10%",
           height: "100%",
@@ -324,6 +358,7 @@ export default function qrScanner(props) {
           <Image style={{ width: Dimensions.get("screen").height * 0.022 , height:Dimensions.get("screen").height * 0.022 , resizeMode: "contain" }} source={require("../../assets/searchHome.png")} />
         </View>
         <View style={{
+          
           width: "55%",
           height: "100%",
           borderRadius: 12
@@ -332,7 +367,7 @@ export default function qrScanner(props) {
             style={context.darkMode ? { width: "100%",color:"white", height: Dimensions.get("screen").height * 0.045 }:{ width: "100%",color:"black", height: Dimensions.get("screen").height * 0.045 }}
             placeholderTextColor={"#B5B5B5"}
             placeholder={"Search"}
-          />
+         />
         </View>
         <View style={{
           width: "35%",
@@ -362,10 +397,10 @@ export default function qrScanner(props) {
 
 
                             <View style={!completed ? {
-                                width: "60%", height: 60, borderRadius: 12, opacity: 0.8, backgroundColor: "#3E3E3E",
+                                width: "50%", height: 40, borderRadius: 12, opacity: 0.8, backgroundColor: "#3E3E3E",
                                 position: "absolute", top: "65%"
                             } : {
-                                width: "60%", height: 60, borderRadius: 12, opacity: 0.8, backgroundColor: "#73e340",
+                                width: "50%", height: 40, borderRadius: 12, opacity: 0.8, backgroundColor: "#73e340",
                                 position: "absolute", top: "65%"
                             }}>
                                 <TouchableOpacity disabled={disabled} onPress={() => { checkifCompleted() }} style={{ width: "100%", height: "100%", borderRadius: 20, justifyContent: 'center', alignItems: "center", flexDirection: "column" }}>
@@ -377,7 +412,7 @@ export default function qrScanner(props) {
 {
 props.route.params.last_screen=="debou_items" ?
 
-<View style={{ width: "80%", height: 80, flexDirection: "column",justifyContent:"center",alignItems:"center", borderRadius: 16, position: "absolute", bottom: 40, backgroundColor: "#3E3E3E" }}>
+<View style={{ width: "70%", height: 60, flexDirection: "column",justifyContent:"center",alignItems:"center", borderRadius: 16, position: "absolute", bottom: 40, backgroundColor: "#3E3E3E" }}>
 
 <View style={{ width: "50%", height: "100%", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
     <TouchableOpacity style={{ width: "50%", height: "50%" }} onPress={() => { checkDebou() }}>
@@ -403,7 +438,7 @@ props.route.params.last_screen=="debou_items" ?
 </View>
 }
 
-                            <View style={{ width: 200, height: 200, flexDirection: "column", justifyContent: 'space-between' }}>
+                            <View style={{ width: 250, height: 250, flexDirection: "column", justifyContent: 'space-between' }}>
                                 <View style={{ width: "100%", height: "50%", flexDirection: "row", justifyContent: "space-between" }}>
                                     <Image style={{ width: 50, height: 50 }} source={require("../../assets/corner1.png")} />
                                     <Image style={{ width: 50, height: 50, }} source={require("../../assets/corner3.png")} />
@@ -431,6 +466,7 @@ props.route.params.last_screen=="debou_items" ?
                                 <Text style={{ color: "black", fontFamily: 'Poppins', fontSize: Dimensions.get("screen").width * 0.05, margin: 10, textAlign: "center" }}>{"Are you sure,you want to confirm delivering order ?"}</Text>
                                 <Text style={{ color: "grey", fontFamily: 'Poppins', fontSize: Dimensions.get("screen").width * 0.04, textAlign: "center", margin: 10 }}>{"Please make sure you scanned all orders !"}</Text>
                             </View>
+                           
                             <View style={{ width: "100%", height: "20%", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
                                 <TouchableOpacity style={{ width: "45%", height: "75%" }} onPress={() => { setNotCompleted(!notCompeleted) }}>
                                     <View style={{ width: "100%", height: "100%", borderRadius: 12, flexDirection: "column", backgroundColor: "#2474F1", justifyContent: "center", alignItems: "center" }}>
@@ -447,12 +483,12 @@ props.route.params.last_screen=="debou_items" ?
                     <Modal
 
 transparent={true}
-animationType={'slide'}
 visible={modalListPartners}
 
 >
 <View style={{ backgroundColor: "#000000aa", flex: 1 }}>
-  <View style={{ width: Dimensions.get("screen").width, height: 200, alignSelf: "center", backgroundColor: "white" }}>
+  <Animated.View style={{ width: Dimensions.get("screen").width,position:"absolute",top:-200,transform: [{ translateX: positionModal.x }, { translateY: positionModal.y }]
+,height: 200, alignSelf: "center", backgroundColor: "white" }}>
     <View style={{ width: "100%", height: "95%" }}>
       <FlatList
         data={profiles}
@@ -471,7 +507,7 @@ visible={modalListPartners}
                 <Text style={{ marginHorizontal: 15, fontFamily: 'Poppins', fontSize: 15 }}>{item.firstName ? item.firstName + " " + item.lastName : item.partnerName}</Text>
               </View>
               <View style={{ width: "20%", height: "100%", flexDirection: "column", justifyContent: "center" }}>
-                <View style={profile === item ? { width: 30, height: 30, borderRadius: 30, borderColor: "#2474F1", borderWidth: 8, alignSelf: "center" } : { width: 30, height: 30, borderRadius: 30, borderColor: "#dbdbdb", borderWidth: 1, alignSelf: "center" }}></View>
+                <View style={context.profile._id === item._id ? { width: 30, height: 30, borderRadius: 30, borderColor: "#2474F1", borderWidth: 8, alignSelf: "center" } : { width: 30, height: 30, borderRadius: 30, borderColor: "#dbdbdb", borderWidth: 1, alignSelf: "center" }}></View>
               </View>
 
             </View>
@@ -482,13 +518,19 @@ visible={modalListPartners}
         keyExtractor={item => item._id}
       >
       </FlatList>
-      <View style={{ width: "100%", height: "5%", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-        <ScrollView  onScroll={() => { setModalListPartners(!modalListPartners) }}>
+      <View style={{ width: "100%", height: "10%", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+        <ScrollView onScrollBeginDrag={() => {modalDown(); }}>
           <View style={{ width: 50, height: 3, backgroundColor: "black", borderRadius: 5 }}></View>
         </ScrollView>
       </View>
     </View>
 
+  </Animated.View>
+
+  <View style={{width:"100%",position:"absolute",top:200,height:Dimensions.get("screen").height-200}}>
+<TouchableWithoutFeedback style={{width:"100%",height:"100%"}} onPress={()=>{modalDown()}}>
+        <View style={{width:"100%",height:"100%"}}></View>
+</TouchableWithoutFeedback>
   </View>
 </View>
 
@@ -519,11 +561,22 @@ const styles = StyleSheet.create({
     },
     mapContainer: {
         width: "100%",
-        height: "92%",
-        flexDirection: "column",
+        height: "100%",
+        backgroundColor:"black"
 
     },
 
+    menu: {
+      height: Dimensions.get("screen").height * 0.03,
+      width: Dimensions.get("screen").height * 0.03,
+      marginTop: Platform.OS == 'ios' ? 40 : 35,
+  
+      position: "absolute",
+      left: "4%",
+      elevation:1,
+      zIndex:1,
+    },
+  
     menuDark: {
         width: "100%",
         height: "8%",

@@ -52,12 +52,7 @@ export default function SingleBrand(props) {
     const goBack = () => {
         setNewArrivals(null);
         setPartner(null);
-        if(props.route.params.lastScreen && props.route.params.lastScreen=="Home"){
-            props.navigation.navigate("Home")
-        }
-        else {       
-        props.navigation.navigate("brand")
-        }
+        props.navigation.navigate("Home",{brand:props.route.params.partner._id});
     }
     const showallNewArrivals = () => {
         props.navigation.navigate("products", { last_screen: "newArrivals" ,newArrivals:newArrivals})
@@ -68,28 +63,49 @@ export default function SingleBrand(props) {
 
     }
     const checkCategory = (item) => {
-        // if(partner.services.isFood){
-        //     props.navigation.navigate("products", {category:item,last_screen:"food",gender:''});
-        // }
-        // else {
-        //     props.navigation.navigate("gender", { gender: item.name ,categories:partner.categories})
-        // }
-        props.navigation.navigate("subCategory", { subCategory: item.name ,subCategories:item.subCategories})
+
+
+        if(partner.services.isFood){
+            let _products =[];
+        item.subCategories.map(sub=>{
+            _products = _products.concat(sub.products)
+        })
+
+           props.navigation.navigate("products", {last_screen:"food",products:_products});
+        }
+
+        else {
+            props.navigation.navigate("subCategory", { gender: item.name ,categories:partner.categories})
+        }
     
     }
     const checkProduct = (item)=>{
         if(item.type=="food"){
-            props.navigation.navigate("food",{product:item})
+            props.navigation.navigate("food",{product:item,last:null,partner:partner})
                         }
         else {
-        props.navigation.navigate("singleProduct",{product:item})
+        props.navigation.navigate("singleProduct",{product:item,last:null})
         }
     }
     const checkBasket =()=>{
          props.navigation.navigate("basket",{last_screen:"singleBrand"});
     }
 
-
+    
+    const startPartnerConversation = () => {
+        if(partner){
+        let users_id = []
+        partner.managers.forEach(manager => {
+          users_id.push(manager.user);
+        })
+        users_id.push(context.user._id);
+        users_id.push(partner.owner._id);
+        const conversation = context.openConversationHandler({}, { users_id }, "group", partner);
+        props.navigation.navigate("conversation", { conversation:conversation})
+      
+    }}
+    
+    
 
 
 
@@ -113,11 +129,16 @@ export default function SingleBrand(props) {
 
                 </TouchableOpacity>
 
-
+                <TouchableOpacity  onPress={()=>{startPartnerConversation()}} style={{width:Dimensions.get("screen").width*0.12,height:Dimensions.get("screen").width*0.12,position:"absolute",borderRadius:Dimensions.get("screen").width*0.12,top: "75%", right: "4%",elevation:10,zIndex:50,backgroundColor:"#2474F1"}}>
+                    <View style={{fwidth:Dimensions.get("screen").width*0.12,height:Dimensions.get("screen").width*0.12,borderRadius:Dimensions.get("screen").width*0.12,flexDirection:"column",justifyContent:"center",alignItems:"center"}}>
+                            <Image style={{width:"60%",height:"60%",resizeMode:"cover"}} source={require("../assets/chatting.png")}/>
+                    </View>
+                </TouchableOpacity>
             </View>
             <View style={styles.categories}>
                 <FlatList
                     horizontal
+                    showsHorizontalScrollIndicator={false}
                     data={categories}
 
                     renderItem={({ item }) =>
@@ -155,6 +176,8 @@ export default function SingleBrand(props) {
                 <View style={styles.newArrivalsBody}>
                     {newArrivals ? <FlatList
                         data={newArrivals}
+                        showsHorizontalScrollIndicator={false}
+
                         horizontal
                         renderItem={
                             ({ item }) =>
@@ -166,7 +189,6 @@ export default function SingleBrand(props) {
                                     <Text style={styles.price}>{item.basePrice} DT</Text>
                                 </View>
                                 </TouchableOpacity>
-
                         }
                         keyExtractor={item => item._id}
                     >
@@ -197,6 +219,7 @@ export default function SingleBrand(props) {
                 <View style={styles.newArrivalsBody}>
                     {topTrends ?
                         <FlatList
+                        showsHorizontalScrollIndicator={false}
                             data={topTrends}
                             horizontal
                             renderItem={
@@ -281,7 +304,7 @@ const styles = StyleSheet.create({
     },
     description: {
         color: "white",
-        fontFamily:'Poppins',fontSize: Dimensions.get("window").width*0.04,
+        fontFamily:'Poppins',fontSize: Dimensions.get("window").width*0.03,
         fontWeight: "300",
         position: "absolute",
         top: "80%",
@@ -337,7 +360,6 @@ const styles = StyleSheet.create({
         height: "100%",
         width: 140,
         marginHorizontal: 8,
-        backgroundColor: "white",
         borderRadius: 8
 
     },
@@ -355,22 +377,25 @@ const styles = StyleSheet.create({
         width: "100%",
         borderTopLeftRadius: 8,
         borderTopRightRadius: 8,
+        borderBottomLeftRadius:8,
+        borderBottomRightRadius:8,
+    
         resizeMode: "cover"
     },
     productTitle: {
-        fontFamily:'Poppins',fontFamily:'PoppinsBold',fontSize: Dimensions.get("screen").width*0.035,
+        fontFamily:'PoppinsBold',fontSize: Dimensions.get("screen").width*0.028,
         color: "black",
         fontWeight: "400",
-
     },
+
     productTitleDark: {
-        fontFamily:'Poppins',fontFamily:'PoppinsBold',fontSize: Dimensions.get("screen").width*0.035,
+      fontFamily:'PoppinsBold',fontSize: Dimensions.get("screen").width*0.028,
         color: "white",
         fontWeight: "400",
         
     },
     price: {
-        fontFamily:'Poppins',fontFamily:'PoppinsBold',fontSize: Dimensions.get("screen").width*0.035,
+        fontFamily:'Poppins',fontFamily:'PoppinsBold',fontSize: Dimensions.get("screen").width*0.028,
         color: "grey",
         fontWeight: "100",
     }

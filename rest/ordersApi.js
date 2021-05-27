@@ -1,4 +1,3 @@
-import { useField } from "formik";
 import axios from "../rest/customAxios";
 
 export const getDeliveryOptions = (partnerId,body)=>{
@@ -18,18 +17,24 @@ return new Promise((resolve,reject)=>{
 export const duringCollectDelivery = (idcollecter,partner)=>{
     return new Promise((resolve,reject)=>{
         axios.get(`/delivery-order/duringCollectDelivery/${partner}/${idcollecter}`).then(res=>{
-            resolve(res.data.duringCollectDeliveries);
+            if(res.status===200){
+                resolve(res.data.duringCollectDeliveries);
+            }
 
 
            
         })
-        .catch(err=>{reject(err)})
+        .catch(
+            err=>{
+                reject(err)})
     })
 }
 export const getTobepickedUpOrders= (idcollecter,partner)=>{
     return new Promise((resolve,reject)=>{
         axios.get(`/delivery-order/tobepickedup/${partner}/${idcollecter}`).then(res=>{
-            resolve(res.data.todayTobepickedupOrders);
+            if(res.status===200){
+                resolve(res.data.todayTobepickedupOrders);
+            }
 
 
            
@@ -60,10 +65,6 @@ export const getArrivedOrders= (idmanager,partner)=>{
 
 
 
-
-
-
-
 export const getTobeDeliveredOrders= (iddeliverer,partner)=>{
     return new Promise((resolve,reject)=>{
         axios.get(`/delivery-order/tobedelivered/${partner}/${iddeliverer}`).then(res=>{
@@ -91,12 +92,15 @@ export const getNotArrivedOrders= (idmanager,partner)=>{
 
 export const markOrderAsDuringCollectDelivery =(partnerId,orderId,targetPosition,delivererPosition)=>{
     return new Promise((resolve,reject)=>{
+        console.log(targetPosition)
+        console.log(delivererPosition)
         axios.patch(`/delivery-order/${partnerId}/status/during-collect-delivery/${orderId}`,
         {targetPosition:targetPosition,delivererPosition:delivererPosition}).then(res=>{
                 if(res.status===200){
                     resolve(res.data.message);
                 }
-        })
+        }).catch(err=>{
+            reject(err)})
     })
 }
 
@@ -107,7 +111,6 @@ export const markOrderArrivedInDeposit =(partnerId,orderId,targetPosition,delive
                     resolve(res.data.message);
                 }
         })
-
         .catch(err=>{
             reject(err);
         })
@@ -127,15 +130,36 @@ export const markOrderAsToBeDelivered=(orderId,partnerId)=>{
     })
 }
 
-export const markOrderAsDuringClientDelivery=(partnerId,orderId,delivererPosition,targetPosition)=>{
+
+
+export const markOrderAsDelivered=(orderId,partnerId)=>{
     return new Promise((resolve,reject)=>{
-        axios.patch(`/delivery-order/${partnerId}/status/arrived-deposit/${orderId}`,{delivererPosition:delivererPosition,targetPosition:targetPosition}).then(res=>{
+        axios.patch(`/delivery-order/${partnerId}/status/delivered/${orderId}`).then(res=>{
+
                 if(res.status===200){
                     resolve(res.data.message);
                 }
+        }).catch(err=>{
+            reject(err)
         })
-    }).catch(err=>{
-        reject(err);
+    })
+}
+
+
+
+
+export const markOrderAsDuringClientDelivery=(partnerId,orderId,delivererPosition,targetPosition)=>{
+    console.log(delivererPosition);
+    console.log(targetPosition);
+    return new Promise((resolve,reject)=>{
+        axios.patch(`/delivery-order/${partnerId}/status/during-client-delivery/${orderId}`,{delivererPosition:delivererPosition,targetPosition:targetPosition})
+        .then(res=>{
+                if(res.status===200){
+                    resolve(res.data.message);
+                }
+        }).catch(err=>{
+            reject(err);
+        })
     })
 }
 

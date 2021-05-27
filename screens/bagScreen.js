@@ -11,6 +11,7 @@ export default function bag(props) {
     const [preOrder, setPreOrder] = useState(null);
     const [ingredients, setIngredients] = useState([]);
     const [productVariants,setProductVariants]=useState([]);
+    const [foodTotal,setFoodTotal]=useState(0)
 
     const context = useContext(AuthContext);
 
@@ -18,18 +19,21 @@ export default function bag(props) {
         let mounted = true;
         if (mounted) {
             getOrder(props.route.params.order._id).then(order => {
+                order.price=0
                 setPreOrder(order);
                 if (order.type != 'food') {
                     var _variants = []
                     order.items.map(item => {
-                        var p = 0;
+                        let p = 0;
+                        item.product.basePrice=item.product.basePrice*((100-item.product.discount)/100)
+
                         let pricing = { ...item.product.pricing[item.product.pricing.findIndex(pricing => { return pricing._id == item.productPricing  })] };
                         
                                 item.product.variants.map(variant => {
                                     if(variant.options.length>0){
                                         variant.options.map(option=>{
                                             if(pricing.variantOptions&&pricing.variantOptions.length>0&&pricing.variantOptions.findIndex(vo=>{return vo ==option._id})>=0){
-                                                _variants.push({variant:option,_id:item._id});
+                                                _variants.push({name:variant.name,variant:option,_id:item._id});
                                             }
                                         })
                                     }
@@ -38,16 +42,18 @@ export default function bag(props) {
                                 p += pricing.price;
                                 item.product.basePrice = p;
                                 item.product.total = item.product.basePrice * item.quantity
-        
+                                order.price+=item.product.total
                         })
-                    setProductVariants(_variants);
-                    console.log(order.items);
-                    setProducts(order.items);
+                        if(_variants.length>0){
+                            setProductVariants(_variants);
+                            setProducts(order.items);
+                        }
 
                     
                 }
                 else {
                     var _variants = []
+                    let total = 0
                     order.foodItems.map(item => {
                         var p = 0;
                         item.ingredients.map(e => {
@@ -56,7 +62,7 @@ export default function bag(props) {
                                 item.product.variants.map(variant => {
                                     if (variant.options.findIndex(option => { return option._id === pricing.variantOptions[0] }) >= 0) {                                    
                                         let _variant  = {...variant.options[variant.options.findIndex(option => { return option._id === pricing.variantOptions[0] })]}
-                                        _variants.push({variant : _variant,_id:item._id});}
+                                        _variants.push({name:variant.name,variant : _variant,_id:item._id});}
                                 })
                                 p += pricing.price;
                             
@@ -64,14 +70,16 @@ export default function bag(props) {
                         })
                         item.product.basePrice = p;
                         item.product.total = item.product.basePrice * item.quantity
+                        total+=item.product.total
                     })
+                    setFoodTotal(total);
                     setIngredients(_variants);
                     
                     setProducts(order.foodItems);
                 }
             })
         }
-        return () => { mounted = false; setProducts([]); setPreOrder(null);setIngredients([]); }
+        return () => { mounted = false; setProducts([]); setPreOrder(null);setIngredients([]);setFoodTotal(0) }
     }, [props.route.params])
 
     const goBack = () => {
@@ -86,8 +94,12 @@ export default function bag(props) {
                 _item.quantity += 1;
                 _item.product.total = _item.product.basePrice * _item.quantity
                 preOrder.price += _item.product.basePrice
+                if(preOrder.type == 'food'){
+                    setFoodTotal(foodTotal=>foodTotal+=_item.product.basePrice)
+                }
+
             }
-            if (_item.quantity > _item.product.stock&&_item.prduct.type=='regular') {
+            if ((_item.quantity > _item.product.stock)&&_item.product.type=='regular') {
                 alert("no stock valid for this product")
             }
         })
@@ -102,11 +114,11 @@ export default function bag(props) {
                     _item.quantity -= 1;
                     _item.product.total = _item.product.total - _item.product.basePrice
                     preOrder.price -= _item.product.basePrice
-
+                    if(preOrder.type == 'food'){
+                        setFoodTotal(foodTotal=>foodTotal-=_item.product.basePrice)
+                    }
                 }
-                if (_item.quantity > _item.product.stock) {
-                    alert("no stock valid for this product")
-                }
+              
             }
         })
         setProducts(_items);
@@ -117,7 +129,10 @@ export default function bag(props) {
 
             deleteOrder(props.route.params.order._id).then(message=>{
                 setProducts(products.filter(_prod => _prod._id != _product._id));   
-                context.setBag(bag=>bag-1);
+                if(context.bag>0){
+                    context.setBag(bag=>bag-1);
+
+                }
                 Alert.alert(
                     "",
                     "order deleted !",
@@ -175,18 +190,21 @@ export default function bag(props) {
                                     </View>
                                     <View style={styles.productInfoContainer}>
                                         <View style={{ width: "92%",flex:1, marginVertical: 4, alignSelf: "center" }}>
-                                            <Text style={context.darkMode ? { fontFamily:'Poppins',fontSize: 17, fontWeight: "700", color: "white" } : { fontFamily:'Poppins',fontSize: 17, fontWeight: "700" }}>{item.product.name}</Text>
+                                            <Text style={context.darkMode ? { fontFamily:'PoppinsBold',fontSize: Dimensions.get("screen").width*0.055 , color: "white" } : { fontFamily:'PoppinsBold',fontSize: Dimensions.get("screen").width*0.055}}>{item.product.name}</Text>
                                         </View>
                                         <TouchableOpacity style={{ width: "92%", height: "8%" }} onPress={() => { removeProduct(item) }}>
                                             <View style={{ width: "100%", height: "100%", marginLeft:7, alignSelf: "center" }}>
-                                                <Text style={{ fontFamily:'Poppins',fontSize: 16, fontWeight: "500", color: "grey" }}>Remove</Text>
+                                                <Text style={{ fontFamily:'Poppins',fontSize: Dimensions.get("screen").width*0.03, fontWeight: "500", color: "grey" }}>Remove</Text>
                                             </View>
                                         </TouchableOpacity>
-                                        <View style={{ width: "92%", height: "10%", marginVertical: 4, alignSelf: "center" }}>
-                                            <Text style={context.darkMode ? { fontFamily:'Poppins',fontSize: 20, fontWeight: "700", color: "white" } : { fontFamily:'Poppins',fontSize: 20, fontWeight: "700" }}>{item.product.basePrice ?item.product.basePrice.toString():"0"} TND</Text>
+                                        <View style={{ width: "92%", height: "10%", marginVertical: 4, alignSelf: "center",flexDirection:"row" }}>
+                                        <Text style={context.darkMode ? { fontFamily:'Poppins',fontSize: Dimensions.get("screen").width*0.04, fontWeight: "700", color: "white" } : { fontFamily:'Poppins',fontSize: Dimensions.get("screen").width*0.04, fontWeight: "700" }}>Price: </Text>
+                                            <Text style={context.darkMode ? { fontFamily:'Poppins',fontSize: Dimensions.get("screen").width*0.05, fontWeight: "700", color: "white" } : { fontFamily:'Poppins',fontSize: Dimensions.get("screen").width*0.05, fontWeight: "700" }}>{item.product.basePrice ?item.product.basePrice.toString():"0"} TND</Text>
                                         </View>
-                                        <View style={{ width: "92%", height: "10%", marginVertical: 4, alignSelf: "center" }}>
-                                            <Text style={context.darkMode ? { fontFamily:'Poppins',fontSize: 20, fontWeight: "700", color: "white" } : { fontFamily:'Poppins',fontSize: 20, fontWeight: "700" }}>{item.product.total ? item.product.total.toString() :item.product.basePrice ?  item.product.basePrice.toString():"0"} TND</Text>
+                                        <View style={{ width: "92%", height: "10%", marginVertical: 4, alignSelf: "center",flexDirection:"row" }}>
+                                        <Text style={context.darkMode ? { fontFamily:'Poppins',fontSize: Dimensions.get("screen").width*0.04, fontWeight: "700", color: "white" } : { fontFamily:'Poppins',fontSize: Dimensions.get("screen").width*0.04, fontWeight: "700" }}>Total: </Text>
+
+                                            <Text style={context.darkMode ? { fontFamily:'Poppins',fontSize: Dimensions.get("screen").width*0.05, fontWeight: "700", color: "white" } : { fontFamily:'Poppins',fontSize:  Dimensions.get("screen").width*0.05, fontWeight: "700" }}>{item.product.total ? item.product.total.toString() :item.product.basePrice ?  item.product.basePrice.toString():"0"} TND</Text>
                                         </View>
                                         <View style={{ flex:1, marginVertical: 4,marginLeft:6 }}>
                                             {
@@ -195,7 +213,7 @@ export default function bag(props) {
                                                     ingredient._id==item._id
                                                     &&
                                                     <View key={ingredient.variant._id}>
-                                                        <Text style={context.darkMode ? { fontFamily:'Poppins',fontSize: 14, color: "white" } : { fontFamily:'Poppins',fontSize: 14,color:"black" }}>{ingredient.variant.name}</Text>
+                                                        <Text style={context.darkMode ? { fontFamily:'Poppins',fontSize: 14, color: "white" } : { fontFamily:'Poppins',fontSize: 14,color:"black" }}>{ingredient.name+" : "+ingredient.variant.name}</Text>
                                                     </View>
 
                                                 ))
@@ -206,7 +224,7 @@ export default function bag(props) {
                                                     _variant._id==item._id
                                                     &&
                                                     <View key={_variant.variant._id}>
-                                                        <Text style={context.darkMode ? { fontFamily:'Poppins',fontSize: 14, color: "white" } : { fontFamily:'Poppins',fontSize: 14,color:"black" }}>{_variant.variant.name}</Text>
+                                                        <Text style={context.darkMode ? { fontFamily:'Poppins',fontSize: 14, color: "white" } : { fontFamily:'Poppins',fontSize: 14,color:"black" }}>{_variant.name +" : "+_variant.variant.name}</Text>
                                                     </View>
 
                                                 ))
@@ -235,13 +253,16 @@ export default function bag(props) {
 
                     </FlatList>}
                 </View>
+                <View style={{width:"100%",height:"5%",backgroundColor:"#F2F6FF"}}>
+
+                </View>
                 <View style={styles.finalSteps}>
                     <View style={styles.orderOverview}>
                         <View >
-                            <Text style={context.darkMode ? { fontFamily:'Poppins',fontSize: 20, fontWeight: "600", color: "white" } : { fontFamily:'Poppins',fontSize: 20, fontWeight: "600" }}>Total</Text>
+                            <Text style={context.darkMode ? { fontFamily:'Poppins',fontSize: Dimensions.get("screen").width*0.05, fontWeight: "600", color: "white" } : { fontFamily:'Poppins',fontSize: Dimensions.get("screen").width*0.05, fontWeight: "600" }}>Total</Text>
                         </View>
                         <View >
-                            <Text style={context.darkMode ? { fontFamily:'Poppins',fontSize: 20, fontWeight: "600", color: "white" } : { fontFamily:'Poppins',fontSize: 20, fontWeight: "600" }}>{preOrder ? preOrder.price : null} DT</Text>
+                            <Text style={context.darkMode ? { fontFamily:'Poppins',fontSize: Dimensions.get("screen").width*0.05, fontWeight: "600", color: "white" } : { fontFamily:'Poppins',fontSize: Dimensions.get("screen").width*0.05, fontWeight: "600" }}>{foodTotal>0 ? foodTotal : preOrder ? preOrder.price : ""} DT</Text>
                         </View>
                     </View>
                     <View style={styles.buttonContainer}>
@@ -304,8 +325,8 @@ const styles = StyleSheet.create({
     },
     orderOverview: {
         width: "92%",
-        height: "40%",
-        marginVertical: 4,
+        height: "20%",
+        marginVertical: 1,
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
@@ -315,10 +336,12 @@ const styles = StyleSheet.create({
     finalSteps: {
         height: "15%",
         width: "100%",
+        backgroundColor:"#F2F6FF"
     },
     bagContainer: {
         width: "100%",
         height: "75%",
+        backgroundColor:"white",
         flexDirection: "column",
         justifyContent: "center",
     },

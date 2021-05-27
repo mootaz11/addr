@@ -6,8 +6,6 @@ import { FlatList} from 'react-native-gesture-handler';
 
 
 const  PartnerService = (props)=>{
-
-
     return (
       <View style={{ width: "100%", height: Dimensions.get("screen").height / 1.8, marginVertical: 2, flexDirection: "column", alignItems: "center" }}>
       <View style={{ width: "98%", height: "35%", flexDirection: "row" }}>
@@ -41,7 +39,7 @@ const  PartnerService = (props)=>{
       <View style={{ width: "98%", height: "20%", flexDirection: "row" }}>
 
         <View style={{ width: "50%", height: "100%", flexDirection: "row" }}>
-          <TouchableOpacity onPress={props.openYoutube.bind(this)} style={{
+          <TouchableOpacity onPress={props.openYoutube.bind(this,props.partnerService.youtube)} style={{
             height: "100%", width: '25%',marginHorizontal:2
           }}>
             <Image
@@ -49,7 +47,7 @@ const  PartnerService = (props)=>{
               source={props.darkMode ? require("../assets/images/youtube_dark.png"):require("../assets/images/youtube.png")}
             />
           </TouchableOpacity>
-          <TouchableOpacity onPress={props.openInstagram.bind(this)} style={{
+          <TouchableOpacity onPress={props.openInstagram.bind(this,props.partnerService.instagram)} style={{
             height: "100%", width: '25%',marginHorizontal:2
           }}>
             <Image
@@ -57,7 +55,7 @@ const  PartnerService = (props)=>{
               source={props.darkMode ? require("../assets/images/instagram_dark.png") :require("../assets/images/instagram.png")}
             />
           </TouchableOpacity>
-          <TouchableOpacity onPress={props.openFacebook.bind(this)} style={{
+          <TouchableOpacity onPress={props.openFacebook.bind(this,props.partnerService.facebook)} style={{
             height: "100%", width: '25%',marginHorizontal:2
           }}>
             <Image

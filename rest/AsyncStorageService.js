@@ -10,7 +10,24 @@ const getToken = async (item) => {
   return token;
 }
 
+
+const getDarkMode = async (item)=>{
+  let darkmode = false 
+  try {
+    darkmode = await AsyncStorage.getItem(item) || false ; 
+
+  
+  }
+catch(err) {
+  console.log(error.message);
+}
+return darkmode;
+} 
     
+
+
+
+
   const AsyncStorageService = (function () {
     var _service;
     function _getService() {
@@ -20,6 +37,10 @@ const getToken = async (item) => {
         }
         return _service
     }
+
+
+
+
     async  function _setToken(accessToken) {
       await  AsyncStorage.setItem('access_token',accessToken);
     }
@@ -31,7 +52,19 @@ const getToken = async (item) => {
       return    getToken('access_token')
    
     }
-    
+
+    async function _getDarkMode(){
+      return getDarkMode('dark_mode')
+    }
+
+
+  async function _setDarkMode(darkmode) { 
+    await  AsyncStorage.setItem('dark_mode',darkmode);
+  }  
+
+
+
+
 
   async  function _clearToken() {
        await AsyncStorage.removeItem('access_token');
@@ -45,6 +78,8 @@ const getToken = async (item) => {
     return {
         clearAll:_clearAll,
         getService: _getService,
+        getDarkMode:_getDarkMode,
+        setDarkMode:_setDarkMode,
         setToken: _setToken,
         setAccessToken: _setAccessToken,
         getAccessToken: _getAccessToken,

@@ -62,9 +62,10 @@ export default function deliveryAdress(props) {
 
     setOpenModal(!openModal);
     setlocationChosen(!locationChosen);  
-      
-    getDeliveryOptions(props.route.params.partner,{location:location}).then(data=>{
-        setDeliveryOption({Time:data.deliveryInfo.deliveryTime
+       let _location = {...location}
+    getDeliveryOptions(props.route.params.partner,{location:_location}).then(data=>{
+        console.log(data.deliveryPartner.partnerName);
+        setDeliveryOption({...deliveryOption,Time:data.deliveryInfo.deliveryTime
             ,Type:data.deliveryInfo.deliveryType,
             Price:data.deliveryInfo.deliveryPrice,
            Name:data.deliveryPartner.partnerName,
@@ -82,6 +83,9 @@ export default function deliveryAdress(props) {
     
 
     const checkReview = () => {
+        if(deliveryOptions){
+
+       
         if(phone.length>0){
             
             props.navigation.navigate("orderReview", { order: props.route.params.order,
@@ -96,6 +100,10 @@ export default function deliveryAdress(props) {
         else {
             alert("please set your phone number");
         }
+    }
+    else {
+        alert("no delivery options")
+    }
     }
     return (
         <SafeAreaView >
@@ -146,7 +154,7 @@ export default function deliveryAdress(props) {
                                             
                      
 <View>
-    <Text style={context.darkMode ?{color:"white",fontFamily:'Poppins',fontSize:Dimensions.get("screen").width*0.07,marginTop:12,textShadowColor:"white",textShadowOffset:{width:0.5,height:0.5},textShadowRadius:1}:{color:"black",fontFamily:'Poppins',fontSize:Dimensions.get("screen").width*0.07,marginTop:12,textShadowColor:"black",textShadowOffset:{width:0.5,height:0.5},textShadowRadius:1}}>{deliveryOption ? `${deliveryOption.Name} will handle your delivery with just ${deliveryOption.Price} Dt for delivery cost  `:"no delivery option found for your zone !!"}</Text>
+    <Text style={context.darkMode ?{color:"white",fontFamily:'Poppins',fontSize:Dimensions.get("screen").width*0.04,marginTop:12,textShadowColor:"white",textShadowOffset:{width:0.5,height:0.5},textShadowRadius:1}:{color:"black",fontFamily:'Poppins',fontSize:Dimensions.get("screen").width*0.04,marginTop:12,textShadowColor:"black",textShadowOffset:{width:0.5,height:0.5},textShadowRadius:1}}>{deliveryOption ? `${deliveryOption.Name} will handle your delivery with just ${deliveryOption.Price?deliveryOption.Price :"(not yet)"} Dt for delivery cost  `:"no delivery option found for your zone !!"}</Text>
     </View>
                 </View>
                 <View style={styles.buttonContainer}>
@@ -167,8 +175,8 @@ export default function deliveryAdress(props) {
                         <View style={{ width: "100%", height: "80%" }}>
                             <MapView
                                 initialRegion={{
-                                    latitude:  context.location ? Number(context.location.location.latitude):0,
-                                    longitude: context.location ? Number(context.location.location.longitude):0
+                                    latitude:  location ? location.lat : context.location ? Number(context.location.location.latitude):0,
+                                    longitude: location ? location.lng :context.location ? Number(context.location.location.longitude):0
                                     ,latitudeDelta: 0.5,
                                     longitudeDelta: 0.5 * (Dimensions.get("window").width / Dimensions.get("window").height )
                                 }}
@@ -183,14 +191,14 @@ export default function deliveryAdress(props) {
                                     coordinate={
                                         Platform.OS == 'ios' ?
                                             {
-                                                latitude:  context.location ? Number(context.location.location.latitude):0,
-                                                longitude: context.location ? Number(context.location.location.longitude):0
-                        
+                                                latitude:  location ? location.lat : context.location ? Number(context.location.location.latitude):0,
+                                                longitude: location ? location.lng :context.location ? Number(context.location.location.longitude):0
+                                    
                                             } :
                                             {
-                                                latitude:  context.location ? Number(context.location.location.latitude):0,
-                                                longitude: context.location ? Number(context.location.location.longitude):0}
-
+                                                latitude:  location ? location.lat : context.location ? Number(context.location.location.latitude):0,
+                                                longitude: location ? location.lng :context.location ? Number(context.location.location.longitude):0
+                                            }            
 
 
                                     }

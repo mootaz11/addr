@@ -13,7 +13,7 @@ export default function subCategory(props){
     useEffect(()=>{
         if(props.route.params.gender)
         {setGender(props.route.params.subCategory)}
-        if(props.route.params.subCategories.length>0){
+        if(props.route.params.subCategories&&props.route.params.subCategories.length>0){
             setCategories(props.route.params.subCategories);
         }
 
@@ -33,7 +33,7 @@ export default function subCategory(props){
         <View style={context.darkMode ?  styles.containerDark : styles.container}>
                 <View style={context.darkMode ?  styles.menuDark : styles.menu}>
                     <View style={styles.leftArrowContainer}>
-                        <TouchableOpacity style={styles.leftArrow} onPress={goBack}>
+                        <TouchableOpacity style={{height:Dimensions.get("screen").height * 0.03,width:Dimensions.get("screen").height * 0.03}} onPress={goBack}>
                         <Image style={{width:"100%", height:"100%"}}  source={context.darkMode ?  require("../assets/left-arrow-dark.png"):require("../assets/left-arrow.png")}/>
 
                         </TouchableOpacity>
@@ -57,9 +57,9 @@ export default function subCategory(props){
                    <TouchableOpacity onPress={()=>{checkCategory(item)}}>
                    <View style={styles.category}>
                        <View style={{marginLeft:8}}>
-                           <Text style={context.darkMode ?  {fontFamily:'Poppins',fontSize:20,fontWeight:"400",color:"white"}:{fontFamily:'Poppins',fontSize:20,fontWeight:"400"}}>{item.name}</Text>
+                           <Text style={context.darkMode ?  {fontFamily:'Poppins',fontSize:Dimensions.get("screen").width*0.05,fontWeight:"400",color:"white"}:{fontFamily:'Poppins',fontSize:Dimensions.get("screen").width*0.05,fontWeight:"400"}}>{item.name}</Text>
                        </View>
-                       <View style={{width:30, height:"80%",justifyContent:"center",alignItems:"center" ,marginRight:8}}>
+                       <View style={{width:Dimensions.get("screen").width*0.08, height:"80%",justifyContent:"center",alignItems:"center" ,marginRight:8}}>
                         <Image style={styles.arrowright} source={context.darkMode ?  require("../assets/right-arrow-dark.png"):require("../assets/right-arrow.png")}/>
                        </View>
                    </View>
@@ -72,7 +72,7 @@ export default function subCategory(props){
        </View>
     :
     <View style={{width:"100%",height:"100%",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
-            <Text style={{fontFamily:'Poppins',fontSize:20,color:"white"}}>no Cagetories Found for this partner</Text>
+            <Text style={context.darkMode ? {fontFamily:'Poppins',fontSize:20,color:"white",textAlign:"center"}:{fontFamily:'Poppins',fontSize:20,color:"black",textAlign:"center"}}>no sub categories Found for this category</Text>
     </View>
            
        }
@@ -99,8 +99,9 @@ const styles = StyleSheet.create({
         flexDirection:"row"
     },
     arrowright:{
-        width:"100%",
-        height:"100%"
+        width:"80%",
+        height:"80%",
+        resizeMode:'contain'
     },
     container : {
         flex:1,
@@ -118,30 +119,36 @@ const styles = StyleSheet.create({
         backgroundColor: "#121212",
     
     },
-    menu:{
-        width:"100%",
-        height:"8%",
-        backgroundColor:"white",
-        flexDirection:"row",
+    
+    menu: {
+        width: "100%",
+        height: "8%",
+        backgroundColor: "white",
+        flexDirection: "row",
+        marginBottom: 8,
+        marginTop:10
     },
-    menuDark :{
-        width:"100%",
-        height:"8%",
+    menuDark: {
+        width: "100%",
+        height: "8%",
         backgroundColor: "#121212",
-        flexDirection:"row",
+        flexDirection: "row",
+        marginBottom: 8,
+        marginTop:10
+
 
     },
-    leftArrowContainer:{
-        width:"10%",
-        height:"100%",
-        flexDirection:"column",
-        alignItems:"center",
-        justifyContent:"center"
+    leftArrowContainer: {
+        width: "10%",
+        height: "100%",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        marginTop:5
     },
-    leftArrow:{
-        marginLeft:5,
-        width:30,
-        height:30
+    leftArrow: {
+        width: 30,
+        height: 30
     },
     
     titleContainer:{
@@ -151,14 +158,14 @@ const styles = StyleSheet.create({
         alignItems:"center",
         justifyContent:"center"
     },
-    Title:{
-        fontWeight:"700",
+    Title: {
+        fontWeight: "700",
         fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.07,
     },
-    TitleDark:{
-        fontWeight:"700",
-        fontSize: Dimensions.get("window").width * 0.07,
-        color:"white"
+    TitleDark: {
+        fontWeight: "700",
+        fontFamily:'Poppins',fontSize: Dimensions.get("window").width * 0.07,
+        color: "white"
 
     },
     searchContainer:{

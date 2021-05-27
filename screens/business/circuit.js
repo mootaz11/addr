@@ -8,58 +8,6 @@ const api_directions_key = "AIzaSyDcbXzRxlL0q_tM54tnAWHMlGdmPByFAfE";
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
 
-const orders = [
-    {name:"mootaz amara",location:{
-        latitude: 35.7778,
-        longitude: 10.8313
-        },
-        image:require("../../assets/user_image.png")
-    },
-    {name:"julia ",location:{
-        latitude: 35.7778,
-        longitude: 10.7113
-
-      },
-        image:require("../../assets/julia.jpg")
-    },
-    {name:"julia ",location:{
-        latitude: 35.7138,
-        longitude: 10.7113
-
-      },
-        image:require("../../assets/user_image.png")
-    },
-    
-];
-const partner ={
-    name:'adidas',location:{
-        latitude: 35.6778,
-        longitude: 10.8313
-
-      },
-      image:require("../../assets/adidas.jpg")
-}
-const deliverers = [   
-        {name:"mootaz amara",location:{
-            latitude: 35.7778,
-            longitude: 10.8313
-            },
-            image:require("../../assets/user_image.png")
-        },
-        {name:"julia ",location:{
-            latitude: 35.7778,
-            longitude: 10.7113
-          },
-            image:require("../../assets/julia.jpg")
-        },
-        {name:"julia ",location:{
-            latitude: 35.7138,
-            longitude: 10.7113
-          },
-            image:require("../../assets/user_image.png")
-        },
-        
-]
 
 export default function circuit(props) {
     const context = useContext(AuthContext)

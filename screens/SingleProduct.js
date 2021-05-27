@@ -6,6 +6,8 @@ import { Picker } from '@react-native-community/picker'
 import { getProduct } from '../rest/productApi';
 import { FlatList } from 'react-native-gesture-handler';
 import { createOrder } from '../rest/ordersApi'
+import _ from 'lodash';
+
 export default function SingleProduct(props) {
     const context = useContext(AuthContext)
     const [product, setProduct] = useState(null);
@@ -16,7 +18,8 @@ export default function SingleProduct(props) {
     const [variantsIds, setVariantsIds] = useState([]);
     const [productPricing, setProductPricing] = useState(null);
     const [selectedOption,setSelectedOption]=useState(null);
-
+    const [productPrice,setProductPrice]=useState(0);
+    const [selectedVariant,setSelectedVariant]=useState(null);
 
 
     useEffect(() => {
@@ -40,9 +43,9 @@ export default function SingleProduct(props) {
                             plen += 1;
                         }
                     }
-    
                     if (plen == pricing.variantOptions.length) {
-                        setProductPricing(pricing);
+                        setProductPricing(null);
+                        
                     }
                 })
     
@@ -82,12 +85,11 @@ export default function SingleProduct(props) {
                         "",
                         "order created done ",
                         [
+                            { text: "OK" ,onPress:()=>{
+                                props.navigation.navigate("basket", { last_screen: "SingleProduct" });
 
-                            { text: "OK" }
-                        ],
+                            }}                        ],
                         { cancelable: false }
-
-
                     );
                 }
             }).catch(err => {
@@ -124,7 +126,6 @@ export default function SingleProduct(props) {
                     plen += 1;
                 }
             }
-
             if (plen == pricing.variantOptions.length) {
                 setProductPricing(pricing);
             }
@@ -135,7 +136,15 @@ export default function SingleProduct(props) {
     }
 
     const goBack = () => {
-        props.navigation.goBack()
+        console.log(props.route.params);
+        
+        if(props.route.params.last&&props.route.params.last=="Home"){
+            props.navigation.navigate("Home",{product:product})
+        }
+        else {
+            props.navigation.goBack()
+
+        }
         setProduct(null);
         setProductsImages([]);
         setVariantsIds([])
@@ -186,7 +195,7 @@ export default function SingleProduct(props) {
                     <View style={context.darkMode ? styles.productBodyContainerDark : styles.productBodyContainer}>
                         <View style={styles.productInfo}>
                             <View style={styles.productTitle}>
-                                <Text style={context.darkMode ? { fontFamily: 'PoppinsBold', fontSize: Dimensions.get("screen").width*0.07, fontWeight: "600", color: "white" } : { fontFamily: 'Poppins', fontSize: 28, fontWeight: "600" }}>{props.route.params.product.name}</Text>
+                                <Text style={context.darkMode ? { fontFamily: 'PoppinsBold', fontSize: Dimensions.get("screen").width*0.07, fontWeight: "600", color: "white" } : { fontFamily: 'PoppinsBold', fontSize: 28, fontWeight: "600" }}>{props.route.params.product.name}</Text>
                             </View>
                             <View style={styles.productDetails}>
                                 <Text style={context.darkMode ? { fontFamily: 'Poppins', fontSize: 14, fontWeight: "100", color: "white" } : { fontFamily: 'Poppins', fontSize: 14, fontWeight: "100" }}>{description.length > 0 && description}</Text>
@@ -199,12 +208,8 @@ export default function SingleProduct(props) {
                     <View style={context.darkMode ? styles.productValuesDark : styles.productValues}>
                         <View
                             style={{
-                                borderBottomColor: context.darkMode ? "#292929" : '#d8d8d8',
-                                borderBottomWidth: 1,
-                                marginLeft: 5,
-                                marginRight: 5,
-                                marginTop: 5,
-                                marginBottom: 5
+                                height:"12%"
+
                             }}
                         />
                         <View style={styles.colorAndSize}>
@@ -213,25 +218,30 @@ export default function SingleProduct(props) {
                                 data={product.variants}
                                 horizontal
                                 renderItem={({ item }) =>
-                                    <View style={context.darkMode ? {width: 150, height: Dimensions.get("screen").width *0.1,borderRadius:12, marginHorizontal: 3, flex: 1,backgroundColor:"#333333"}:{ width: 150, height: Dimensions.get("screen").width *0.1,borderRadius:12, marginHorizontal: 3, flex: 1, backgroundColor: "white" }}>
-                                        {!selectedOption&&<TouchableOpacity onPress={() => { setSelectedOption(item._id)  }} style={{ flexDirection: "row", width: "100%", height: "100%", justifyContent: 'flex-start' }}>
+                                    <View style={context.darkMode ? {width: 150, height: Dimensions.get("screen").width *0.1,borderRadius:12, marginHorizontal: 3, flex: 1,borderWidth:1,borderColor:"#bfbfbf",backgroundColor:"#333333"}:{ width: 150,borderWidth:1,borderColor:"#bfbfbf", height: Dimensions.get("screen").width *0.1,borderRadius:12, marginHorizontal: 3, flex: 1, backgroundColor: "white" }}>
+                                        {(selectedOption!=item._id)&&<TouchableOpacity onPress={() => {setSelectedOption(item._id); console.log(item) }} style={{ flexDirection: "row", width: "100%", height: "100%", justifyContent: 'flex-start' }}>
                                             <Image style={{ marginLeft: 8, width: "15%", height: "100%", resizeMode: "contain" }} source={context.darkMode ?require("../assets/picker_up_dark.png"):require("../assets/picker_up.png")} />
-                                            <View style={{ width: "85%", height: "100%", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-                                                <Text style={context.darkMode ? { fontFamily: 'PoppinsBold', fontSize: Dimensions.get("screen").width * 0.05, color: "white"}:{ fontFamily: 'PoppinsBold', fontSize: Dimensions.get("screen").width * 0.05, color: "black"}}>{item.name}</Text>
+                                            <View style={{ width: "85%", height: "100%", flexDirection: "row", alignItems: "center", justifyContent: "center" }}>
+                                            <Text style={context.darkMode ? { fontFamily: 'Poppins', fontSize: Dimensions.get("screen").width * 0.035, color: "white"}:{ fontFamily: 'Poppins', fontSize: Dimensions.get("screen").width * 0.035, color: "black"}}>{item.name+": "}</Text>
+
+                                                <Text style={context.darkMode ? { fontFamily: 'PoppinsBold', fontSize: Dimensions.get("screen").width * 0.035, color: "white"}:{ fontFamily: 'PoppinsBold', fontSize: Dimensions.get("screen").width * 0.035, color: "black"}}>{item.options[item.options.findIndex(option =>{return  variantsIds[variantsIds.findIndex(_variantId => { return _variantId.variant == item._id })].variantOption==option._id})].name}</Text>
                                             </View>
-                                        </TouchableOpacity>}
-
-
+                                        </TouchableOpacity>}                                
                                        {
-                                      selectedOption&&selectedOption==item._id &&
+                                      (selectedOption==item._id)&&
                                        <Picker
+
                                             selectedValue={variantsIds[variantsIds.findIndex(_variantId => { return _variantId.variant == item._id })].variantOption}
                                             onValueChange={(itemValue, itemIndex) => { handleOption(itemValue); setOption(itemValue);setSelectedOption(null)}}>
+
+                                                
                                             {
                                                 item.options.map((option, index) => (
                                                     <Picker.Item color={"black"} key={index} label={option.name} value={option._id} />
                                                 ))
                                             }
+
+
                                         </Picker>
                                        } 
 
@@ -251,22 +261,20 @@ export default function SingleProduct(props) {
                                 <Text style={context.darkMode ? { fontFamily: 'Poppins', fontSize: 20, fontWeight: "600", color: "white" } : { fontFamily: 'Poppins', fontSize: 20, fontWeight: "600", color: "black" }}>Cost</Text>
                             </View>
                             <View >
-                                <Text style={context.darkMode ? { fontFamily: 'Poppins', fontSize: 20, fontWeight: "600", color: "white" } : { fontFamily: 'Poppins', fontSize: 20, fontWeight: "600", color: "black" }}>{product ? productPricing ? productPricing.price + product.basePrice : product.basePrice : ""} DT</Text>
+                                <Text style={context.darkMode ? { fontFamily: 'Poppins', fontSize: 20, fontWeight: "600", color: "white" } : { fontFamily: 'Poppins', fontSize: 20, fontWeight: "600", color: "black" }}>{product ? productPricing ? productPricing.price :product.basePrice*((100-product.discount)/100) : ""} DT</Text>
                             </View>
                         </View>
 
                         <View style={styles.buttonContainer}>
-                            <TouchableOpacity style={styles.addButton} onPress={_createOrder}>
+                            <TouchableOpacity style={styles.addButton} onPress={_.once(_createOrder)}>
                                 <View style={{ height: "100%", height: "100%", flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
                                     <FontAwesome color={"white"} style={{ marginRight: 8, padding: 0, fontSize: 15, fontWeight: "700" }} name="shopping-bag" />
                                     <Text style={{ fontFamily: 'Poppins', fontSize: 15, fontWeight: "700", color: "white" }}>ADD</Text>
                                 </View>
                             </TouchableOpacity>
-
                         </View>
-
                     </View>
-            </View>
+                             </View>
 
 
         );
@@ -282,7 +290,7 @@ export default function SingleProduct(props) {
 
 const styles = StyleSheet.create({
     buttonContainer: {
-        height: Dimensions.get("window").height * 0.065,
+        height: Dimensions.get("window").height * 0.055,
         width: "100%",
         flexDirection: "column",
         justifyContent: "center",
@@ -302,8 +310,8 @@ const styles = StyleSheet.create({
         borderRadius: 8,
     },
     cost: {
-        flex: 1,
-        marginVertical: 6,
+        height:Dimensions.get("screen").height*0.05,
+        marginVertical:Dimensions.get("screen").width*0.01,
         width: "94%",
         flexDirection: "row",
         justifyContent: "space-between",
@@ -311,7 +319,7 @@ const styles = StyleSheet.create({
         alignSelf: "center"
     },
     colorAndSize: {
-        flex: 1,
+        height:Dimensions.get("screen").height*0.098,
         width: "100%",
         flexDirection: "row",
     },

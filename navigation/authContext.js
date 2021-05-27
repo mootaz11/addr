@@ -13,4 +13,7 @@ export default React.createContext({
     bag:0,
     total:0,
     notifications:[],
+    notread:0,
+    homeLocation:null,
+    profile:null
 }) 

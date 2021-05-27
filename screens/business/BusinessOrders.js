@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { View, Text, StyleSheet, Platform, TouchableOpacity, Image, TextInput, ScrollView,Dimensions,Alert,Modal } from 'react-native'
+import { View, Text, StyleSheet, Platform, TouchableOpacity, Image, TextInput, Animated,ScrollView,Dimensions,Alert,Modal,TouchableWithoutFeedback } from 'react-native'
 import { Icon } from 'react-native-elements';
 import AuthContext from '../../navigation/AuthContext';
 import _ from 'lodash';
@@ -29,9 +29,10 @@ export default function  BusinessOrders (props) {
     const [deliveredOrder, setDeliveredOrder] = useState(false);
     const [payedOrders,setPayedOrders]=useState([]);
     const [modalListPartners, setModalListPartners] = useState(false)
-    const [profile, setProfile] = useState(null);
     const [profiles, setProfiles] = useState([]);
     const [profileChecked, setProfileChecked] = useState(false);
+    const [positionModal,setPositionModal]=useState(new Animated.ValueXY({x:0,y:0}))
+
 
 
     useEffect(()=>{
@@ -63,14 +64,36 @@ export default function  BusinessOrders (props) {
         })
     }
     },[context.partner])
-
+    const modalDown =()=>{
+        console.log(positionModal);
+        Animated.timing(positionModal, {
+          toValue: { x: 0, y:0},
+          duration: 200,
+          useNativeDriver: true
+        }).start(()=>{
+          setModalListPartners(!modalListPartners)
+    
+        });
+    
+     
+    
+    }
+    
+      const modalUp =()=>{
+        Animated.timing(positionModal, {
+          toValue: { x: 0, y:200},
+          duration: 200,
+          useNativeDriver: true
+        }).start();
+      }
+    
    
     const checkAccount = (item) => {
-        setProfile(item);
+        context.setProfile(item);
         if (!item.firstName) {
           context.setPartner(item);
             
-            if(item.delivery.cities.length>0 || item.delivery.regions.length>0){
+            if(item.delivery.cities.length>0 || item.delivery.regions.length>0||item.delivery.localRegions.length>0){
                 if(item.owner ==context.user._id){
                     props.navigation.navigate('deliveryDash');
                 }
@@ -81,15 +104,28 @@ export default function  BusinessOrders (props) {
               }
                 if(item.deliverers.findIndex(d=>{return d.user==context.user._id})>=0){
                   if(item.deliverers[item.deliverers.findIndex(d=>{return d.user==context.user._id})].type=="delivery"){
-                      props.navigation.navigate("livraisons",{last_screen:""});
-                  }
+                    props.navigation.navigate("livraisons", { last_screen: "delivery" });
+                }
                   if(item.deliverers[item.deliverers.findIndex(d=>{return d.user==context.user._id})].type=="collect"){
                     props.navigation.navigate("collecting");
                   }
         
-                  if(item.deliverers[item.deliverers.findIndex(d=>{return d.user==context.user._id})].type=="both"){
-                    props.navigation.navigate("collecting");
-                  }
+                  if (item.delivery.localRegions.length > 0 && item.deliverers[item.deliverers.findIndex(d => { return d.user == context.user._id })].type == "both") {
+            
+                    getTobepickedUpOrders(context.user._id,context.partner._id).then(_orders=>{
+                      _orders.map(_order=>{
+                          markOrderAsDuringClientDelivery(context.partner._id, _order._id,
+                              {lat:context.location.location.latitude,lng:context.location.location.longitude}, 
+                              {lng:_order.client.location.location.longitude,
+                              lat:_order.client.location.location.latitude})
+                              .then(message => {
+                              }).catch(err=>{alert("failed while updating order")})                    })
+        
+                  
+                              props.navigation.navigate('delivering', { last_screen: "menu to  delivering" })
+        
+                  })          
+                }
                   
         
                 }
@@ -98,7 +134,7 @@ export default function  BusinessOrders (props) {
             }
     
     
-            if(item.delivery.cities.length==0 && item.delivery.regions.length==0)
+            if(item.delivery.cities.length==0 && item.delivery.regions.length==0&& item.delivery.localRegions.length==0)
               {
               if(item.managers.findIndex(m=>{return m.manager==context.user._id})>=0 &&item.managers[item.managers.findIndex(m=>{return m.manager==context.user._id})].access.businessAccess.dashboard){
                 props.navigation.navigate("businessDash");
@@ -135,29 +171,21 @@ export default function  BusinessOrders (props) {
           props.navigation.navigate("Settings")
         }
       }
-    
       const checkProfile = () => {
-        let _profiles = [];
-    
-        if (context.user.isVendor) {
-          _profiles = context.user.workPlaces;
-    
-          if(context.partner && context.user.workPlaces.findIndex(partner=>{return partner._id == context.partner._id})){
-            setProfile(context.partner);
-        }
 
-        }
-        if (context.user.isPartner) {
-            _profiles = context.user.partners;
-            if(context.partner && context.user.partners.findIndex(partner=>{return partner._id == context.partner._id})){
-              setProfile(context.partner);
-          }
-          }
+        let _profiles = [];
+
+    if (context.user.isVendor) {
+      _profiles =_profiles.concat(context.user.workPlaces);
+    }
+
+    if (context.user.isPartner) {
+        _profiles = _profiles.concat(context.user.partners);
+     
+      }
         if (_profiles.findIndex(p => { return p._id == context.user._id }) == -1) {
           _profiles.push(context.user);
-          if(!context.partner){
-              setProfile(context.user);
-          }
+       
     
         }
         setProfiles(_profiles);
@@ -165,6 +193,8 @@ export default function  BusinessOrders (props) {
         // setProfiles([context.user,...profiles]);
         setProfileChecked(!profileChecked);
         setModalListPartners(!modalListPartners)
+        modalUp();
+    
       }
     
 
@@ -182,6 +212,7 @@ export default function  BusinessOrders (props) {
                   { text: "OK" ,onPress:()=>{
                     setPreparedOrders([...preparedOrders,item]);
                     setOrderstoPrepare(orderstoPrepare.filter(order => order._id != item._id));
+               
                   }
                 }
                 ],
@@ -393,12 +424,12 @@ export default function  BusinessOrders (props) {
                 <Modal
 
 transparent={true}
-animationType={'slide'}
 visible={modalListPartners}
 
 >
 <View style={{ backgroundColor: "#000000aa", flex: 1 }}>
-  <View style={{ width: Dimensions.get("screen").width, height: 200, alignSelf: "center", backgroundColor: "white" }}>
+  <Animated.View style={{ width: Dimensions.get("screen").width,position:"absolute",top:-200,transform: [{ translateX: positionModal.x }, { translateY: positionModal.y }]
+,height: 200, alignSelf: "center", backgroundColor: "white" }}>
     <View style={{ width: "100%", height: "95%" }}>
       <FlatList
         data={profiles}
@@ -417,7 +448,7 @@ visible={modalListPartners}
                 <Text style={{ marginHorizontal: 15, fontFamily: 'Poppins', fontSize: 15 }}>{item.firstName ? item.firstName + " " + item.lastName : item.partnerName}</Text>
               </View>
               <View style={{ width: "20%", height: "100%", flexDirection: "column", justifyContent: "center" }}>
-                <View style={profile === item ? { width: 30, height: 30, borderRadius: 30, borderColor: "#2474F1", borderWidth: 8, alignSelf: "center" } : { width: 30, height: 30, borderRadius: 30, borderColor: "#dbdbdb", borderWidth: 1, alignSelf: "center" }}></View>
+                <View style={context.profile._id === item._id ? { width: 30, height: 30, borderRadius: 30, borderColor: "#2474F1", borderWidth: 8, alignSelf: "center" } : { width: 30, height: 30, borderRadius: 30, borderColor: "#dbdbdb", borderWidth: 1, alignSelf: "center" }}></View>
               </View>
 
             </View>
@@ -428,13 +459,19 @@ visible={modalListPartners}
         keyExtractor={item => item._id}
       >
       </FlatList>
-      <View style={{ width: "100%", height: "5%", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-        <ScrollView  onScroll={() => { setModalListPartners(!modalListPartners) }}>
+      <View style={{ width: "100%", height: "10%", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+        <ScrollView onScrollBeginDrag={() => {modalDown(); }}>
           <View style={{ width: 50, height: 3, backgroundColor: "black", borderRadius: 5 }}></View>
         </ScrollView>
       </View>
     </View>
 
+  </Animated.View>
+
+  <View style={{width:"100%",position:"absolute",top:200,height:Dimensions.get("screen").height-200}}>
+<TouchableWithoutFeedback style={{width:"100%",height:"100%"}} onPress={()=>{modalDown()}}>
+        <View style={{width:"100%",height:"100%"}}></View>
+</TouchableWithoutFeedback>
   </View>
 </View>
 
