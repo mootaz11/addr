@@ -122,9 +122,7 @@ export default function AppContext(props) {
                         setBag(res.data.orders.length);
                         setLocation(location);
 
-                        AsyncStorageService.getDarkMode(darkmode => { 
-                            setDarkMode(darkmode)
-                        })
+                    
 
                         setUser(res.data.connectedUser);
                         setProfile(res.data.connectedUser)
@@ -137,11 +135,13 @@ export default function AppContext(props) {
                         socket.emit('connectuser', t);
                     }).catch(err => { alert("error occured while setting Location") })
                 }).catch(err => {
+                    console.log("problem");
                     setIsloading(false);
                     setLoggedIn(false);
                 })
             }
             else {
+                console.log("problem");
                 setIsloading(false);
                 setLoggedIn(false);
 
@@ -177,12 +177,14 @@ export default function AppContext(props) {
                 const _convSorted = _convs.sort((a, b) => a.last - b.last);
                 setConversations(_convSorted);
                 let _notread=0
-              let  _notifs=[...user.notifications]
+              
+                let  _notifs=[...user.notifications]
                 _notifs.map(notif=>{
                     if(notif.read==false){
                         _notread+=1
                     }    
                 })
+
                 setNotRead(_notread);
                 setNotifications(user.notifications)
                 setIsloading(false);
@@ -274,6 +276,8 @@ export default function AppContext(props) {
             setConversations(conversations => [...conversations, conversation]);
         }
     }
+    
+
 
     const markAsReadConversation = (conv_id) => {
         if(conv_id){
