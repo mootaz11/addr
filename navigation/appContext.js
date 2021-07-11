@@ -116,6 +116,8 @@ export default function AppContext(props) {
 
     useEffect(() => {
         AsyncStorageService.getAccessToken().then(token => {
+            console.log(token)
+
             if (token) {
                 getConnectedUser().then(res => {
                     getLocation().then(async location => {
@@ -135,7 +137,6 @@ export default function AppContext(props) {
                         socket.emit('connectuser', t);
                     }).catch(err => { alert("error occured while setting Location") })
                 }).catch(err => {
-                    console.log("problem");
                     setIsloading(false);
                     setLoggedIn(false);
                 })
@@ -414,7 +415,6 @@ export default function AppContext(props) {
 
 
     const modifyDarkModeHandler =  async   () => {
-       // await AsyncStorageService.setDarkMode(!darkMode);        
         setDarkMode(darkMode => !darkMode);
     }
 
