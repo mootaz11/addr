@@ -3,7 +3,7 @@ import AuthContext from './AuthContext';
 import io from 'socket.io-client';
 import AsyncStorageService from '../rest/AsyncStorageService'
 import { createConversation, getUserConversations, sendMessage, markAsreadConversationApi } from '../rest/conversationApi';
-import {updateLocation, addTemporarlyLocation } from '../rest/locationApi';
+import {updateLocation, addTemporarlyLocation,getUserConnectedLocation } from '../rest/locationApi';
 import { getConnectedUser, updateLocationState, setNotifToken, userLogout } from '../rest/userApi';
 import * as Location from 'expo-location';
 
@@ -116,16 +116,12 @@ export default function AppContext(props) {
 
     useEffect(() => {
         AsyncStorageService.getAccessToken().then(token => {
-            console.log(token)
 
             if (token) {
                 getConnectedUser().then(res => {
-                    getLocation().then(async location => {
+                    getUserConnectedLocation().then(async location => {
                         setBag(res.data.orders.length);
                         setLocation(location);
-
-                    
-
                         setUser(res.data.connectedUser);
                         setProfile(res.data.connectedUser)
                         setTotal(res.data.notificationsLength);
@@ -142,7 +138,7 @@ export default function AppContext(props) {
                 })
             }
             else {
-                console.log("problem");
+                console.log("problem")
                 setIsloading(false);
                 setLoggedIn(false);
 
@@ -160,7 +156,9 @@ export default function AppContext(props) {
 
 
     useEffect(() => {
+
         if (user) {
+
             getUserConversations().then(_conversations => {
                 _conversations.map(conversation => {
                     let notSeenSum = 0;

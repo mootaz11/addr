@@ -191,6 +191,7 @@ export default function Home(props) {
       setOrders(_orders.filter(order => order.actif == true && order.taked == true && order.prepared == true));
     })
 
+    console.log(context.user.searchedLocations);
     setFriendsLocation(context.user.searchedLocations);
     getCities().then(cities => {
       const _cities = [{ cityName: 'choose city', _id: "af0f260a-9f70-11eb-a8b3-0242ac130003" }, ...cities]
@@ -815,7 +816,7 @@ export default function Home(props) {
               }
              
             >
-              <Image source={friendLocation.user.photo ? { uri: friendLocation.user.photo } : require("../assets/user_image.png")} style={{ height: 30, width: 30, borderRadius: 30, borderColor: "#2474F1", borderWidth: 2 }} />
+              <Image source={friendLocation.user ? friendLocation.user.photo ? { uri: friendLocation.user.photo } : require("../assets/user_image.png"):require("../assets/user_image.png")} style={{ height: 30, width: 30, borderRadius: 30, borderColor: "#2474F1", borderWidth: 2 }} />
             {
              Platform.OS=='android'?
              <Callout tooltip>

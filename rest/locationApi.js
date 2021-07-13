@@ -22,7 +22,7 @@ export const getUserLocation=(code)=>{
 
 
 
-export const getLocation = ()=>{
+export const getUserConnectedLocation = ()=>{
     return new Promise ((resolve ,reject)=>{
         axios.get(`/location/`).then(res=>{
             if(res.status===200){

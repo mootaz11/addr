@@ -24,6 +24,7 @@ const BusinessDashboardScreen = (props) => {
         useEffect(() => {
             if(context.partner){
                 getPartnerDashboard(context.partner._id).then(dash => {
+                    console.log(dash)
                     setDashboard(dash)
                     setManagers(dash.partner.managers);
                     setDeliverers(dash.partner.deliverers);
